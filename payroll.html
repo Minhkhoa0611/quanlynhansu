@@ -367,6 +367,7 @@
                         let caSalaries = caCong.map((count, idx) => count * (parseInt(shifts[idx]?.salary) || 0));
                         let totalCa = caCong.reduce((a, b) => a + b, 0);
                         let totalCaSalary = caSalaries.reduce((a, b) => a + b, 0);
+                        // Sửa lại công thức tính lương thực nhận cho lương ca
                         let total = totalCaSalary + allowance + bonus - penalty - advance;
 
                         if (totalCa === 0) {
@@ -430,47 +431,118 @@
                     let workdays = tongCong;
                     let baseSalary = emp.base_salary || 0;
                     let salary = 0;
-                    if (workdays >= stdDays) {
+                    // --- BẮT ĐẦU SỬA ĐOẠN NÀY ---
+                    if (emp.salary_type === 'em') {
+                        // Lấy phần trăm hoa hồng, mặc định 0 nếu không có
+                        let commissionPercent = parseFloat(emp.commission_percent) || 0;
+                        // Lương cơ bản + TC/LT + phụ cấp + thưởng lễ + doanh thu * %hoa hồng - phạt - ứng
+                        let commission = revenue * commissionPercent / 100;
+                        salary = baseSalary;
+                        let total = salary + extra + allowance + bonus + commission - penalty - advance;
+                        let displayWorkdays = workdays + extraShifts;
+                        let baseSalaryLabel = `${formatVND(baseSalary)} <span style="font-size:12px;color:#888">(Tháng)</span>`;
+                        html += `<table class="employee-payroll-table">
+                            <thead>
+                                <tr>
+                                    <th>Ngày công</th>
+                                    <th>Lương cơ bản</th>
+                                    <th>TC/LT</th>
+                                    <th>Phụ cấp</th>
+                                    <th>Thưởng lễ</th>
+                                    <th>Doanh thu</th>
+                                    <th>Hoa hồng</th>
+                                    <th>Tiền ứng</th>
+                                    <th>Phạt</th>
+                                    <th>Lương thực nhận</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${displayWorkdays}</td>
+                                    <td>${baseSalaryLabel}</td>
+                                    <td>${formatVND(extra)}</td>
+                                    <td>${formatVND(allowance)}</td>
+                                    <td>${formatVND(bonus)}</td>
+                                    <td>${formatVND(revenue)}</td>
+                                    <td>${formatVND(commission)} <span style="font-size:12px;color:#888">(${commissionPercent}% trên doanh thu)</span></td>
+                                    <td>${formatVND(advance)}</td>
+                                    <td>${formatVND(penalty)}</td>
+                                    <td style="font-weight:bold;color:#1976d2;">${formatVND(total)}</td>
+                                </tr>
+                            </tbody>
+                        </table>`;
+                        // Thêm biểu đồ cho nhân viên lương cơ bản kiểu em
+                        renderBasicSalaryPieChart(emp, monthVal, workdays, stdDays, extraShifts, allowance, bonus, revenue, penalty, advance, baseSalary, perDayEmp, commission, commissionPercent);
+                    } else if (workdays >= stdDays) {
                         // Nếu dư công thì cộng thêm số công dư * tiền 1 ngày công
                         salary = baseSalary + ((workdays - stdDays) * (perDayEmp || 0));
+                        let total = salary + extra + allowance + bonus + revenue - penalty - advance;
+                        let displayWorkdays = workdays + extraShifts;
+                        let baseSalaryLabel = `${formatVND(baseSalary)} <span style="font-size:12px;color:#888">(Tháng)</span>`;
+                        html += `<table class="employee-payroll-table">
+                            <thead>
+                                <tr>
+                                    <th>Ngày công</th>
+                                    <th>Lương cơ bản</th>
+                                    <th>Phụ cấp</th>
+                                    <th>Thưởng lễ</th>
+                                    <th>Doanh thu</th>
+                                    <th>Tiền ứng</th>
+                                    <th>Phạt</th>
+                                    <th>Lương thực nhận</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${displayWorkdays}</td>
+                                    <td>${baseSalaryLabel}</td>
+                                    <td>${formatVND(allowance)}</td>
+                                    <td>${formatVND(bonus)}</td>
+                                    <td>${formatVND(revenue)}</td>
+                                    <td>${formatVND(advance)}</td>
+                                    <td>${formatVND(penalty)}</td>
+                                    <td style="font-weight:bold;color:#1976d2;">${formatVND(total)}</td>
+                                </tr>
+                            </tbody>
+                        </table>`;
+                        renderBasicSalaryPieChart(emp, monthVal, workdays, stdDays, extraShifts, allowance, bonus, revenue, penalty, advance, baseSalary, perDayEmp);
                     } else {
                         // Nếu thiếu công thì trừ đi số công thiếu * tiền 1 ngày công
                         salary = baseSalary - ((stdDays - workdays) * (perDayEmp || 0));
                         if (salary < 0) salary = 0;
+                        let total = salary + extra + allowance + bonus + revenue - penalty - advance;
+                        let displayWorkdays = workdays + extraShifts;
+                        let baseSalaryLabel = `${formatVND(baseSalary)} <span style="font-size:12px;color:#888">(Tháng)</span>`;
+                        html += `<table class="employee-payroll-table">
+                            <thead>
+                                <tr>
+                                    <th>Ngày công</th>
+                                    <th>Lương cơ bản</th>
+                                    <th>Phụ cấp</th>
+                                    <th>Thưởng lễ</th>
+                                    <th>Doanh thu</th>
+                                    <th>Tiền ứng</th>
+                                    <th>Phạt</th>
+                                    <th>Lương thực nhận</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${displayWorkdays}</td>
+                                    <td>${baseSalaryLabel}</td>
+                                    <td>${formatVND(allowance)}</td>
+                                    <td>${formatVND(bonus)}</td>
+                                    <td>${formatVND(revenue)}</td>
+                                    <td>${formatVND(advance)}</td>
+                                    <td>${formatVND(penalty)}</td>
+                                    <td style="font-weight:bold;color:#1976d2;">${formatVND(total)}</td>
+                                </tr>
+                            </tbody>
+                        </table>`;
+                        renderBasicSalaryPieChart(emp, monthVal, workdays, stdDays, extraShifts, allowance, bonus, revenue, penalty, advance, baseSalary, perDayEmp);
                     }
-                    // Tính tổng lương thực nhận (cộng doanh thu)
-                    let total = salary + extra + allowance + bonus + revenue - penalty - advance;
-                    let displayWorkdays = workdays + extraShifts;
-                    let baseSalaryLabel = `${formatVND(baseSalary)} <span style="font-size:12px;color:#888">(Tháng)</span>`;
-                    html += `<table class="employee-payroll-table">
-                        <thead>
-                            <tr>
-                                <th>Ngày công</th>
-                                <th>Lương cơ bản</th>
-                                <th>Phụ cấp</th>
-                                <th>Thưởng lễ</th>
-                                <th>Doanh thu</th>
-                                <th>Tiền ứng</th>
-                                <th>Phạt</th>
-                                <th>Lương thực nhận</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>${displayWorkdays}</td>
-                                <td>${baseSalaryLabel}</td>
-                                <td>${formatVND(allowance)}</td>
-                                <td>${formatVND(bonus)}</td>
-                                <td>${formatVND(revenue)}</td>
-                                <td>${formatVND(advance)}</td>
-                                <td>${formatVND(penalty)}</td>
-                                <td style="font-weight:bold;color:#1976d2;">${formatVND(total)}</td>
-                            </tr>
-                        </tbody>
-                    </table>`;
-                    // Thêm biểu đồ cho nhân viên lương cơ bản
-                    renderBasicSalaryPieChart(emp, monthVal, workdays, stdDays, extraShifts, allowance, bonus, revenue, penalty, advance, baseSalary, perDayEmp);
                 }
+                // --- KẾT THÚC SỬA ĐOẠN NÀY ---
                 html += `</div>`;
             });
             document.getElementById('payrollTableWrap').innerHTML = html;
@@ -832,7 +904,7 @@
         }
 
         // Thêm hàm vẽ biểu đồ cho nhân viên lương cơ bản
-        function renderBasicSalaryPieChart(emp, month, workdays, stdDays, extraShifts, allowance, bonus, revenue, penalty, advance, baseSalary, perDayEmp) {
+        function renderBasicSalaryPieChart(emp, month, workdays, stdDays, extraShifts, allowance, bonus, revenue, penalty, advance, baseSalary, perDayEmp, commission, commissionPercent) {
             const chartWrap = document.getElementById('payrollChartWrap');
             chartWrap.innerHTML = '';
             // Biểu đồ 1: Ngày công (đủ, thiếu, dư)

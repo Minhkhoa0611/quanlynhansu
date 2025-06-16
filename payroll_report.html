@@ -160,13 +160,13 @@
                     || parseInt(localStorage.getItem('salaryPerDay') || '0');
                 let workdays = 0;
                 let extraShiftsVal = getPayrollInput(emp.id, month, 'extraShifts', 0);
+                let extraShifts = parseFloat((extraShiftsVal + '').replace(',', '.')) || 0;
                 let allowanceVal = getPayrollInput(emp.id, month, 'allowance', 0);
                 let bonusVal = getPayrollInput(emp.id, month, 'bonus', 0);
                 let penaltyVal = getPayrollInput(emp.id, month, 'penalty', 0);
                 let advanceVal = getPayrollInput(emp.id, month, 'advance', 0);
                 // Lấy doanh thu
                 let revenueVal = getPayrollInput(emp.id, month, 'revenue', 0);
-                let extraShifts = parseFloat((extraShiftsVal + '').replace(',', '.')) || 0;
                 let allowance = parseCurrency(allowanceVal);
                 let bonus = parseCurrency(bonusVal);
                 let penalty = parseCurrency(penaltyVal);
@@ -175,7 +175,6 @@
                 let extra = extraShifts * (perDayEmp || 0);
 
                 let total = 0;
-                workdays = 0;
                 if (emp.salary_type === 'shift') {
                     // Lấy ca/tháng đúng chuẩn
                     let shifts = (shiftsByEmpByMonth[month] && shiftsByEmpByMonth[month][emp.id]) || [];
@@ -191,23 +190,37 @@
                     let caSalaries = caCong.map((count, idx) => count * (parseInt(shifts[idx]?.salary) || 0));
                     let totalCaSalary = caSalaries.reduce((a, b) => a + b, 0);
                     total = totalCaSalary + allowance + bonus - penalty - advance;
-                    workdays = caCong.reduce((a, b) => a + b, 0);
+                    workdays = caCong.reduce((a, b) => a + b, 0); // workdays cho lương ca là tổng số ca
+                    // Sửa: Hiển thị tổng số ca/tháng (có thể là số thập phân)
+                    var workDisplay = workdays % 1 === 0 ? workdays : workdays.toFixed(1);
+                } else if (emp.salary_type === 'em') {
+                    // Nhân viên lương cơ bản kiểu "em" (có hoa hồng doanh thu)
+                    // Ngày công = công thực tế + TC/LT
+                    workdays = getWorkdaysWithFactor(emp, month) + extraShifts;
+                    let baseSalary = emp.base_salary || 0;
+                    let commissionPercent = parseFloat(emp.commission_percent) || 0;
+                    let commission = Math.round(revenue * commissionPercent) / 100;
+                    let salary = baseSalary;
+                    // SỬA: KHÔNG cộng extraShifts * perDayEmp vào tổng lương nữa vì đã tính trong workdays
+                    total = salary + allowance + bonus + commission - penalty - advance;
+                    totalRevenue += revenue;
+                    var workDisplay = workdays % 1 === 0 ? workdays : workdays.toFixed(2);
                 } else {
-                    // Đếm tổng công (bao gồm nửa ca nếu có)
+                    // Lương cơ bản thường
+                    // Ngày công = công thực tế + TC/LT
                     workdays = getWorkdaysWithFactor(emp, month) + extraShifts;
                     let baseSalary = emp.base_salary || 0;
                     let salary = 0;
                     if (workdays >= stdDays) {
-                        // Nếu dư công thì cộng thêm số công dư * tiền 1 ngày công
                         salary = baseSalary + ((workdays - stdDays) * (perDayEmp || 0));
                     } else {
-                        // Nếu thiếu công thì trừ đi số công thiếu * tiền 1 ngày công
                         salary = baseSalary - ((stdDays - workdays) * (perDayEmp || 0));
                         if (salary < 0) salary = 0;
                     }
-                    total = salary + extra + allowance + bonus + revenue - penalty - advance;
-                    workdays = workdays + extraShifts;
+                    // SỬA: KHÔNG cộng extraShifts * perDayEmp vào tổng lương nữa vì đã tính trong workdays
+                    total = salary + allowance + bonus + revenue - penalty - advance;
                     totalRevenue += revenue;
+                    var workDisplay = workdays % 1 === 0 ? workdays : workdays.toFixed(2);
                 }
                 if (total < 0) total = 0;
                 totalAll += total;
@@ -223,7 +236,7 @@
                 html += `<tr>
                     <td>${idx+1}</td>
                     <td>${emp.name}</td>
-                    <td>${workdays}</td>
+                    <td>${workDisplay}</td>
                     <td>${formatVND(allowance)}</td>
                     <td>${formatVND(bonus)}</td>
                     <td>${emp.salary_type !== 'shift' ? formatVND(revenue) : ''}</td>
