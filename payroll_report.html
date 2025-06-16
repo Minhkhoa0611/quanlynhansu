@@ -18,13 +18,15 @@
     <script src="data_io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <script>renderMenu('payroll_report');</script>
     <div class="container">
         <h2>Lập Báo Cáo Lương</h2>
         <div style="margin-bottom:18px;">
+            <!-- Đưa ô tìm kiếm nhân viên ra trước -->
+            <input type="text" id="employeeSearchInput" placeholder="Tìm nhân viên..." style="margin-right:18px;padding:6px 14px;min-width:180px;border-radius:6px;border:1px solid #ccc;font-size:16px;" oninput="renderPayrollReport()">
             <label style="font-weight:500;color:#1976d2;">Chọn cửa hàng: </label>
             <select id="reportStoreSelect" style="font-size:17px;padding:6px 16px;min-width:120px;border-radius:6px;" onchange="renderPayrollReport()">
                 <option value="">--Tất cả--</option>
@@ -34,8 +36,18 @@
             <label style="font-weight:500;color:#1976d2;margin-left:12px;">Chọn tháng: </label>
             <input type="month" id="reportMonth" style="font-size:17px;padding:6px 16px;min-width:160px;border-radius:6px;">
             <button onclick="renderPayrollReport()" style="margin-left:12px;padding:6px 18px;background:#1976d2;color:#fff;border:none;border-radius:4px;cursor:pointer;">Xem báo cáo</button>
+            <!-- ĐÃ BỎ nút in báo cáo -->
         </div>
         <div id="payrollReportTable"></div>
+        <!-- Đưa 2 biểu đồ xuống dưới bảng -->
+        <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin:32px 0 12px 0;">
+            <div style="flex:1;min-width:320px;max-width:520px;">
+                <canvas id="payrollBarChart" height="220"></canvas>
+            </div>
+            <div style="flex:1;min-width:320px;max-width:420px;">
+                <canvas id="storeTotalBarChart" height="220"></canvas>
+            </div>
+        </div>
     </div>
     <script>
         function formatVND(val) {
@@ -49,11 +61,59 @@
             let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
             return payrollInputs?.[empId]?.[month]?.[field] ?? defaultVal;
         }
+        function getWorkdaysWithFactor(emp, month) {
+            let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            let workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+            let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+            let empAtt = (attendanceByMonth[month] && attendanceByMonth[month][emp.id]) || {};
+            let total = 0;
+            for (let d in empAtt) {
+                let arr = empAtt[d];
+                let factor = 1;
+                if (workFactorByMonth[month] && workFactorByMonth[month][emp.id] && typeof workFactorByMonth[month][emp.id][d] !== 'undefined') {
+                    factor = parseFloat(workFactorByMonth[month][emp.id][d]) || 1;
+                }
+                if (Array.isArray(arr) && arr.length > 0) {
+                    let shifts = shiftsByEmp[emp.id] || [];
+                    if (shifts.length > 0) {
+                        let sum = 0;
+                        arr.forEach(shiftIdx => {
+                            sum += (shifts[shiftIdx]?.half ? 0.5 : 1);
+                        });
+                        total += sum * factor;
+                    } else {
+                        total += factor;
+                    }
+                }
+            }
+            return total;
+        }
+        // Khai báo biến lưu chart để tái sử dụng
+        let payrollBarChartInstance = null;
+        let storeTotalBarChartInstance = null;
+
+        // Một số màu sắc đẹp cho các cột nhân viên
+        const payrollBarColors = [
+            '#1976d2', '#43a047', '#fbc02d', '#e53935', '#8e24aa', '#00acc1', '#fb8c00', '#6d4c41', '#c0ca33', '#d81b60',
+            '#3949ab', '#00897b', '#f4511e', '#7cb342', '#5e35b1', '#039be5', '#c62828', '#ffb300', '#8d6e63', '#00bcd4'
+        ];
+        // Màu cho từng cửa hàng
+        const storeColors = {
+            'LepShop': '#1976d2',
+            "H'farm": '#43a047',
+            'Khác': '#fbc02d'
+        };
+
         function renderPayrollReport() {
             let employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
             // Lọc theo cửa hàng
             const store = document.getElementById('reportStoreSelect').value;
             if (store) employees = employees.filter(e => (e.store || '') === store);
+            // Lọc theo tên nhân viên (tìm kiếm)
+            const searchVal = (document.getElementById('employeeSearchInput')?.value || '').trim().toLowerCase();
+            if (searchVal) {
+                employees = employees.filter(e => (e.name || '').toLowerCase().includes(searchVal));
+            }
             let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
             let workDaysStd = parseInt(localStorage.getItem('workDaysStd') || '26');
             let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay') || '0');
@@ -86,6 +146,11 @@
                 <tbody>`;
             let totalAll = 0;
             let totalRevenue = 0;
+            // Thêm mảng lưu dữ liệu cho biểu đồ
+            let chartLabels = [];
+            let chartData = [];
+            let chartColors = [];
+            let storeTotals = {};
             employees.forEach((emp, idx) => {
                 let empAtt = (attendanceByMonth[month] && attendanceByMonth[month][emp.id]) || {};
                 // Lấy ngày công chuẩn và tiền công/ngày riêng cho từng nhân viên nếu có
@@ -129,21 +194,7 @@
                     workdays = caCong.reduce((a, b) => a + b, 0);
                 } else {
                     // Đếm tổng công (bao gồm nửa ca nếu có)
-                    for (let d in empAtt) {
-                        let arr = empAtt[d];
-                        if (Array.isArray(arr) && arr.length > 0) {
-                            let shifts = shiftsByEmp[emp.id] || [];
-                            if (shifts.length > 0) {
-                                let sum = 0;
-                                arr.forEach(shiftIdx => {
-                                    sum += (shifts[shiftIdx]?.half ? 0.5 : 1);
-                                });
-                                workdays += sum;
-                            } else {
-                                workdays++;
-                            }
-                        }
-                    }
+                    workdays = getWorkdaysWithFactor(emp, month) + extraShifts;
                     let baseSalary = emp.base_salary || 0;
                     let salary = 0;
                     if (workdays >= stdDays) {
@@ -160,6 +211,15 @@
                 }
                 if (total < 0) total = 0;
                 totalAll += total;
+                // Thêm dữ liệu cho biểu đồ nhân viên
+                chartLabels.push(emp.name + (emp.store ? ` (${emp.store})` : ''));
+                // Đổi màu: mỗi nhân viên 1 màu, lặp lại nếu quá số màu
+                chartColors.push(payrollBarColors[idx % payrollBarColors.length]);
+                chartData.push(total);
+                // Tính tổng lương từng cửa hàng
+                let storeKey = emp.store || 'Khác';
+                if (!storeTotals[storeKey]) storeTotals[storeKey] = 0;
+                storeTotals[storeKey] += total;
                 html += `<tr>
                     <td>${idx+1}</td>
                     <td>${emp.name}</td>
@@ -181,6 +241,11 @@
                     <tr>
                         <td colspan="9" style="text-align:left;font-style:italic;color:#1976d2;">
                             Số tiền bằng chữ: <span id="totalAllText"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="9" style="text-align:right;color:#888;font-size:15px;">
+                            Số nhân viên: <span id="employeeCount">${employees.length}</span>
                         </td>
                     </tr>
                 </tfoot>
@@ -220,6 +285,94 @@
                 `;
                 document.querySelector('.container').appendChild(actionsDiv);
             }
+
+            // Sau khi render bảng, vẽ biểu đồ
+            renderPayrollBarChart(chartLabels, chartData, chartColors, store);
+            renderStoreTotalBarChart(storeTotals);
+        }
+
+        // Hàm vẽ biểu đồ lương nhân viên
+        function renderPayrollBarChart(labels, data, colors, store) {
+            const ctx = document.getElementById('payrollBarChart').getContext('2d');
+            if (payrollBarChartInstance) payrollBarChartInstance.destroy();
+            payrollBarChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Lương nhân viên',
+                        data: data,
+                        backgroundColor: colors,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: store ? `So sánh lương nhân viên (${store})` : 'So sánh lương nhân viên 2 cửa hàng'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => formatVND(ctx.parsed.y)
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => formatVND(value)
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Hàm vẽ biểu đồ tổng lương từng cửa hàng
+        function renderStoreTotalBarChart(storeTotals) {
+            const ctx = document.getElementById('storeTotalBarChart').getContext('2d');
+            if (storeTotalBarChartInstance) storeTotalBarChartInstance.destroy();
+            const labels = Object.keys(storeTotals);
+            const data = Object.values(storeTotals);
+            // Đổi màu: mỗi cửa hàng 1 màu
+            const colors = labels.map(s => storeColors[s] || '#bdbdbd');
+            storeTotalBarChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Tổng lương cửa hàng',
+                        data: data,
+                        backgroundColor: colors,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'So sánh tổng lương giữa các cửa hàng'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => formatVND(ctx.parsed.y)
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => formatVND(value)
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         // --- Các hàm xuất/chép PNG và Excel ---

@@ -509,6 +509,26 @@
             };
             reader.readAsText(file);
         }
+        // Trong hàm importAllData hoặc nơi xử lý nhập dữ liệu:
+        if (data.payrollInputs) {
+            let oldPayrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+            let newPayrollInputs = data.payrollInputs;
+            let mergedPayrollInputs = { ...oldPayrollInputs };
+            Object.keys(newPayrollInputs).forEach(empId => {
+                if (!mergedPayrollInputs[empId]) mergedPayrollInputs[empId] = {};
+                Object.keys(newPayrollInputs[empId]).forEach(month => {
+                    mergedPayrollInputs[empId][month] = {
+                        ...mergedPayrollInputs[empId][month],
+                        ...newPayrollInputs[empId][month]
+                    };
+                });
+            });
+            localStorage.setItem('payrollInputs', JSON.stringify(mergedPayrollInputs));
+        }
+        // Phát tín hiệu đồng bộ cho các tab khác
+        if (window.localStorage) {
+            localStorage.setItem('sync_data_trigger', Date.now().toString());
+        }
     </script>
     <script src="footer.js"></script>
     <script>renderFooter();</script>

@@ -299,10 +299,109 @@
             80%  { border-color: #8e24aa; box-shadow: 0 0 18px 4px #8e24aaa0; }
             100% { border-color: #1976d2; box-shadow: 0 0 18px 4px #1976d2a0; }
         }
+        /* --- Thay đổi: làm to bảng chấm công lương ca vừa phải --- */
+        .shift-salary-table-big {
+            font-size: 18px !important;
+            zoom: 1.12;
+        }
+        .shift-salary-table-big th, .shift-salary-table-big td {
+            padding: 10px 6px !important;
+            font-size: 15px !important;
+        }
+        .shift-salary-table-big input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+        .shift-salary-table-big input[type="number"],
+        .shift-salary-table-big input[type="text"] {
+            font-size: 15px !important;
+        }
+        @media (max-width: 900px) {
+            .shift-salary-table-big {
+                font-size: 13px !important;
+                zoom: 1;
+            }
+            .shift-salary-table-big th, .shift-salary-table-big td {
+                font-size: 13px !important;
+                padding: 8px 4px !important;
+            }
+        }
+        @media (max-width: 600px) {
+            .shift-salary-table-big {
+                font-size: 12px !important;
+                zoom: 1;
+            }
+            .shift-salary-table-big th, .shift-salary-table-big td {
+                font-size: 12px !important;
+                padding: 5px 2px !important;
+            }
+        }
+        /* --- Thu nhỏ phần cảnh báo Lưu ý --- */
+        .notice-warning {
+            background: #fff3cd;
+            color: #b8860b;
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 1rem;
+            font-weight: 500;
+            box-shadow: 0 2px 8px #ffc10730;
+            border: 1.5px solid #ffc107;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .notice-warning .notice-main {
+            flex: 1;
+            min-width: 0;
+        }
+        .notice-warning .notice-title {
+            font-size: 1.1rem;
+            color: #d32f2f;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            font-family: 'Segoe UI Semibold','Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .notice-bold {
+            color: #d32f2f;
+            font-size: 1.05rem;
+            font-weight: 700;
+            display: block;
+            margin: 6px 0 6px 0;
+            font-family: 'Segoe UI Semibold','Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .notice-small {
+            color: #d32f2f;
+            font-size: 0.98rem;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0;
+            font-family: 'Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .notice-qr {
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .notice-warning .notice-qr span {
+            font-size: 0.98rem;
+            color: #1976d2;
+            display: block;
+            margin-bottom: 6px;
+            font-family: 'Segoe UI Semibold','Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .qr-animated-wrap img {
+            width: 80px !important;
+            height: 80px !important;
+            border-radius: 8px;
+            border: 1.5px solid #1976d2;
+        }
     </style>
     <script src="menu.js"></script>
     <script src="data_io.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- Thêm Chart.js CDN cho biểu đồ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div id="menu"></div>
@@ -312,29 +411,53 @@
     </script>
     <script src="data_io.js"></script>
     <div class="container">
-        <div style="background:#fff3cd;color:#b8860b;padding:18px 28px;border-radius:14px;margin-bottom:28px;font-size:1.18rem;font-weight:600;box-shadow:0 2px 12px #ffc10750;border:2px solid #ffc107;display:flex;align-items:center;justify-content:space-between;gap:28px;">
-            <div style="flex:1;min-width:0;">
-                <span style="font-size:1.35rem;color:#d32f2f;font-weight:bold;letter-spacing:0.5px;font-family:'Segoe UI Semibold','Segoe UI',Arial,sans-serif;">&#9888; Lưu ý:</span>
-                <span style="color:#d32f2f;font-size:1.25rem;font-weight:700;display:block;margin:10px 0 12px 0;font-family:'Segoe UI Semibold','Segoe UI',Arial,sans-serif;">
+        <!-- Xóa phần cảnh báo Lưu ý -->
+        <!--
+        <div class="notice-warning">
+            <div class="notice-main">
+                <span class="notice-title">&#9888; Lưu ý:</span>
+                <span class="notice-bold">
                     <b>Công bạn tự chấm, lương bạn tự hưởng – sai là tự chịu!</b>
                 </span>
-                <span style="color:#d32f2f;font-size:1.08rem;font-weight:600;display:block;margin-bottom:0;font-family:'Segoe UI',Arial,sans-serif;">
+                <span class="notice-small">
                     Kiểm tra chấm công từng ngày, đừng chấm trước rồi lại sai!
                 </span>
             </div>
-            <div style="flex-shrink:0;text-align:center;">
-                <span style="font-size:1.08rem;color:#1976d2;display:block;margin-bottom:10px;font-family:'Segoe UI Semibold','Segoe UI',Arial,sans-serif;">Sự cố kỹ thuật liên hệ Zalo:</span>
+            <div class="notice-qr">
+                <span>Sự cố kỹ thuật liên hệ Zalo:</span>
                 <div class="qr-animated-wrap">
                     <img 
                         id="qrDynamic"
                         src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zalo.me/0867544809&color=1976d2&bgcolor=ffffff"
-                        alt="QR Zalo"
-                        style="width:120px;height:120px;border-radius:12px;border:2px solid #1976d2;background:#fff;transition:box-shadow 0.4s,border-color 0.4s;">
+                        alt="QR Zalo">
                     <div class="qr-animated-border"></div>
                 </div>
             </div>
         </div>
-        <h2>Chấm công theo tháng</h2>
+        -->
+        <!-- Thay đổi tiêu đề Chấm công theo tháng -->
+        <div style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 18px;
+        ">
+            <div style="
+                border: 2.5px solid #1976d2;
+                border-radius: 14px;
+                padding: 12px 36px;
+                background: #e3f0ff;
+                color: #1976d2;
+                font-size: 2.1rem;
+                font-weight: bold;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                text-align: center;
+                box-shadow: 0 2px 12px #1976d220;
+            ">
+                CHẤM CÔNG THEO THÁNG
+            </div>
+        </div>
         <div class="form-row">
             <label style="width:130px;">Chọn cửa hàng:</label>
             <select id="attStoreSelect" onchange="renderEmpSelect();renderAttendance();updateSalaryTypeDisplay()" style="font-size:18px;padding:8px 18px;min-width:180px;border-radius:8px;border:1.5px solid #b3d1f7;background:#f7fbff;color:#1976d2;font-weight:500;box-shadow:0 1px 6px #1976d210;">
@@ -359,6 +482,8 @@
             <!-- <button class="btn" onclick="saveAttendanceMonth()" style="display:none;">Lưu chấm công</button> -->
         </div>
         <div id="attTableWrap" style="overflow-x:auto"></div>
+        <!-- Thêm vùng chứa biểu đồ ngay sau bảng chấm công -->
+        <div id="attChartWrap" style="max-width:420px;margin:18px auto 0 auto;"></div>
     </div>
     <!-- Modal ghi chú -->
     <div id="noteModal" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:#0005;">
@@ -426,6 +551,8 @@
         let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
         let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
         let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+        // Thêm biến lưu hệ số công từng ngày
+        let workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
 
         function getCurrentMonth() {
             let m = document.getElementById('attMonth').value;
@@ -529,12 +656,7 @@
                             : `<input type="text" value="${formatVND(shift.salary)}" style="width:90px" oninput="formatCurrencyInput(this)" onchange="updateShift('${empId}',${idx},'salary',parseCurrency(this.value))">`
                         ) +
                     `</td>
-                    <td>
-                        <label style="font-size:13px;">
-                            <input type="checkbox" ${shift.half ? 'checked' : ''} onchange="onHalfShiftChange('${empId}',${idx},this.checked)">
-                            Nửa ca (0.5 công)
-                        </label>
-                    </td>
+                    <!-- Bỏ cột Nửa ca -->
                     <td><button class="btn" style="background:#e53935" onclick="deleteShift('${empId}',${idx})">Xóa</button></td>
                 </tr>`;
             });
@@ -622,8 +744,24 @@
                 span.textContent = '';
             }
         }
+        function getWorkFactor(month, empId, day) {
+            if (!workFactorByMonth[month]) workFactorByMonth[month] = {};
+            if (!workFactorByMonth[month][empId]) workFactorByMonth[month][empId] = {};
+            if (typeof workFactorByMonth[month][empId][day] === 'undefined') {
+                workFactorByMonth[month][empId][day] = 1;
+            }
+            return workFactorByMonth[month][empId][day];
+        }
+        function setWorkFactor(month, empId, day, value) {
+            if (!workFactorByMonth[month]) workFactorByMonth[month] = {};
+            if (!workFactorByMonth[month][empId]) workFactorByMonth[month][empId] = {};
+            workFactorByMonth[month][empId][day] = value;
+            localStorage.setItem('workFactorByMonth', JSON.stringify(workFactorByMonth));
+            renderAttendance();
+        }
         function renderAttendance() {
             shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
             const month = getCurrentMonth();
             const days = daysInMonth(month);
             const empId = document.getElementById('empSelect').value;
@@ -661,14 +799,21 @@
                             <th>Giờ bắt đầu</th>
                             <th>Giờ kết thúc</th>
                             <th>Tiền ca</th>
-                            <th>Nửa ca</th>
+                            <!-- <th>Nửa ca</th> -->
                             <th>Xóa</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>`;
                 // Thêm hàng tiêu đề lớn cho bảng chấm công
-                html += `<table style="margin-bottom:0;"><thead>`;
+                let tableStyle = '';
+                let tableClass = '';
+                if (emp.salary_type !== 'shift') {
+                    tableStyle = 'font-size:18px;zoom:1.12;';
+                } else {
+                    tableClass = 'shift-salary-table-big';
+                }
+                html += `<table style="margin-bottom:0;${tableStyle}"${tableClass ? ` class="${tableClass}"` : ''}><thead>`;
                 html += `<tr>
                     <th colspan="${days + (emp.salary_type === 'shift' ? 6 : 5)}" style="background:#1976d2;color:#fff;font-size:20px;font-weight:700;text-align:center;letter-spacing:1px;">
                         BẢNG CHẤM CÔNG ${emp.name ? emp.name.toUpperCase() : ''} THÁNG ${String(tableM).padStart(2, '0')}/${tableY}
@@ -687,6 +832,7 @@
                 }
                 html += `<th style="min-width:140px">Lương thực nhận</th>`;
                 html += `</tr>`;
+                // Bỏ dòng nhập hệ số công phía trên
                 html += `<tr><th></th><th></th>`;
                 for(let d=1; d<=days; ++d) {
                     const [y, m] = month.split('-').map(Number);
@@ -711,13 +857,20 @@
                     for(let d=1; d<=days; ++d) {
                         let checked = (empAtt[d] && empAtt[d].includes(s)) ? 'checked' : '';
                         let shiftVal = shifts[s]?.half ? 0.5 : 1;
-                        if (checked) rowWork += shiftVal;
+                        let factor = getWorkFactor(month, emp.id, d);
+                        if (checked) rowWork += shiftVal * factor;
                         if (empAtt[d] && empAtt[d].length > 0) daysWithWork.add(d);
                         let isToday = (curY === tableY && curM === tableM && curD === d);
-                        html += `<td${isToday ? ' class="today-col"' : ''}>
-                            <input type="checkbox" onchange="toggleAttendanceShift('${emp.id}',${d},${s},this.checked)" ${checked}>
-                            <span style="font-size:11px;color:#1976d2;">${shifts[s]?.half ? '0.5' : '1'}</span>
-                        </td>`;
+                        html += `<td${isToday ? ' class="today-col"' : ''}>`;
+                        html += `<input type="checkbox" onchange="toggleAttendanceShift('${emp.id}',${d},${s},this.checked)" ${checked}>`;
+                        // Chỉ hiện input hệ số công cho lương cơ bản, không hiện gì cho lương ca
+                        if (emp.salary_type !== 'shift' && s === 0) {
+                            html += `<input type="number" min="0" step="0.1" value="${factor}" 
+                                style="width:36px;font-size:11px;padding:1px 2px;margin-left:2px;text-align:center;"
+                                title="Hệ số công"
+                                onchange="setWorkFactor('${month}','${emp.id}',${d},parseFloat(this.value)||1)">`;
+                        }
+                        html += `</td>`;
                     }
                     caCong[s] = rowWork;
                     let caSalary = parseInt(shifts[s]?.salary || 0);
@@ -731,9 +884,9 @@
                             tongLuong = caSalaries.reduce((a, b) => a + b, 0);
                         } else {
                             let baseSalary = emp.base_salary || 0;
-                            let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay_' + emp.id)) 
+                            let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay_' + empId)) 
                                 || parseInt(localStorage.getItem('salaryPerDay') || '0');
-                            let workDaysStd = parseInt(localStorage.getItem('workDaysStd_' + emp.id)) 
+                            let workDaysStd = parseInt(localStorage.getItem('workDaysStd_' + empId)) 
                                 || parseInt(localStorage.getItem('workDaysStd') || '26');
                             if (tongCong >= workDaysStd) {
                                 tongLuong = baseSalary + ((tongCong - workDaysStd) * salaryPerDay);
@@ -760,6 +913,18 @@
             }
             document.getElementById('attTableWrap').innerHTML = html;
             if (emp) renderShifts(emp.id);
+            // Sau khi render bảng, vẽ biểu đồ nếu là lương ca
+            setTimeout(() => renderShiftPieChartInAtt(emp, month), 0);
+
+            // Thêm ghi chú nhỏ về vấn đề kỹ thuật chấm công dưới bảng chấm công
+            let note = document.getElementById('attTechNote');
+            if (!note) {
+                note = document.createElement('div');
+                note.id = 'attTechNote';
+                note.style = 'margin:10px 0 0 0;font-size:13px;color:#d32f2f;text-align:center;';
+                document.getElementById('attTableWrap').after(note);
+            }
+            note.innerHTML = 'Nếu gặp sự cố kỹ thuật khi chấm công, vui lòng liên hệ quản lý hoặc bộ phận kỹ thuật để được hỗ trợ kịp thời.';
         }
         function toggleAttendanceShift(empId, day, shiftIdx, checked) {
             const month = getCurrentMonth();

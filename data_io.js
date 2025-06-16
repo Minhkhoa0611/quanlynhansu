@@ -243,7 +243,20 @@ function importAllData(jsonData) {
         }
         // Ghi lại payrollInputs (bao gồm TC/LT, Phụ cấp, Thưởng lễ, Phạt)
         if (data.payrollInputs) {
-            localStorage.setItem('payrollInputs', JSON.stringify(data.payrollInputs));
+            // Merge payrollInputs cũ và mới để không mất dữ liệu cũ
+            let oldPayrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+            let newPayrollInputs = data.payrollInputs;
+            let mergedPayrollInputs = { ...oldPayrollInputs };
+            Object.keys(newPayrollInputs).forEach(empId => {
+                if (!mergedPayrollInputs[empId]) mergedPayrollInputs[empId] = {};
+                Object.keys(newPayrollInputs[empId]).forEach(month => {
+                    mergedPayrollInputs[empId][month] = {
+                        ...mergedPayrollInputs[empId][month],
+                        ...newPayrollInputs[empId][month]
+                    };
+                });
+            });
+            localStorage.setItem('payrollInputs', JSON.stringify(mergedPayrollInputs));
         }
         if (data.notes) {
             Object.keys(data.notes).forEach(k => {
@@ -278,7 +291,7 @@ function importAllData(jsonData) {
 
         // Reload lại trang hiện tại để cập nhật giao diện (nếu muốn)
         if (typeof location !== 'undefined' && location.reload) {
-            location.reload();
+            setTimeout(() => location.reload(), 100); // Để các tab khác kịp nhận sự kiện storage
         }
     } catch (e) {
         alert('Lỗi khi nhập dữ liệu: ' + e.message);
@@ -417,9 +430,13 @@ function exportAllDataAndSync() {
 window.addEventListener('storage', function(e) {
     if (e.key === 'sync_data_trigger') {
         // Khi có tín hiệu đồng bộ, reload lại dữ liệu từ localStorage
-        // (Các trang nên có hàm reload dữ liệu từ localStorage, ví dụ: renderAttendance, calcPayroll, ...)
-        if (typeof renderAttendance === 'function') renderAttendance();
-        if (typeof calcPayroll === 'function') calcPayroll();
+        // Ưu tiên reload trang để đảm bảo đồng bộ hoàn toàn
+        if (typeof location !== 'undefined' && location.reload) {
+            location.reload();
+        }
+        // Nếu không muốn reload trang, có thể gọi các hàm render dữ liệu ở đây
+        // if (typeof renderAttendance === 'function') renderAttendance();
+        // if (typeof calcPayroll === 'function') calcPayroll();
         // Thêm các hàm render khác nếu có
     }
 });

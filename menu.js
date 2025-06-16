@@ -1,5 +1,5 @@
 if (typeof CODE_VERSION === 'undefined') {
-    var CODE_VERSION = '2.0.3'; // ví dụ: '2.0.3'
+    var CODE_VERSION = '2.1.0'; // ví dụ: '2.1.0'
 }
 
 function renderMenu(active) {
@@ -53,6 +53,19 @@ function renderMenu(active) {
         labelColor = (versionColors[appVersion] || versionColors['Free']).label;
     }
 
+    // Lấy màu và font logo từ localStorage nếu có
+    let logoColor = localStorage.getItem('menuLogoColor') || '#111';
+    let logoFont = localStorage.getItem('menuLogoFont') || "'Times New Roman', serif";
+
+    // Thêm font Pacifico vào head nếu chưa có
+    if (!document.getElementById('font-pacifico-link')) {
+        const link = document.createElement('link');
+        link.id = 'font-pacifico-link';
+        link.rel = 'stylesheet';
+        link.href = 'https://fonts.googleapis.com/css?family=Pacifico&display=swap';
+        document.head.appendChild(link);
+    }
+
     // Luôn cập nhật lại style khi renderMenu (xóa style cũ nếu có)
     const oldStyle = document.getElementById('menu-style');
     if (oldStyle) oldStyle.remove();
@@ -74,25 +87,36 @@ function renderMenu(active) {
             z-index: 10;
         }
         .navbar .navbar-logo {
+            font-family: ${logoFont};
             font-size: 22px;
             font-weight: bold;
-            letter-spacing: 1.5px;
-            color: #fff;
+            letter-spacing: 1.2px;
+            color: ${logoColor};
             margin-right: 32px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             user-select: none;
+            font-style: italic;
+            transform: skew(-8deg,0deg);
+            text-shadow: 0 2px 8px #0003;
         }
         .navbar .navbar-logo-icon {
             width: 32px;
             height: 32px;
-            background: #fff2;
+            background: #fff3;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 0;
+            box-shadow: 0 2px 8px #0002;
+            /* SVG sẽ fill toàn bộ */
+        }
+        .navbar .navbar-logo-icon svg {
+            width: 22px;
+            height: 22px;
+            display: block;
         }
         .navbar .app-version-label {
             background: ${labelColor};
@@ -282,15 +306,24 @@ function renderMenu(active) {
     nav.className = 'navbar';
     nav.innerHTML = `
         <div class="navbar-logo" style="position:relative;">
-            <span class="navbar-logo-icon">🕒</span>
-            TimePro <span style="position:relative;display:inline-block;">
-                HRM
+            <span class="navbar-logo-icon">
+                <!-- SVG đồng hồ hiện đại -->
+                <svg viewBox="0 0 32 32" fill="none">
+                  <circle cx="16" cy="16" r="13" stroke="#1976d2" stroke-width="3" fill="#fff"/>
+                  <circle cx="16" cy="16" r="11" stroke="#1976d2" stroke-width="1" fill="#fff"/>
+                  <line x1="16" y1="16" x2="16" y2="8" stroke="#1976d2" stroke-width="2.2" stroke-linecap="round"/>
+                  <line x1="16" y1="16" x2="23" y2="16" stroke="#ec4899" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="16" cy="16" r="1.6" fill="#ec4899"/>
+                </svg>
+            </span>
+            <span style="display:inline-block;transform:skew(8deg,0deg);color:${logoColor};font-family:${logoFont};">
+                TimePro <span style="font-size:0.9em;letter-spacing:1px;">HRM</span>
                 <span id="app-version-number" style="
                     position: absolute;
                     left: 85%;
                     top: -15px;
                     font-size: 11px;
-                    color: #fff;
+                    color: #111;
                     font-weight: bold;
                     letter-spacing: 0.5px;
                     background: none;
@@ -305,28 +338,28 @@ function renderMenu(active) {
                     V${CODE_VERSION}
                 </span>
             </span>
-            <span id="app-version-label" class="app-version-label" title="Nhấn để nhập Key">
+            <span id="app-version-label" class="app-version-label" title="Nhấn để nhập Key" style="color:#111;">
                 ${appVersion}
             </span>
         </div>
         <div class="navbar-menu">
             ${(() => {
-                // Danh sách menu mặc định
+                // Danh sách menu mặc định (bỏ setup khỏi menu chính)
                 const defaultMenus = [
                     { id: 'index', label: 'Trang Chủ', href: 'index.html' },
                     { id: 'emp', label: 'Danh sách nhân viên', href: 'emp.html' },
-                    { id: 'work_schedule', label: 'Lịch làm việc', href: 'work_schedule.html' },
-                    { id: 'setup', label: 'Thiết Lập', href: 'setup.html' },
+                    // { id: 'setup', label: 'Thiết Lập', href: 'setup.html' }, // chuyển vào Cài Đặt
                     { id: 'att', label: 'Chấm công', href: 'att.html' },
                     { id: 'payroll', label: 'Bảng lương', href: 'payroll.html' },
-                    { id: 'payroll_report', label: 'Lập BC Lương', href: 'payroll_report.html' },
-                    { id: 'about', label: 'Giới thiệu', href: 'about-mksof.html' }
+                    { id: 'payroll_report', label: 'Lập BC Lương', href: 'payroll_report.html' }
                 ];
                 // Lấy cấu hình menu từ localStorage
                 let menuConfig = [];
                 try {
                     menuConfig = JSON.parse(localStorage.getItem('menuConfig') || '[]');
                 } catch {}
+                // Loại bỏ setup, work_schedule, about khỏi menuConfig nếu có
+                menuConfig = menuConfig.filter(m => m.id !== 'setup' && m.id !== 'work_schedule' && m.id !== 'about');
                 let menus = menuConfig.length ? menuConfig : defaultMenus.map(m => ({...m, visible: true}));
                 // Đảm bảo luôn có đủ các menu mặc định (nếu thiếu do cập nhật)
                 defaultMenus.forEach(def => {
@@ -348,14 +381,16 @@ function renderMenu(active) {
             </button>
             <div class="menu-data-list">
                 <button onclick="exportAllData()" class="menu-export-btn"${active==='export'?' class="active"':''}>Xuất dữ liệu</button>
-                <button type="button" class="menu-import-btn" onclick="document.getElementById('importDataInput').click()">Nhập dữ liệu</button>
+                <button type="button" class="menu-import-btn" onclick="handleMenuImportBtnClick()">Nhập dữ liệu</button>
                 <input id="importDataInput" type="file" accept=".json" onchange="importAllData && importAllData(event)">
                 <button type="button" class="menu-telegram-btn" onclick="sendAllDataToTelegramBot()">Gửi dữ liệu về Bot</button>
                 <button type="button" class="menu-setting-btn" onclick="showMenuSettingPopup()" style="color:#1976d2;">⚙️ Cài đặt menu</button>
+                <button type="button" class="menu-setup-btn" onclick="location.href='setup.html'" style="color:#1976d2;">🔧 Thiết Lập</button>
+                <button type="button" class="menu-work-schedule-btn" onclick="location.href='work_schedule.html'" style="color:#1976d2;">📅 Lịch làm việc</button>
+                <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ Giới thiệu</button>
             </div>
         </div>
     `;
-    // Thêm menu vào đầu body
     document.body.insertBefore(nav, document.body.firstChild);
 
     // Thêm popup nhập key nếu chưa có
@@ -610,8 +645,13 @@ function renderMenu(active) {
     function showVersionHistoryPopup() {
         const overlay = document.getElementById('popup-version-history-overlay');
         const content = document.getElementById('popup-version-history-content');
-        // Danh sách lịch sử phiên bản (từ 1.0.0 đến 2.0.3, mỗi bản một cải tiến)
+        // Danh sách lịch sử phiên bản (từ 1.0.0 đến 2.1.0, mỗi bản một cải tiến)
         const history = [
+            {
+                version: '2.1.0',
+                date: '22/6/2025',
+                note: 'Nâng cấp lớn: Thêm cập nhật hệ số công với hình thức lương cơ bản, bổ sung biểu đồ cơ cấu nhân sự, cải tiến giao diện phần mềm.'
+            },
             {
                 version: '2.0.3',
                 date: '20/6/2025',
@@ -765,6 +805,28 @@ function renderMenu(active) {
                 <div id="menu-setting-list" style="width:100%; max-height:50vh; overflow-y:auto; margin-bottom:16px;">
                     <!-- Danh sách menu sẽ render ở đây -->
                 </div>
+                <div id="logo-setting-area" style="width:100%;margin-bottom:16px;">
+                    <div style="font-size:15px;color:#1976d2;font-weight:600;margin-bottom:6px;">Tùy chỉnh Logo</div>
+                    <div style="display:flex;align-items:center;gap:18px;">
+                        <label style="display:flex;align-items:center;gap:6px;">
+                            <span>Màu chữ:</span>
+                            <input type="color" id="menu-logo-color-input" value="#111" style="width:32px;height:32px;border:none;background:none;cursor:pointer;">
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;">
+                            <span>Font:</span>
+                            <select id="menu-logo-font-input" style="padding:4px 8px;border-radius:5px;">
+                                <option value="'Pacifico', cursive">Pacifico</option>
+                                <option value="'Arial', sans-serif">Arial</option>
+                                <option value="'Times New Roman', serif">Times New Roman</option>
+                                <option value="'Roboto', sans-serif">Roboto</option>
+                                <option value="'Tahoma', sans-serif">Tahoma</option>
+                                <option value="'Courier New', monospace">Courier New</option>
+                                <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                            </select>
+                        </label>
+                        <button id="menu-logo-reset-btn" type="button" style="margin-left:10px;padding:5px 12px;border-radius:6px;border:1px solid #1976d2;background:#fff;color:#1976d2;cursor:pointer;font-size:14px;">Về mặc định</button>
+                    </div>
+                </div>
                 <div style="display:flex; gap:12px; width:100%; justify-content:center;">
                     <button id="popup-menu-setting-ok" style="background:#1976d2; color:#fff; border:none; border-radius:6px; padding:7px 22px; font-size:15px; font-weight:600; cursor:pointer;">Lưu</button>
                     <button id="popup-menu-setting-cancel" style="background:#eee; color:#1976d2; border:none; border-radius:6px; padding:7px 22px; font-size:15px; font-weight:600; cursor:pointer;">Hủy</button>
@@ -783,44 +845,38 @@ function renderMenu(active) {
     window.showMenuSettingPopup = function showMenuSettingPopup() {
         const overlay = document.getElementById('popup-menu-setting-overlay');
         const listDiv = document.getElementById('menu-setting-list');
-        // Danh sách menu mặc định
+        // Danh sách menu mặc định (không có setup, work_schedule, about)
         const defaultMenus = [
             { id: 'index', label: 'Trang Chủ', href: 'index.html' },
             { id: 'emp', label: 'Danh sách nhân viên', href: 'emp.html' },
-            { id: 'work_schedule', label: 'Lịch làm việc', href: 'work_schedule.html' },
-            { id: 'setup', label: 'Thiết Lập', href: 'setup.html' },
+            // { id: 'setup', label: 'Thiết Lập', href: 'setup.html' },
             { id: 'att', label: 'Chấm công', href: 'att.html' },
             { id: 'payroll', label: 'Bảng lương', href: 'payroll.html' },
-            { id: 'payroll_report', label: 'Lập BC Lương', href: 'payroll_report.html' },
-            { id: 'about', label: 'Giới thiệu', href: 'about-mksof.html' }
+            { id: 'payroll_report', label: 'Lập BC Lương', href: 'payroll_report.html' }
+            // { id: 'work_schedule', label: 'Lịch làm việc', href: 'work_schedule.html' },
+            // { id: 'about', label: 'Giới thiệu', href: 'about-mksof.html' }
         ];
         // Lấy cấu hình menu từ localStorage (nếu có)
         let menuConfig = [];
         try {
             menuConfig = JSON.parse(localStorage.getItem('menuConfig') || '[]');
         } catch {}
+        // Loại bỏ setup, work_schedule, about khỏi menuConfig nếu có
+        menuConfig = menuConfig.filter(m => m.id !== 'setup' && m.id !== 'work_schedule' && m.id !== 'about');
         let menus;
         if (menuConfig.length) {
-            // Nếu đã có cấu hình thì dùng cấu hình đó
             menus = menuConfig;
-            // Đảm bảo luôn có đủ các menu mặc định (nếu thiếu do cập nhật)
             defaultMenus.forEach(def => {
                 if (!menus.some(m => m.id === def.id)) {
                     menus.push({
                         ...def,
-                        visible: (def.id === 'work_schedule' || def.id === 'about') ? false : true
+                        visible: true
                     });
                 }
             });
-            // Sắp xếp lại đúng thứ tự theo defaultMenus
             menus = menus.filter(m => defaultMenus.some(d => d.id === m.id));
         } else {
-            // Nếu chưa có cấu hình thì mặc định ẩn 2 menu
-            menus = defaultMenus.map(m =>
-                (m.id === 'work_schedule' || m.id === 'about')
-                    ? { ...m, visible: false }
-                    : { ...m, visible: true }
-            );
+            menus = defaultMenus.map(m => ({ ...m, visible: true }));
         }
         // Hàm render lại danh sách menu trong popup (không gọi lại showMenuSettingPopup)
         function renderMenuSettingList() {
@@ -880,9 +936,44 @@ function renderMenu(active) {
         renderMenuSettingList();
         overlay.style.display = 'flex';
 
+        // --- Logo color/font setup ---
+        // Lấy giá trị hiện tại từ localStorage
+        const logoColor = localStorage.getItem('menuLogoColor') || '#111';
+        const logoFont = localStorage.getItem('menuLogoFont') || "'Times New Roman', serif";
+        // Gán giá trị cho input
+        setTimeout(() => {
+            const colorInput = document.getElementById('menu-logo-color-input');
+            const fontInput = document.getElementById('menu-logo-font-input');
+            if (colorInput) colorInput.value = logoColor.startsWith('#') ? logoColor : '#111';
+            if (fontInput) fontInput.value = logoFont;
+            // Nút về mặc định
+            const resetBtn = document.getElementById('menu-logo-reset-btn');
+            if (resetBtn && colorInput && fontInput) {
+                resetBtn.onclick = function() {
+                    colorInput.value = '#111';
+                    fontInput.value = "'Times New Roman', serif";
+                };
+            }
+        }, 0);
+
         // Lưu
         document.getElementById('popup-menu-setting-ok').onclick = function() {
             localStorage.setItem('menuConfig', JSON.stringify(menus));
+            // Lưu màu và font logo, nếu là mặc định thì xóa khỏi localStorage
+            const colorInput = document.getElementById('menu-logo-color-input');
+            const fontInput = document.getElementById('menu-logo-font-input');
+            if (colorInput && fontInput) {
+                if (colorInput.value === '#111') {
+                    localStorage.removeItem('menuLogoColor');
+                } else {
+                    localStorage.setItem('menuLogoColor', colorInput.value);
+                }
+                if (fontInput.value === "'Times New Roman', serif") {
+                    localStorage.removeItem('menuLogoFont');
+                } else {
+                    localStorage.setItem('menuLogoFont', fontInput.value);
+                }
+            }
             overlay.style.display = 'none';
             renderMenu(window._lastActiveMenu || 'index');
         };
@@ -1041,6 +1132,31 @@ function renderMenu(active) {
             {
                 q: 'Tôi muốn góp ý hoặc báo lỗi?',
                 a: 'Bạn có thể gửi góp ý hoặc báo lỗi qua Zalo: 0867.544.809 hoặc Telegram Bot.'
+            },
+            // Thêm các câu hỏi mới về tính năng mới
+            {
+                q: 'Hệ số công là gì và cập nhật ở đâu?',
+                a: 'Hệ số công là hệ số dùng để tính lương dựa trên số ngày công thực tế. Bạn có thể cập nhật hệ số công trong phần "Thiết Lập" hoặc khi lập bảng lương.'
+            },
+            {
+                q: 'Làm sao để xem biểu đồ cơ cấu nhân sự?',
+                a: 'Bạn vào trang "Trang Chủ" để xem biểu đồ cơ cấu nhân sự trực quan theo từng phòng ban, giới tính, độ tuổi.'
+            },
+            {
+                q: 'Tính năng chấm công bằng mã QR hoạt động như thế nào?',
+                a: 'Tính năng này cho phép nhân viên quét mã QR để chấm công nhanh chóng. Bạn nhấn nút "Quét QR chấm công" trên trang chấm công để sử dụng.'
+            },
+            {
+                q: 'Tôi muốn xuất báo cáo lương chi tiết từng nhân viên?',
+                a: 'Bạn vào trang "Bảng lương" hoặc "Lập BC Lương", chọn nhân viên và nhấn "Xuất Excel" để tải báo cáo chi tiết.'
+            },
+            {
+                q: 'Có thể xem lịch sử phiên bản phần mềm không?',
+                a: 'Bạn nhấn vào số phiên bản ở góc trên bên trái menu để xem lịch sử các phiên bản và các cập nhật mới nhất.'
+            },
+            {
+                q: 'Tôi muốn thay đổi vị trí hoặc ẩn/hiện các menu?',
+                a: 'Bạn vào "Cài Đặt" > "Cài đặt menu" để kéo thả thay đổi vị trí hoặc tick chọn ẩn/hiện các menu theo ý muốn.'
             }
         ];
         // Render danh sách câu hỏi mẫu
@@ -1246,4 +1362,33 @@ function sendAllDataToTelegramBot() {
     } catch (e) {
         alert('Lỗi khi gửi dữ liệu về Bot!');
     }
+}
+
+// Thêm hàm xử lý mới cho nút nhập dữ liệu
+function handleMenuImportBtnClick() {
+    // Nếu đang ở emp.html thì mở file luôn, còn không thì chuyển trang rồi mở file
+    if (location.pathname.endsWith('emp.html')) {
+        document.getElementById('importDataInput').click();
+    } else {
+        // Hiển thị thông báo trước khi chuyển trang
+        alert('Chức năng nhập dữ liệu chỉ thực hiện trên trang "Danh sách nhân viên". Hệ thống sẽ chuyển bạn sang trang này để tiếp tục.');
+        // Lưu cờ vào sessionStorage để biết cần mở nhập file sau khi chuyển trang
+        sessionStorage.setItem('openImportDataInput', '1');
+        location.href = 'emp.html';
+    }
+}
+
+// Khi vào emp.html, nếu có cờ thì tự động mở file nhập
+if (
+    typeof window !== 'undefined' &&
+    sessionStorage.getItem('openImportDataInput') === '1' &&
+    location.pathname.endsWith('emp.html')
+) {
+    sessionStorage.removeItem('openImportDataInput');
+    window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            var input = document.getElementById('importDataInput');
+            if (input) input.click();
+        }, 300);
+    });
 }

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html style="zoom:90%;">
 <head>
@@ -193,10 +192,13 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
 <body>
-    <script src="intro.js"></script>
     <script>renderMenu('emp');</script>
     <div class="container">
         <h2>Danh sách nhân viên</h2>
+        <!-- Nút xóa tất cả nhân viên -->
+        <div style="text-align:right;margin-bottom:10px;">
+            <button class="btn" style="background:#e53935" onclick="deleteAllEmployees()">Xóa tất cả nhân viên</button>
+        </div>
         <!-- Snackbar hoàn tác xóa -->
         <div id="undoDeleteSnackbar" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:16px 28px;border-radius:8px;box-shadow:0 4px 24px #0005;z-index:3000;font-size:1.08rem;min-width:220px;text-align:center;">
             <span id="undoDeleteMsg"></span>
@@ -581,13 +583,16 @@
         let lastDeletedEmp = null;
         let undoDeleteTimer = null;
 
+        // Thêm biến lưu backup khi xóa tất cả
+        let lastDeletedAllEmp = null;
+
         function deleteEmployee(empId) {
             const emp = employees.find(e => e.id === empId);
             if (!emp) return;
-            // Thêm xác nhận nếu gọi trực tiếp (không qua popup)
-            if (typeof deleteEmployeeFromModal !== "undefined" && event === undefined) {
-                if (!confirm(`Bạn có chắc chắn muốn xóa nhân viên "${emp.name}"?`)) return;
-            }
+            // Xóa xác nhận thừa ở đây
+            // if (typeof deleteEmployeeFromModal !== "undefined" && event === undefined) {
+            //     if (!confirm(`Bạn có chắc chắn muốn xóa nhân viên "${emp.name}"?`)) return;
+            // }
             // Lưu lại dữ liệu nhân viên và các dữ liệu liên quan để hoàn tác
             let backup = {
                 emp: JSON.parse(JSON.stringify(emp)),
@@ -686,18 +691,61 @@
             showUndoDeleteSnackbar(emp.name);
         }
 
-        function showUndoDeleteSnackbar(empName) {
+        function showUndoDeleteSnackbar(empName, isAll = false) {
             clearTimeout(undoDeleteTimer);
             const snackbar = document.getElementById('undoDeleteSnackbar');
-            document.getElementById('undoDeleteMsg').textContent = `Đã xóa nhân viên "${empName}".`;
+            document.getElementById('undoDeleteMsg').textContent = isAll
+                ? `Đã xóa tất cả nhân viên.`
+                : `Đã xóa nhân viên "${empName}".`;
             snackbar.style.display = '';
             undoDeleteTimer = setTimeout(() => {
                 snackbar.style.display = 'none';
                 lastDeletedEmp = null;
+                lastDeletedAllEmp = null;
             }, 10000);
         }
 
         document.getElementById('undoDeleteBtn').onclick = function() {
+            // Nếu vừa xóa tất cả
+            if (lastDeletedAllEmp) {
+                // Phục hồi lại toàn bộ dữ liệu
+                localStorage.setItem('employees', JSON.stringify(lastDeletedAllEmp.employees));
+                localStorage.setItem('nhanvien', JSON.stringify(lastDeletedAllEmp.employees));
+                localStorage.setItem('employees_backup', JSON.stringify(lastDeletedAllEmp.employees));
+                if (lastDeletedAllEmp.attendanceByMonth !== null)
+                    localStorage.setItem('attendanceByMonth', lastDeletedAllEmp.attendanceByMonth);
+                if (lastDeletedAllEmp.shifts !== null)
+                    localStorage.setItem('shifts', lastDeletedAllEmp.shifts);
+                if (lastDeletedAllEmp.shiftsByEmp !== null)
+                    localStorage.setItem('shiftsByEmp', lastDeletedAllEmp.shiftsByEmp);
+                if (lastDeletedAllEmp.shiftsByEmpByMonth !== null)
+                    localStorage.setItem('shiftsByEmpByMonth', lastDeletedAllEmp.shiftsByEmpByMonth);
+                if (lastDeletedAllEmp.payrollInputs !== null)
+                    localStorage.setItem('payrollInputs', lastDeletedAllEmp.payrollInputs);
+                if (lastDeletedAllEmp.workDaysStd !== null)
+                    localStorage.setItem('workDaysStd', lastDeletedAllEmp.workDaysStd);
+                if (lastDeletedAllEmp.salaryPerDay !== null)
+                    localStorage.setItem('salaryPerDay', lastDeletedAllEmp.salaryPerDay);
+
+                // Phục hồi notes, workDaysStd_, salaryPerDay_
+                Object.keys(lastDeletedAllEmp.notes).forEach(k => {
+                    localStorage.setItem(k, lastDeletedAllEmp.notes[k]);
+                });
+                Object.keys(lastDeletedAllEmp.workDaysStdByEmp).forEach(k => {
+                    localStorage.setItem(k, lastDeletedAllEmp.workDaysStdByEmp[k]);
+                });
+                Object.keys(lastDeletedAllEmp.salaryPerDayByEmp).forEach(k => {
+                    localStorage.setItem(k, lastDeletedAllEmp.salaryPerDayByEmp[k]);
+                });
+
+                employees = JSON.parse(localStorage.getItem('employees') || '[]');
+                renderEmployees();
+                document.getElementById('undoDeleteSnackbar').style.display = 'none';
+                lastDeletedAllEmp = null;
+                if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+                return;
+            }
+            // Nếu vừa xóa 1 nhân viên
             if (!lastDeletedEmp) return;
             // Phục hồi nhân viên
             employees.push(lastDeletedEmp.emp);
@@ -932,6 +980,23 @@
                             }
                         }
 
+                        // Merge payrollInputs nếu có (đảm bảo các trường TC/LT, Doanh Thu, Phụ cấp, Thưởng lễ, Tiền ứng, Phạt được nhập lại)
+                        if (data.payrollInputs) {
+                            let oldPayrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+                            let newPayrollInputs = data.payrollInputs;
+                            let mergedPayrollInputs = { ...oldPayrollInputs };
+                            Object.keys(newPayrollInputs).forEach(empId => {
+                                if (!mergedPayrollInputs[empId]) mergedPayrollInputs[empId] = {};
+                                Object.keys(newPayrollInputs[empId]).forEach(month => {
+                                    mergedPayrollInputs[empId][month] = {
+                                        ...mergedPayrollInputs[empId][month],
+                                        ...newPayrollInputs[empId][month]
+                                    };
+                                });
+                            });
+                            localStorage.setItem('payrollInputs', JSON.stringify(mergedPayrollInputs));
+                        }
+
                         alert('Nhập dữ liệu thành công! Trang sẽ được tải lại.');
                         if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
                         location.reload();
@@ -1050,6 +1115,63 @@
             });
         }
         window.copyEmpIdToClipboard = copyEmpIdToClipboard;
+
+        // Xóa tất cả nhân viên và dữ liệu liên quan
+        function deleteAllEmployees() {
+            if (!employees.length) {
+                alert('Không có nhân viên nào để xóa!');
+                return;
+            }
+            if (!confirm('Bạn có chắc chắn muốn xóa TẤT CẢ nhân viên và toàn bộ dữ liệu liên quan? Hành động này không thể hoàn tác!')) return;
+
+            // Lưu lại toàn bộ dữ liệu để hoàn tác
+            lastDeletedAllEmp = {
+                employees: JSON.parse(JSON.stringify(employees)),
+                attendanceByMonth: localStorage.getItem('attendanceByMonth'),
+                shifts: localStorage.getItem('shifts'),
+                shiftsByEmp: localStorage.getItem('shiftsByEmp'),
+                shiftsByEmpByMonth: localStorage.getItem('shiftsByEmpByMonth'),
+                payrollInputs: localStorage.getItem('payrollInputs'),
+                notes: {},
+                workDaysStd: localStorage.getItem('workDaysStd'),
+                salaryPerDay: localStorage.getItem('salaryPerDay'),
+                workDaysStdByEmp: {},
+                salaryPerDayByEmp: {}
+            };
+            // Lưu tất cả notes, workDaysStd_, salaryPerDay_
+            Object.keys(localStorage).forEach(k => {
+                if (k.startsWith('note_')) lastDeletedAllEmp.notes[k] = localStorage.getItem(k);
+                if (k.startsWith('workDaysStd_')) lastDeletedAllEmp.workDaysStdByEmp[k] = localStorage.getItem(k);
+                if (k.startsWith('salaryPerDay_')) lastDeletedAllEmp.salaryPerDayByEmp[k] = localStorage.getItem(k);
+            });
+
+            // Xóa dữ liệu nhân viên
+            employees = [];
+            localStorage.setItem('employees', '[]');
+            localStorage.setItem('nhanvien', '[]');
+            localStorage.setItem('employees_backup', '[]');
+
+            // Xóa dữ liệu liên quan đến nhân viên
+            localStorage.removeItem('attendanceByMonth');
+            localStorage.removeItem('shifts');
+            localStorage.removeItem('shiftsByEmp');
+            localStorage.removeItem('shiftsByEmpByMonth');
+            localStorage.removeItem('payrollInputs');
+
+            // Xóa notes, workDaysStd, salaryPerDay từng nhân viên
+            Object.keys(localStorage).forEach(k => {
+                if (k.startsWith('note_') || k.startsWith('workDaysStd_') || k.startsWith('salaryPerDay_')) {
+                    localStorage.removeItem(k);
+                }
+            });
+
+            renderEmployees();
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+            // alert('Đã xóa tất cả nhân viên và dữ liệu liên quan!');
+            // Hiển thị snackbar hoàn tác
+            showUndoDeleteSnackbar('tất cả nhân viên', true);
+        }
+        window.deleteAllEmployees = deleteAllEmployees;
     </script>
     <script src="footer.js"></script>
     <script>renderFooter();</script>
