@@ -1,5 +1,5 @@
 if (typeof CODE_VERSION === 'undefined') {
-    var CODE_VERSION = '2.1.0'; // ví dụ: '2.1.0'
+    var CODE_VERSION = '2.2.0'; // cập nhật version mới nhất
 }
 
 function renderMenu(active) {
@@ -645,8 +645,13 @@ function renderMenu(active) {
     function showVersionHistoryPopup() {
         const overlay = document.getElementById('popup-version-history-overlay');
         const content = document.getElementById('popup-version-history-content');
-        // Danh sách lịch sử phiên bản (từ 1.0.0 đến 2.1.0, mỗi bản một cải tiến)
+        // Danh sách lịch sử phiên bản (từ 1.0.0 đến 2.2.0, mỗi bản một cải tiến)
         const history = [
+            {
+                version: '2.2.0',
+                date: '25/6/2025',
+                note: 'Thêm chức năng thiết lập ngày lễ: Cho phép người dùng thêm, sửa, xóa các ngày lễ để tự động tính công và lương ngày lễ.'
+            },
             {
                 version: '2.1.0',
                 date: '22/6/2025',
@@ -827,6 +832,36 @@ function renderMenu(active) {
                         <button id="menu-logo-reset-btn" type="button" style="margin-left:10px;padding:5px 12px;border-radius:6px;border:1px solid #1976d2;background:#fff;color:#1976d2;cursor:pointer;font-size:14px;">Về mặc định</button>
                     </div>
                 </div>
+                <!-- Thêm vùng chọn màu nền menu -->
+                <div id="menu-bgcolor-area" style="width:100%;margin-bottom:16px;">
+                    <div style="font-size:15px;color:#1976d2;font-weight:600;margin-bottom:6px;">Chọn màu menu</div>
+                    <div id="menu-bgcolor-palette" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                        <div style="display:grid;grid-template-columns:repeat(5,32px);gap:10px;">
+                            <div class="menu-color-swatch" data-color="#1976d2" style="background:#1976d2;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#8e24aa" style="background:#8e24aa;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#2e7d32" style="background:#2e7d32;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#fbc02d" style="background:#fbc02d;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#ff7043" style="background:#ff7043;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#ff9800" style="background:#ff9800;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#5d4037" style="background:#5d4037;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#43a047" style="background:#43a047;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#1976d2" style="background:#1976d2;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#3949ab" style="background:#3949ab;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#00bcd4" style="background:#00bcd4;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#d4e157" style="background:#d4e157;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#ff5722" style="background:#ff5722;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#0097a7" style="background:#0097a7;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                            <div class="menu-color-swatch" data-color="#e53935" style="background:#e53935;width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px #0002;"></div>
+                        </div>
+                        <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+                            <input type="color" id="menu-bgcolor-input" value="#1976d2" style="width:38px;height:38px;border-radius:8px;border:2px solid #1976d2;box-shadow:0 1px 4px #0002;cursor:pointer;">
+                            <span style="font-size:15px;color:#1976d2;">Tự chọn màu</span>
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:center;gap:16px;margin-top:18px;">
+                        <button id="menu-bgcolor-default-btn" type="button" style="background:#fff;color:#e53935;font-weight:600;border:1.5px solid #e53935;border-radius:8px;padding:8px 22px;font-size:16px;box-shadow:0 2px 8px #e5393520;cursor:pointer;">Mặc định</button>
+                    </div>
+                </div>
                 <div style="display:flex; gap:12px; width:100%; justify-content:center;">
                     <button id="popup-menu-setting-ok" style="background:#1976d2; color:#fff; border:none; border-radius:6px; padding:7px 22px; font-size:15px; font-weight:600; cursor:pointer;">Lưu</button>
                     <button id="popup-menu-setting-cancel" style="background:#eee; color:#1976d2; border:none; border-radius:6px; padding:7px 22px; font-size:15px; font-weight:600; cursor:pointer;">Hủy</button>
@@ -954,6 +989,53 @@ function renderMenu(active) {
                     fontInput.value = "'Times New Roman', serif";
                 };
             }
+            // --- Menu background color setup ---
+            // Lấy màu nền menu hiện tại từ localStorage
+            let menuBgColor = localStorage.getItem('menuColor') || '#1976d2';
+            const bgColorInput = document.getElementById('menu-bgcolor-input');
+            if (bgColorInput) bgColorInput.value = menuBgColor.startsWith('#') ? menuBgColor : '#1976d2';
+
+            // Xử lý chọn màu mẫu
+            document.querySelectorAll('.menu-color-swatch').forEach(swatch => {
+                swatch.onclick = function() {
+                    let color = swatch.getAttribute('data-color');
+                    bgColorInput.value = color;
+                    // Đánh dấu viền cho swatch được chọn
+                    document.querySelectorAll('.menu-color-swatch').forEach(s => s.style.outline = '');
+                    swatch.style.outline = '3px solid #1976d2';
+                    // Lưu ngay khi chọn
+                    if (color === '#1976d2') {
+                        localStorage.removeItem('menuColor');
+                    } else {
+                        localStorage.setItem('menuColor', color);
+                    }
+                    renderMenu(window._lastActiveMenu || 'index');
+                };
+                // Nếu là màu đang chọn thì đánh dấu
+                if (bgColorInput.value.toLowerCase() === swatch.getAttribute('data-color').toLowerCase()) {
+                    swatch.style.outline = '3px solid #1976d2';
+                } else {
+                    swatch.style.outline = '';
+                }
+            });
+            // Khi đổi input color thì bỏ viền các swatch và lưu ngay
+            if (bgColorInput) {
+                bgColorInput.oninput = function() {
+                    document.querySelectorAll('.menu-color-swatch').forEach(s => s.style.outline = '');
+                    if (bgColorInput.value === '#1976d2') {
+                        localStorage.removeItem('menuColor');
+                    } else {
+                        localStorage.setItem('menuColor', bgColorInput.value);
+                    }
+                    renderMenu(window._lastActiveMenu || 'index');
+                };
+            }
+            // Mặc định
+            document.getElementById('menu-bgcolor-default-btn').onclick = function() {
+                localStorage.removeItem('menuColor');
+                renderMenu(window._lastActiveMenu || 'index');
+                document.getElementById('popup-menu-setting-overlay').style.display = 'none';
+            };
         }, 0);
 
         // Lưu
@@ -972,6 +1054,15 @@ function renderMenu(active) {
                     localStorage.removeItem('menuLogoFont');
                 } else {
                     localStorage.setItem('menuLogoFont', fontInput.value);
+                }
+            }
+            // Lưu màu nền menu, nếu là mặc định thì xóa khỏi localStorage
+            const bgColorInput = document.getElementById('menu-bgcolor-input');
+            if (bgColorInput) {
+                if (bgColorInput.value === '#1976d2') {
+                    localStorage.removeItem('menuColor');
+                } else {
+                    localStorage.setItem('menuColor', bgColorInput.value);
                 }
             }
             overlay.style.display = 'none';

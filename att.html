@@ -222,6 +222,19 @@
             font-weight: bold;
             box-shadow: 0 0 8px #ffd6e6 inset;
         }
+        /* Thêm style cho ngày lễ */
+        .holiday-col {
+            background: #ffe082 !important; /* vàng nhạt */
+            color: #b8860b !important;
+            font-weight: bold;
+            box-shadow: 0 0 8px #ffe082 inset;
+        }
+        .holiday-marker {
+            color: #b8860b;
+            font-size: 13px;
+            display: block;
+            margin-top: 2px;
+        }
         /* Responsive */
         @media (max-width: 900px) {
             .container { padding: 12px 2vw; }
@@ -396,6 +409,92 @@
             border-radius: 8px;
             border: 1.5px solid #1976d2;
         }
+        /* Popup holiday calendar style */
+        .holiday-calendar-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 4px;
+            margin: 0 auto 10px auto;
+            background: #f7fafd;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #b8860b20;
+        }
+        .holiday-calendar-table th {
+            background: #ffe082;
+            color: #b8860b;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 6px 0;
+            border: none;
+        }
+        .holiday-calendar-table td {
+            text-align: center;
+            padding: 0;
+            border-radius: 8px;
+            border: none;
+            height: 38px;
+            width: 38px;
+            position: relative;
+            background: #fff;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .holiday-calendar-table td .holiday-checkbox-modal {
+            display: none;
+        }
+        .holiday-calendar-table td label {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            border-radius: 8px;
+            line-height: 38px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #b8860b;
+            transition: background 0.2s, color 0.2s;
+            user-select: none;
+            position: relative;
+        }
+        .holiday-calendar-table td.selected label {
+            background: linear-gradient(90deg, #ffe082 60%, #ffd54f 100%);
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 2px 8px #ffe08280;
+            border: 2px solid #b8860b;
+        }
+        .holiday-calendar-table td.selected label::after {
+            content: "★";
+            color: #ff9800;
+            font-size: 18px;
+            position: absolute;
+            top: 2px;
+            right: 6px;
+            pointer-events: none;
+            text-shadow: 0 1px 4px #fff8, 0 0 2px #ff9800;
+        }
+        .holiday-calendar-table td.today label {
+            border: 2px solid #1976d2;
+            background: #e3f0ff;
+            color: #1976d2;
+        }
+        .holiday-calendar-table td:hover label {
+            background: #ffe08280;
+            color: #b8860b;
+        }
+        .holiday-calendar-table td.disabled label {
+            color: #ccc;
+            background: #f5f5f5;
+            cursor: default;
+        }
+        @media (max-width: 600px) {
+            .holiday-calendar-table td, .holiday-calendar-table th {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+                line-height: 28px;
+            }
+        }
     </style>
     <script src="menu.js"></script>
     <script src="data_io.js"></script>
@@ -419,7 +518,7 @@
             margin-bottom: 18px;
         ">
             <div style="
-                border: 2.5px solid #1976d2;
+                /* border: 2.5px solid #1976d2; */ /* Bỏ viền ngoài */
                 border-radius: 14px;
                 padding: 12px 36px;
                 background: #e3f0ff;
@@ -431,7 +530,7 @@
                 text-align: center;
                 box-shadow: 0 2px 12px #1976d220;
             ">
-                CHẤM CÔNG THEO THÁNG
+                Time Pro HRM - CHẤM CÔNG THEO THÁNG
             </div>
         </div>
         <div class="form-row">
@@ -456,6 +555,12 @@
             <label>Chọn tháng:</label>
             <input type="month" id="attMonth" onchange="renderAttendance()">
             <!-- <button class="btn" onclick="saveAttendanceMonth()" style="display:none;">Lưu chấm công</button> -->
+        </div>
+        <!-- Thêm vùng chọn ngày lễ -->
+        <div class="form-row" id="holidayRow">
+            <label>Ngày lễ:</label>
+            <button type="button" class="btn" onclick="openHolidayModal()" style="padding:6px 18px;">Chọn ngày lễ</button>
+            <span id="holidaySummary" style="font-size:13px;color:#b8860b;margin-left:10px;"></span>
         </div>
         <div id="attTableWrap" style="overflow-x:auto"></div>
         <!-- Thêm vùng chứa biểu đồ ngay sau bảng chấm công -->
@@ -521,6 +626,17 @@
     <div id="qrSuccessPopup" style="display:none;position:fixed;z-index:3000;left:0;top:0;width:100vw;height:100vh;pointer-events:none;">
         <div style="position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);background:#e3f9e5;color:#388e3c;padding:28px 36px 22px 36px;border-radius:16px;box-shadow:0 6px 32px #388e3c40;font-size:1.25rem;font-weight:600;text-align:center;min-width:260px;pointer-events:auto;" id="qrSuccessPopupContent"></div>
     </div>
+    <!-- Modal chọn ngày lễ -->
+    <div id="holidayModal" style="display:none;position:fixed;z-index:3001;left:0;top:0;width:100vw;height:100vh;background:#0005;">
+        <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:420px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;">
+            <h3 style="margin-top:0;color:#b8860b;font-size:20px;">Chọn ngày lễ trong tháng</h3>
+            <div id="holidayPicker" style="margin-bottom:18px;"></div>
+            <div style="margin-top:14px;text-align:right;">
+                <button class="btn" onclick="saveHolidayModal()">Lưu</button>
+                <button class="btn" style="background:#e53935" onclick="closeHolidayModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
     <script>
         // ====== DỮ LIỆU VÀ HÀM TIỆN ÍCH ======
         let employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
@@ -529,7 +645,55 @@
         let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
         // Thêm biến lưu hệ số công từng ngày
         let workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+        // Thêm biến lưu ngày lễ từng tháng
+        let holidayDaysByMonth = JSON.parse(localStorage.getItem('holidayDaysByMonth') || '{}');
 
+        // Hàm lấy danh sách ngày lễ của tháng
+        function getHolidayDays(month) {
+            if (!holidayDaysByMonth[month]) holidayDaysByMonth[month] = [];
+            return holidayDaysByMonth[month];
+        }
+        // Hàm lưu ngày lễ từ input
+        function saveHolidayDays() {
+            const month = getCurrentMonth();
+            const val = document.getElementById('holidayInput').value;
+            let arr = val.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x) && x > 0);
+            holidayDaysByMonth[month] = arr;
+            localStorage.setItem('holidayDaysByMonth', JSON.stringify(holidayDaysByMonth));
+            renderAttendance();
+        }
+        function renderHolidayPicker() {
+            const month = getCurrentMonth();
+            const days = daysInMonth(month);
+            const arr = getHolidayDays(month);
+            let html = '';
+            for (let d = 1; d <= days; ++d) {
+                html += `<label style="margin-right:6px;display:inline-block;width:32px;">
+                    <input type="checkbox" class="holiday-checkbox" value="${d}" ${arr.includes(d) ? 'checked' : ''} onchange="onHolidayCheckboxChange(this)">
+                    <span style="font-size:13px;">${d}</span>
+                </label>`;
+                // Xuống dòng sau mỗi 10 ngày cho gọn
+                if (d % 10 === 0) html += '<br>';
+            }
+            document.getElementById('holidayPicker').innerHTML = html;
+        }
+        function onHolidayCheckboxChange(cb) {
+            const month = getCurrentMonth();
+            let arr = getHolidayDays(month);
+            const day = parseInt(cb.value);
+            if (cb.checked) {
+                if (!arr.includes(day)) arr.push(day);
+            } else {
+                arr = arr.filter(x => x !== day);
+            }
+            holidayDaysByMonth[month] = arr;
+            localStorage.setItem('holidayDaysByMonth', JSON.stringify(holidayDaysByMonth));
+            renderAttendance();
+        }
+        // Khi đổi tháng thì cập nhật input ngày lễ
+        function updateHolidayInput() {
+            renderHolidaySummary();
+        }
         function getCurrentMonth() {
             let m = document.getElementById('attMonth').value;
             if (!m) {
@@ -706,6 +870,7 @@
         document.getElementById('attMonth').addEventListener('change', function() {
             renderAttendance();
             showMissingAttendanceAlert();
+            updateHolidayInput();
         });
         function updateSalaryTypeDisplay() {
             const empId = document.getElementById('empSelect').value;
@@ -720,30 +885,33 @@
                 span.textContent = '';
             }
         }
-        function getWorkFactor(month, empId, day) {
+        function getWorkFactor(month, empId, dayShift) {
             if (!workFactorByMonth[month]) workFactorByMonth[month] = {};
             if (!workFactorByMonth[month][empId]) workFactorByMonth[month][empId] = {};
-            if (typeof workFactorByMonth[month][empId][day] === 'undefined') {
-                workFactorByMonth[month][empId][day] = 1;
+            if (typeof workFactorByMonth[month][empId][dayShift] === 'undefined') {
+                workFactorByMonth[month][empId][dayShift] = 1;
             }
-            return workFactorByMonth[month][empId][day];
+            return workFactorByMonth[month][empId][dayShift];
         }
-        function setWorkFactor(month, empId, day, value) {
+        function setWorkFactor(month, empId, dayShift, value) {
             if (!workFactorByMonth[month]) workFactorByMonth[month] = {};
             if (!workFactorByMonth[month][empId]) workFactorByMonth[month][empId] = {};
-            workFactorByMonth[month][empId][day] = value;
+            workFactorByMonth[month][empId][dayShift] = value;
             localStorage.setItem('workFactorByMonth', JSON.stringify(workFactorByMonth));
             renderAttendance();
         }
         function renderAttendance() {
             shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
             workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+            holidayDaysByMonth = JSON.parse(localStorage.getItem('holidayDaysByMonth') || '{}');
             const month = getCurrentMonth();
             const days = daysInMonth(month);
             const empId = document.getElementById('empSelect').value;
             const now = new Date();
             const [curY, curM, curD] = [now.getFullYear(), now.getMonth() + 1, now.getDate()];
             const [tableY, tableM] = month.split('-').map(Number);
+            // Lấy danh sách ngày lễ
+            const holidayDays = getHolidayDays(month);
 
             if (!attendanceByMonth[month]) attendanceByMonth[month] = {};
             let html = '';
@@ -782,14 +950,16 @@
                     <tbody></tbody>
                 </table>`;
                 // Thêm hàng tiêu đề lớn cho bảng chấm công
-                let tableStyle = '';
-                let tableClass = '';
-                if (emp.salary_type !== 'shift') {
-                    tableStyle = 'font-size:18px;zoom:1.12;';
-                } else {
-                    tableClass = 'shift-salary-table-big';
-                }
-                html += `<table style="margin-bottom:0;${tableStyle}"${tableClass ? ` class="${tableClass}"` : ''}><thead>`;
+                // let tableStyle = '';
+                // let tableClass = '';
+                // if (emp.salary_type !== 'shift') {
+                //     tableStyle = 'font-size:18px;zoom:1.12;';
+                // } else {
+                //     tableClass = 'shift-salary-table-big';
+                // }
+                // html += `<table style="margin-bottom:0;${tableStyle}"${tableClass ? ` class="${tableClass}"` : ''}><thead>`;
+                // Sửa lại: luôn dùng style bảng mặc định cho mọi loại nhân viên
+                html += `<table style="margin-bottom:0;"><thead>`;
                 html += `<tr>
                     <th colspan="${days + (emp.salary_type === 'shift' ? 6 : 5)}" style="background:#1976d2;color:#fff;font-size:20px;font-weight:700;text-align:center;letter-spacing:1px;">
                         BẢNG CHẤM CÔNG ${emp.name ? emp.name.toUpperCase() : ''} THÁNG ${String(tableM).padStart(2, '0')}/${tableY}
@@ -800,7 +970,10 @@
                 for(let d=1; d<=days; ++d) {
                     const [y, m] = month.split('-').map(Number);
                     let isToday = (curY === y && curM === m && curD === d);
-                    html += `<th${isToday ? ' class="today-col"' : ''}>${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}</th>`;
+                    let isHoliday = holidayDays.includes(d);
+                    html += `<th${isToday ? ' class="today-col"' : ''}${isHoliday ? ' class="holiday-col"' : ''}>${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}`;
+                    if (isHoliday) html += `<span class="holiday-marker">Lễ</span>`;
+                    html += `</th>`;
                 }
                 html += `<th style="min-width:90px">Tổng ca</th><th style="min-width:120px">Tổng công</th>`;
                 if (emp.salary_type === 'shift') {
@@ -815,7 +988,8 @@
                     const date = new Date(y, m-1, d);
                     const weekday = ['CN','T2','T3','T4','T5','T6','T7'][date.getDay()];
                     let isToday = (curY === y && curM === m && curD === d);
-                    html += `<th${isToday ? ' class="today-col"' : ''}>${weekday}</th>`;
+                    let isHoliday = holidayDays.includes(d);
+                    html += `<th${isToday ? ' class="today-col"' : ''}${isHoliday ? ' class="holiday-col"' : ''}>${weekday}</th>`;
                 }
                 html += `<th></th><th></th><th></th><th></th>`;
                 html += `</tr></thead><tbody>`;
@@ -833,19 +1007,18 @@
                     for(let d=1; d<=days; ++d) {
                         let checked = (empAtt[d] && empAtt[d].includes(s)) ? 'checked' : '';
                         let shiftVal = shifts[s]?.half ? 0.5 : 1;
-                        let factor = getWorkFactor(month, emp.id, d);
+                        let factor = getWorkFactor(month, emp.id, `${d}_${s}`);
                         if (checked) rowWork += shiftVal * factor;
                         if (empAtt[d] && empAtt[d].length > 0) daysWithWork.add(d);
                         let isToday = (curY === tableY && curM === tableM && curD === d);
-                        html += `<td${isToday ? ' class="today-col"' : ''}>`;
-                        html += `<input type="checkbox" onchange="toggleAttendanceShift('${emp.id}',${d},${s},this.checked)" ${checked}>`;
-                        // Chỉ hiện input hệ số công cho lương cơ bản, không hiện gì cho lương ca
-                        if (emp.salary_type !== 'shift' && s === 0) {
-                            html += `<input type="number" min="0" step="0.1" value="${factor}" 
-                                style="width:36px;font-size:11px;padding:1px 2px;margin-left:2px;text-align:center;"
-                                title="Hệ số công"
-                                onchange="setWorkFactor('${month}','${emp.id}',${d},parseFloat(this.value)||1)">`;
-                        }
+                        let isHoliday = holidayDays.includes(d);
+                        html += `<td${isToday ? ' class="today-col"' : ''}${isHoliday ? ' class="holiday-col"' : ''}>`;
+                        html += `<input type="checkbox" onchange="toggleAttendanceShift('${emp.id}',${d},${s},this.checked)" ${checked} style="width:24px;height:24px;">`;
+                        // Luôn hiện input hệ số công cho từng ca, từng ngày
+                        html += `<input type="number" min="0" step="0.1" value="${factor}" 
+                            style="width:54px;font-size:15px;padding:3px 4px;margin-left:2px;text-align:center;"
+                            title="Hệ số công"
+                            onchange="setWorkFactor('${month}','${emp.id}','${d}_${s}',parseFloat(this.value)||1)">`;
                         html += `</td>`;
                     }
                     caCong[s] = rowWork;
@@ -889,8 +1062,7 @@
             }
             document.getElementById('attTableWrap').innerHTML = html;
             if (emp) renderShifts(emp.id);
-            // Sau khi render bảng, vẽ biểu đồ nếu là lương ca
-            setTimeout(() => renderShiftPieChartInAtt(emp, month), 0);
+            // XÓA DÒNG NÀY: setTimeout(() => renderShiftPieChartInAtt(emp, month), 0);
 
             // Thêm ghi chú nhỏ về vấn đề kỹ thuật chấm công dưới bảng chấm công
             let note = document.getElementById('attTechNote');
@@ -901,6 +1073,8 @@
                 document.getElementById('attTableWrap').after(note);
             }
             note.innerHTML = 'Nếu gặp sự cố kỹ thuật khi chấm công, vui lòng liên hệ quản lý hoặc bộ phận kỹ thuật để được hỗ trợ kịp thời.';
+            // Cập nhật giao diện chọn ngày lễ khi render lại
+            updateHolidayInput();
         }
         function toggleAttendanceShift(empId, day, shiftIdx, checked) {
             const month = getCurrentMonth();
@@ -1113,7 +1287,90 @@
             renderAttendance();
             updateSalaryTypeDisplay();
             showMissingAttendanceAlert();
+            updateHolidayInput();
         })();
+    </script>
+    <script>
+        // ====== CHỌN NGÀY LỄ POPUP ======
+        // Đảm bảo các hàm này ở phạm vi global
+        let holidayModalDays = [];
+        window.openHolidayModal = function() {
+            const month = getCurrentMonth();
+            const days = daysInMonth(month);
+            const arr = getHolidayDays(month);
+            holidayModalDays = [...arr];
+            // Tính ngày đầu tuần của tháng
+            const [y, m] = month.split('-').map(Number);
+            const firstDay = new Date(y, m - 1, 1).getDay(); // 0=CN, 1=T2,...
+            // Đổi về 1=Thứ 2, 7=CN cho lịch VN
+            let startCol = firstDay === 0 ? 7 : firstDay;
+            // Render header
+            let html = '<table class="holiday-calendar-table"><thead><tr>';
+            const weekdays = ['T2','T3','T4','T5','T6','T7','CN'];
+            for (let wd of weekdays) html += `<th>${wd}</th>`;
+            html += '</tr></thead><tbody><tr>';
+            // Đệm các ô trống đầu tháng
+            for (let i = 1; i < startCol; ++i) html += '<td class="disabled"></td>';
+            // Render ngày
+            const now = new Date();
+            let col = startCol;
+            for (let d = 1; d <= days; ++d, ++col) {
+                let isSelected = holidayModalDays.includes(d);
+                let isToday = (now.getFullYear() === y && now.getMonth() + 1 === m && now.getDate() === d);
+                html += `<td${isSelected ? ' class="selected"' : ''}${isToday ? (isSelected ? ' today' : ' class="today"') : ''}>`;
+                html += `<label>
+                    <input type="checkbox" class="holiday-checkbox-modal" value="${d}" ${isSelected ? 'checked' : ''} onchange="window.onHolidayCheckboxModalChange(this)">
+                    ${d}
+                </label></td>`;
+                if (col % 7 === 0 && d !== days) html += '</tr><tr>';
+            }
+            // Đệm các ô trống cuối tháng
+            while (col % 7 !== 1) { html += '<td class="disabled"></td>'; ++col; }
+            html += '</tr></tbody></table>';
+            document.getElementById('holidayPicker').innerHTML = html;
+            document.getElementById('holidayModal').style.display = '';
+        }
+        window.closeHolidayModal = function() {
+            document.getElementById('holidayModal').style.display = 'none';
+        }
+        window.onHolidayCheckboxModalChange = function(cb) {
+            const day = parseInt(cb.value);
+            if (cb.checked) {
+                if (!holidayModalDays.includes(day)) holidayModalDays.push(day);
+            } else {
+                holidayModalDays = holidayModalDays.filter(x => x !== day);
+            }
+            // Cập nhật lại giao diện đánh dấu ngay lập tức
+            // Tìm ô td chứa checkbox này
+            let td = cb.closest('td');
+            if (td) {
+                if (cb.checked) {
+                    td.classList.add('selected');
+                } else {
+                    td.classList.remove('selected');
+                }
+            }
+        }
+        window.saveHolidayModal = function() {
+            const month = getCurrentMonth();
+            holidayDaysByMonth[month] = holidayModalDays.sort((a,b)=>a-b);
+            localStorage.setItem('holidayDaysByMonth', JSON.stringify(holidayDaysByMonth));
+            window.closeHolidayModal();
+            renderAttendance();
+        }
+
+        function renderHolidaySummary() {
+            const month = getCurrentMonth();
+            const arr = getHolidayDays(month);
+            const el = document.getElementById('holidaySummary');
+            if (!el) return;
+            if (arr.length === 0) {
+                el.textContent = '(Chưa chọn ngày lễ)';
+            } else {
+                el.textContent = 'Ngày lễ: ' + arr.sort((a,b)=>a-b).join(', ');
+            }
+        }
+        window.renderHolidaySummary = renderHolidaySummary;
     </script>
     <script src="footer.js"></script>
     <script>renderFooter();</script>
