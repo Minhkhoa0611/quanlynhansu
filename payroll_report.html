@@ -19,6 +19,8 @@
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Thêm thư viện QRCode.js -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <script>renderMenu('payroll_report');</script>
@@ -264,6 +266,8 @@
                 </tfoot>
             </table>`;
             document.getElementById('payrollReportTable').innerHTML = html;
+            // XÓA gọi hàm renderPayrollReportQR();
+            // renderPayrollReportQR();
             // Thêm dòng tiêu đề động đầu bảng
             const storeSelect = document.getElementById('reportStoreSelect');
             let storeName = storeSelect.selectedOptions[0].textContent;
@@ -663,6 +667,11 @@
             // Thêm sự kiện onchange để xem báo cáo ngay khi đổi tháng
             document.getElementById('reportMonth').addEventListener('change', renderPayrollReport);
         }
+    </script>
+    <script src="footer.js"></script>
+    <script>renderFooter();</script>
+</body>
+
     </script>
     <script src="footer.js"></script>
     <script>renderFooter();</script>

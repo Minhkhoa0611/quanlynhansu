@@ -715,6 +715,7 @@
                 '#1976d2', '#43a047', '#ff9800', '#e53935', '#8e24aa', '#00bcd4', '#fbc02d', '#6d4c41', '#c2185b', '#388e3c'
             ];
 
+            // BỔ SUNG ĐOẠN NÀY ĐỂ ĐẢM BẢO KHÔNG LỖI BIẾN CHƯA ĐỊNH NGHĨA
             // Tính tổng số ca có thể làm (tổng số ngày trong tháng * số ca/ngày)
             let daysInMonth = Object.keys(empAtt).length;
             let maxPossibleShifts = daysInMonth * shifts.length;
@@ -730,7 +731,6 @@
             let allowance = Number((payrollInputs?.[emp.id]?.[month]?.allowance || '0').replace(/[^\d]/g, '')) || 0;
             let bonus = Number((payrollInputs?.[emp.id]?.[month]?.bonus || '0').replace(/[^\d]/g, '')) || 0;
             let penalty = Number((payrollInputs?.[emp.id]?.[month]?.penalty || '0').replace(/[^\d]/g, '')) || 0;
-            // Thêm lấy tiền ứng
             let advance = Number((payrollInputs?.[emp.id]?.[month]?.advance || '0').replace(/[^\d]/g, '')) || 0;
 
             // Biểu đồ lương: các thành phần Lương tổng các ca, Thưởng lễ, Phụ cấp, Phạt, Tiền ứng
@@ -749,7 +749,7 @@
             ];
 
             // Tạo 3 canvas cho 3 biểu đồ, thêm tên nhân viên vào tiêu đề
-            const canvasId1 = 'shiftPieChart_' + emp.id;
+            const canvasId1 = 'shiftBarChart_' + emp.id;
             const canvasId2 = 'workVsAbsentPieChart_' + emp.id;
             const canvasId3 = 'salaryPieChart_' + emp.id;
             chartWrap.innerHTML = `
@@ -775,12 +775,13 @@
                 </div>
             `;
 
-            // Biểu đồ 1: Tỉ lệ số ca làm từng loại (có %)
+            // Biểu đồ 1: Chuyển sang biểu đồ cột số ca làm từng loại
             new Chart(document.getElementById(canvasId1), {
-                type: 'pie',
+                type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
+                        label: 'Số ca làm',
                         data: data,
                         backgroundColor: labels.map((_, i) => colors[i % colors.length]),
                     }]
@@ -788,33 +789,30 @@
                 options: {
                     responsive: false,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: { display: false },
                         title: {
                             display: true,
-                            text: `Tỉ lệ số ca làm trong tháng của ${emp.name}`
+                            text: `Số ca làm theo loại trong tháng của ${emp.name}`
                         },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    let val = context.parsed;
-                                    let percent = total ? ((val / total) * 100).toFixed(1) : 0;
-                                    return `${context.label}: ${val} (${percent}%)`;
+                                    let val = context.parsed.y;
+                                    return `${context.label}: ${val}`;
                                 }
                             }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Loại ca' }
                         },
-                        datalabels: {
-                            formatter: function(value, ctx) {
-                                let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                let percent = total ? ((value / total) * 100).toFixed(1) : 0;
-                                return percent + '%';
-                            },
-                            color: '#222',
-                            font: { weight: 'bold', size: 14 }
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Số ca' }
                         }
                     }
-                },
-                plugins: window.ChartDataLabels ? [ChartDataLabels] : []
+                }
             });
 
             // Biểu đồ 2: Tỉ lệ làm và nghỉ
@@ -1074,6 +1072,17 @@
                                     return `${label}: ${val.toLocaleString('vi-VN')} ₫`;
                                 }
                             }
+                        },
+                        datalabels: {
+                            formatter: function(value, ctx) {
+                                if (value === 0) return '';
+                                let percent = '';
+                                let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + Math.abs(b), 0);
+                                if (total) percent = ((Math.abs(value) / total) * 100).toFixed(1) + '%';
+                                return percent;
+                            },
+                            color: '#222',
+                            font: { weight: 'bold', size: 13 }
                         }
                     }
                 },
