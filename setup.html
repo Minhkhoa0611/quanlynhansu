@@ -162,9 +162,7 @@
         <div class="form-row-store">
             <label for="storeNameInput">Tên cửa hàng:</label>
             <select id="storeNameInput" onchange="onStoreNameChange()" style="width: 160px; padding: 8px 12px; border-radius: 6px; border: 1.5px solid #bcdffb; font-size: 1.08rem; background: #f6fbff;">
-                <option value="LepShop">LepShop</option>
-                <option value="H'Farm">H'Farm</option>
-                <option value="Hệ Thống">Hệ Thống</option>
+                <!-- Options sẽ được render động -->
             </select>
         </div>
         <div class="employee-select-row">
@@ -190,103 +188,6 @@
         <div id="workdays-setup-section">
             <!-- ...các input thiết lập ngày công... -->
         </div>
-        <div class="setup-section" style="margin-top:18px;">
-            <label style="font-weight:600; color:#1976d2; display:block; margin-bottom:8px;">Thiết lập màu sắc menu:</label>
-            <button id="btn-choose-menu-color" style="padding:7px 18px; border-radius:6px; background:#1976d2; color:#fff; border:none; font-weight:600; cursor:pointer;">Chọn màu menu</button>
-        </div>
-        <div id="menu-color-popup-overlay" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:#0005; align-items:center; justify-content:center;">
-            <div style="background:#fff; border-radius:10px; box-shadow:0 4px 24px #0003; padding:28px 32px 22px 32px; min-width:260px; max-width:90vw; display:flex; flex-direction:column; align-items:center; position:relative;">
-                <div style="font-size:18px; font-weight:600; color:#1976d2; margin-bottom:18px;">Chọn màu menu</div>
-                <div id="menu-color-palette" style="display:grid; grid-template-columns:repeat(6,32px); gap:10px; margin-bottom:18px;">
-                    <div class="menu-color-swatch" data-color="#1976d2" style="background:#1976d2;"></div>
-                    <div class="menu-color-swatch" data-color="#8e24aa" style="background:#8e24aa;"></div>
-                    <div class="menu-color-swatch" data-color="#2e7d32" style="background:#2e7d32;"></div>
-                    <div class="menu-color-swatch" data-color="#e53935" style="background:#e53935;"></div>
-                    <div class="menu-color-swatch" data-color="#fbc02d" style="background:#fbc02d;"></div>
-                    <div class="menu-color-swatch" data-color="#039be5" style="background:#039be5;"></div>
-                    <div class="menu-color-swatch" data-color="#ff9800" style="background:#ff9800;"></div>
-                    <div class="menu-color-swatch" data-color="#6d4c41" style="background:#6d4c41;"></div>
-                    <div class="menu-color-swatch" data-color="#455a64" style="background:#455a64;"></div>
-                    <div class="menu-color-swatch" data-color="#43a047" style="background:#43a047;"></div>
-                    <div class="menu-color-swatch" data-color="#3949ab" style="background:#3949ab;"></div>
-                    <div class="menu-color-swatch" data-color="#d81b60" style="background:#d81b60;"></div>
-                    <div class="menu-color-swatch" data-color="#00bcd4" style="background:#00bcd4;"></div>
-                    <div class="menu-color-swatch" data-color="#cddc39" style="background:#cddc39;"></div>
-                    <div class="menu-color-swatch" data-color="#ff5722" style="background:#ff5722;"></div>
-                    <div class="menu-color-swatch" data-color="#607d8b" style="background:#607d8b;"></div>
-                    <div class="menu-color-swatch" data-color="#009688" style="background:#009688;"></div>
-                    <div class="menu-color-swatch" data-color="#f44336" style="background:#f44336;"></div>
-                </div>
-                <div style="margin-bottom:18px;">
-                    <input type="color" id="menu-color-picker" style="width:40px; height:32px; border:none; vertical-align:middle;"/>
-                    <span style="font-size:14px; color:#1976d2; margin-left:8px;">Tự chọn màu</span>
-                </div>
-                <div style="display:flex; gap:12px;">
-                    <button id="menu-color-apply" style="background:#1976d2; color:#fff; border:none; border-radius:6px; padding:7px 22px; font-size:15px; font-weight:600; cursor:pointer;">Áp dụng</button>
-                    <button id="menu-color-cancel" style="background:#eee; color:#1976d2; border:none; border-radius:6px; padding:7px 22px; font-size:15px; font-weight:600; cursor:pointer;">Hủy</button>
-                    <button id="menu-color-reset" style="background:#e53935; color:#fff; border:none; border-radius:6px; padding:7px 22px; font-size:15px; font-weight:600; cursor:pointer;">Mặc định</button>
-                </div>
-                <span id="menu-color-popup-close" style="position:absolute; top:8px; right:12px; font-size:20px; color:#888; cursor:pointer;" title="Đóng">&times;</span>
-            </div>
-        </div>
-        <style>
-        .menu-color-swatch {
-            width:32px; height:32px; border-radius:6px; border:2px solid #fff; box-shadow:0 1px 4px #0002; cursor:pointer; transition:transform 0.12s, border 0.12s;
-        }
-        .menu-color-swatch.selected, .menu-color-swatch:hover {
-            border:2px solid #1976d2;
-            transform:scale(1.13);
-        }
-        </style>
-        <script>
-        let selectedMenuColor = localStorage.getItem('menuColor') || '#1976d2';
-        function updateSwatchSelection() {
-            document.querySelectorAll('.menu-color-swatch').forEach(s => {
-                if (s.getAttribute('data-color').toLowerCase() === selectedMenuColor.toLowerCase()) {
-                    s.classList.add('selected');
-                } else {
-                    s.classList.remove('selected');
-                }
-            });
-            if (![...document.querySelectorAll('.menu-color-swatch')].some(s => s.getAttribute('data-color').toLowerCase() === selectedMenuColor.toLowerCase())) {
-                document.querySelectorAll('.menu-color-swatch').forEach(s => s.classList.remove('selected'));
-            }
-            document.getElementById('menu-color-picker').value = selectedMenuColor;
-        }
-        document.getElementById('btn-choose-menu-color').onclick = function() {
-            document.getElementById('menu-color-popup-overlay').style.display = 'flex';
-            selectedMenuColor = localStorage.getItem('menuColor') || '#1976d2';
-            updateSwatchSelection();
-        };
-        document.querySelectorAll('.menu-color-swatch').forEach(swatch => {
-            swatch.onclick = function() {
-                selectedMenuColor = swatch.getAttribute('data-color');
-                updateSwatchSelection();
-            };
-        });
-        document.getElementById('menu-color-picker').oninput = function() {
-            selectedMenuColor = this.value;
-            updateSwatchSelection();
-        };
-        document.getElementById('menu-color-apply').onclick = function() {
-            localStorage.setItem('menuColor', selectedMenuColor);
-            document.getElementById('menu-color-popup-overlay').style.display = 'none';
-            // Khi chọn màu thủ công, xóa màu phiên bản để ưu tiên màu người dùng
-            localStorage.removeItem('menuVersionColor');
-            if (typeof renderMenu === 'function') renderMenu();
-        };
-        document.getElementById('menu-color-cancel').onclick = function() {
-            document.getElementById('menu-color-popup-overlay').style.display = 'none';
-        };
-        document.getElementById('menu-color-reset').onclick = function() {
-            localStorage.removeItem('menuColor');
-            document.getElementById('menu-color-popup-overlay').style.display = 'none';
-            if (typeof renderMenu === 'function') renderMenu();
-        };
-        document.getElementById('menu-color-popup-close').onclick = function() {
-            document.getElementById('menu-color-popup-overlay').style.display = 'none';
-        };
-        </script>
     </div>
     <script>
         // Lấy danh sách nhân viên từ localStorage, chỉ lấy nhân viên chưa bị ẩn
@@ -305,6 +206,41 @@
                 const opt = document.createElement('option');
                 opt.value = emp.id || emp.maNV || emp.name || emp.tenNV || '';
                 opt.textContent = (emp.name || emp.tenNV || 'Không tên');
+                select.appendChild(opt);
+            });
+        }
+
+        // Hiển thị danh sách cửa hàng vào select (cập nhật động)
+        function renderStoreNameOptions() {
+            const select = document.getElementById('storeNameInput');
+            let storeList = [];
+            try {
+                storeList = JSON.parse(localStorage.getItem('storeList') || '[]');
+            } catch {}
+            // Luôn có các cửa hàng mặc định
+            const defaultStores = [
+                { name: 'LepShop' },
+                { name: "H'Farm" },
+                { name: 'Hệ Thống' }
+            ];
+            // Gộp các cửa hàng mới và mặc định, không trùng tên
+            const allStores = [];
+            const nameSet = new Set();
+            defaultStores.forEach(store => {
+                allStores.push(store);
+                nameSet.add(store.name);
+            });
+            storeList.forEach(store => {
+                if (!nameSet.has(store.name)) {
+                    allStores.push(store);
+                    nameSet.add(store.name);
+                }
+            });
+            select.innerHTML = '';
+            allStores.forEach(store => {
+                const opt = document.createElement('option');
+                opt.value = store.name;
+                opt.textContent = store.name;
                 select.appendChild(opt);
             });
         }
@@ -382,14 +318,23 @@
             URL.revokeObjectURL(url);
         }
 
-        // Hiển thị tên cửa hàng từ localStorage, mặc định là 'LepShop'
+        // Hiển thị tên cửa hàng từ localStorage, nếu không có thì chọn mặc định
         function renderStoreName() {
+            renderStoreNameOptions();
             let storeName = localStorage.getItem('storeName');
-            if (!storeName || (storeName !== "LepShop" && storeName !== "H'Farm" && storeName !== "Hệ Thống")) {
-                storeName = 'LepShop';
-                localStorage.setItem('storeName', storeName);
+            const select = document.getElementById('storeNameInput');
+            let found = false;
+            for (let i = 0; i < select.options.length; ++i) {
+                if (select.options[i].value === storeName) {
+                    found = true;
+                    select.selectedIndex = i;
+                    break;
+                }
             }
-            document.getElementById('storeNameInput').value = storeName;
+            if (!found) {
+                select.selectedIndex = 0;
+                localStorage.setItem('storeName', select.value);
+            }
         }
 
         // Khi thay đổi tên cửa hàng
@@ -398,6 +343,13 @@
             localStorage.setItem('storeName', name);
             if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
         }
+
+        // Khi có thay đổi storeList ở tab khác, tự động cập nhật dropdown
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'storeList') {
+                renderStoreName();
+            }
+        });
 
         // Khởi tạo giao diện
         renderEmployeeSelect();
@@ -529,6 +481,11 @@
         if (window.localStorage) {
             localStorage.setItem('sync_data_trigger', Date.now().toString());
         }
+    </script>
+    <script src="footer.js"></script>
+    <script>renderFooter();</script>
+</body>
+
     </script>
     <script src="footer.js"></script>
     <script>renderFooter();</script>

@@ -1378,6 +1378,93 @@
     </script>
     <script src="footer.js"></script>
     <script>renderFooter();</script>
+    <script>
+        // ====== KIỂM TRA VÀ THIẾT LẬP QUYỀN CHẤM CÔNG ======
+        function getCheckInOptions() {
+            let allowCorrect = localStorage.getItem('allowCheckInOnCorrectDay');
+            let allowWrong = localStorage.getItem('allowCheckInOnWrongDay');
+            return {
+                allowCorrect: (allowCorrect === null ? true : allowCorrect === 'true'),
+                allowWrong: (allowWrong === null ? true : allowWrong === 'true')
+            };
+        }
+
+        function canCheckIn(date) {
+            const opts = getCheckInOptions();
+            const today = new Date();
+            const d = new Date(date);
+            if (!opts.allowCorrect && !opts.allowWrong) return false;
+            if (opts.allowCorrect && !opts.allowWrong) {
+                // Only allow check-in for today
+                return d.getFullYear() === today.getFullYear() &&
+                       d.getMonth() === today.getMonth() &&
+                       d.getDate() === today.getDate();
+            }
+            if (!opts.allowCorrect && opts.allowWrong) {
+                // Allow check-in for any day
+                return true;
+            }
+            if (opts.allowCorrect && opts.allowWrong) {
+                // Allow check-in for any day (default)
+                return true;
+            }
+            return false;
+        }
+
+        // Khi render bảng chấm công
+        function renderAttendanceTable() {
+            // ...existing code...
+            // Với mỗi ô ngày:
+            /*
+            for (let day = 1; day <= daysInMonth; ++day) {
+                let dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                let canCheck = canCheckIn(dateStr);
+                if (canCheck) {
+                    // render nút/input chấm công
+                } else {
+                    // render nút vô hiệu hoặc thông báo
+                }
+            }
+            */
+            // ...existing code...
+        }
+
+        // Gọi hàm này trong renderAttendance() sau khi render xong bảng chấm công
+        function updateCheckInButtons() {
+            const month = getCurrentMonth();
+            const days = daysInMonth(month);
+            const empId = document.getElementById('empSelect').value;
+            for (let d = 1; d <= days; ++d) {
+                let dateStr = `${month}-${String(d).padStart(2,'0')}`;
+                let canCheck = canCheckIn(dateStr);
+                let cell = document.querySelector(`#attTableWrap td[data-date="${dateStr}"]`);
+                if (cell) {
+                    let checkbox = cell.querySelector('input[type="checkbox"]');
+                    let message = cell.querySelector('.checkin-message');
+                    if (canCheck) {
+                        if (checkbox) {
+                            checkbox.disabled = false;
+                            checkbox.closest('td').style.opacity = 1;
+                        }
+                        if (message) {
+                            message.remove();
+                        }
+                    } else {
+                        if (checkbox) {
+                            checkbox.disabled = true;
+                            checkbox.closest('td').style.opacity = 0.5;
+                        }
+                        if (!message) {
+                            message = document.createElement('div');
+                            message.className = 'checkin-message';
+                            message.style = 'font-size:12px;color:#d32f2f;margin-top:4px;text-align:center;';
+                            message.innerHTML = 'Chấm công không khả dụng';
+                            cell.appendChild(message);
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </body>
-</html>
 </html>

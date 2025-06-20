@@ -387,6 +387,7 @@ function renderMenu(active) {
                 <button type="button" class="menu-setting-btn" onclick="showMenuSettingPopup()" style="color:#1976d2;">⚙️ Cài đặt menu</button>
                 <button type="button" class="menu-setup-btn" onclick="location.href='setup.html'" style="color:#1976d2;">🔧 Thiết Lập</button>
                 <button type="button" class="menu-work-schedule-btn" onclick="location.href='work_schedule.html'" style="color:#1976d2;">📅 Lịch làm việc</button>
+                <button type="button" class="menu-payroll-full-btn" onclick="location.href='payroll_full.html'" style="color:#1976d2;">📊 Bảng lương chi tiết</button>
                 <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ Giới thiệu</button>
             </div>
         </div>
