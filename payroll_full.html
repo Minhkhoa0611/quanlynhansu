@@ -21,6 +21,7 @@
 <body>
     <script>renderMenu('payroll_full');</script>
     <div class="container">
+<<<<<<< HEAD
         <!-- Tiêu đề riêng cho LepShop -->
         <h2 style="color:#1976d2;text-align:center;">BẢNG LƯƠNG TỔNG HỢP NHÂN VIÊN CỬA HÀNG LepShop</h2>
         <div style="margin-bottom:18px;">
@@ -52,6 +53,21 @@
             <input type="text" id="storeCashInput_HFarm" style="font-size:17px;padding:6px 16px;min-width:160px;border-radius:6px;" placeholder="Nhập số tiền mặt" oninput="formatStoreCashInput(this)" />
         </div>
         <div id="fullPayrollTable_HFarm"></div>
+=======
+        <h2>BẢNG LƯƠNG TỔNG HỢP TOÀN BỘ NHÂN VIÊN</h2>
+        <div style="margin-bottom:18px;">
+            <label style="font-weight:500;color:#1976d2;">Chọn cửa hàng: </label>
+            <select id="fullPayrollStoreSelect" style="font-size:17px;padding:6px 16px;min-width:120px;border-radius:6px;margin-right:12px;">
+                <option value="">--Tất cả--</option>
+                <option value="LepShop">LepShop</option>
+                <option value="H'farm">H'farm</option>
+            </select>
+            <label style="font-weight:500;color:#1976d2;">Chọn tháng: </label>
+            <input type="month" id="fullPayrollMonth" style="min-width:160px;" />
+            <button onclick="renderFullPayroll()" style="margin-left:12px;padding:6px 18px;background:#1976d2;color:#fff;border:none;border-radius:4px;cursor:pointer;">Xem bảng lương</button>
+        </div>
+        <div id="fullPayrollTable"></div>
+>>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
     </div>
     <script>
         function formatVND(val) {
@@ -92,6 +108,7 @@
             }
             return total;
         }
+<<<<<<< HEAD
         function setPayMethod(empId, value) {
             let employees = JSON.parse(localStorage.getItem('employees') || '[]');
             let idx = employees.findIndex(e => e.id === empId);
@@ -174,6 +191,23 @@
             }
             let html = `<h3 style="color:#1976d2;text-align:left;margin-top:32px;">${title}</h3>
             <table>
+=======
+        function renderFullPayroll() {
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
+            // Lọc theo cửa hàng nếu có chọn
+            let store = document.getElementById('fullPayrollStoreSelect').value;
+            if (store) employees = employees.filter(e => (e.store || '') === store);
+            let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+            let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            let month = document.getElementById('fullPayrollMonth').value;
+            if (!month) {
+                const now = new Date();
+                month = now.toISOString().slice(0,7);
+                document.getElementById('fullPayrollMonth').value = month;
+            }
+            let html = `<table>
+>>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
                 <thead>
                     <tr>
                         <th>STT</th>
@@ -187,13 +221,20 @@
                         <th>Doanh thu</th>
                         <th>Phạt</th>
                         <th>Tiền ứng</th>
+<<<<<<< HEAD
                         <th>Hình thức nhận lương</th>
+=======
+>>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
                         <th>Tổng lương</th>
                     </tr>
                 </thead>
                 <tbody>`;
             let totalAll = 0;
             employees.forEach((emp, idx) => {
+<<<<<<< HEAD
+=======
+                // ...lấy dữ liệu từng nhân viên...
+>>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
                 let stdDays = parseInt(localStorage.getItem('workDaysStd_' + emp.id)) 
                     || parseInt(localStorage.getItem('workDaysStd') || '26');
                 let perDayEmp = parseInt(localStorage.getItem('salaryPerDay_' + emp.id)) 
@@ -222,7 +263,11 @@
                         if (Array.isArray(arr)) {
                             arr.forEach(shiftIdx => {
                                 if (shifts[shiftIdx]) caCong[shiftIdx] += (shifts[shiftIdx].half ? 0.5 : 1);
+<<<<<<< HEAD
                         });
+=======
+                            });
+>>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
                         }
                     }
                     let caSalaries = caCong.map((count, idx) => count * (parseInt(shifts[idx]?.salary) || 0));
@@ -248,7 +293,10 @@
                 }
                 if (total < 0) total = 0;
                 totalAll += total;
+<<<<<<< HEAD
                 let payMethodVal = emp.pay_method || 'cash';
+=======
+>>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
                 html += `<tr>
                     <td>${idx+1}</td>
                     <td>${emp.name}</td>
@@ -261,18 +309,22 @@
                     <td>${emp.salary_type !== 'shift' ? formatVND(revenue) : ''}</td>
                     <td>${formatVND(penalty)}</td>
                     <td>${formatVND(advance)}</td>
+<<<<<<< HEAD
                     <td>
                         <select onchange="setPayMethod('${emp.id}', this.value)">
                             <option value="cash" ${payMethodVal==='cash'?'selected':''}>Tiền mặt</option>
                             <option value="bank" ${payMethodVal==='bank'?'selected':''}>Chuyển khoản</option>
                         </select>
                     </td>
+=======
+>>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
                     <td style="font-weight:bold;color:#1976d2;">${formatVND(total)}</td>
                 </tr>`;
             });
             html += `</tbody>
                 <tfoot>
                     <tr>
+<<<<<<< HEAD
                         <td colspan="12" style="text-align:right;">TỔNG LƯƠNG:</td>
                         <td style="font-weight:bold;font-size:18px;color:#388e3c;">${formatVND(totalAll)}</td>
                     </tr>
@@ -318,11 +370,20 @@
             html += renderPayrollTable(cashEmployees, "BẢNG LƯƠNG NHÂN VIÊN NHẬN TIỀN MẶT - H'Farm", "H'Farm", month, true);
             html += renderPayrollTable(bankEmployees, "BẢNG LƯƠNG NHÂN VIÊN NHẬN CHUYỂN KHOẢN - H'Farm", "H'Farm", month, false);
             document.getElementById('fullPayrollTable_HFarm').innerHTML = html;
+=======
+                        <td colspan="11" style="text-align:right;">TỔNG LƯƠNG TOÀN BỘ:</td>
+                        <td style="font-weight:bold;font-size:18px;color:#388e3c;">${formatVND(totalAll)}</td>
+                    </tr>
+                </tfoot>
+            </table>`;
+            document.getElementById('fullPayrollTable').innerHTML = html;
+>>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
         }
         // Tự động hiển thị bảng lương khi vào trang
         window.onload = function() {
             const now = new Date();
             const month = now.toISOString().slice(0,7);
+<<<<<<< HEAD
             document.getElementById('fullPayrollMonth_LepShop').value = month;
             document.getElementById('fullPayrollMonth_HFarm').value = month;
             renderFullPayroll_LepShop();
@@ -333,8 +394,23 @@
             document.getElementById('fullPayrollMonth_HFarm').addEventListener('change', renderFullPayroll_HFarm);
             document.getElementById('payMethodFilter_HFarm').addEventListener('change', renderFullPayroll_HFarm);
             document.getElementById('storeCashInput_HFarm').addEventListener('input', renderFullPayroll_HFarm);
+=======
+            document.getElementById('fullPayrollMonth').value = month;
+            renderFullPayroll();
+            document.getElementById('fullPayrollMonth').addEventListener('change', renderFullPayroll);
+            document.getElementById('fullPayrollStoreSelect').addEventListener('change', renderFullPayroll);
+>>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
         }
     </script>
     <script>renderFooter();</script>
 </body>
 </html>
+<<<<<<< HEAD
+=======
+</body>
+</html>
+    </script>
+    <script>renderFooter();</script>
+</body>
+</html>
+>>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177

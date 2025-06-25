@@ -458,6 +458,7 @@
         }
         window.showEmpDetailModal = showEmpDetailModal;
 
+
         // Popup cập nhật thông tin ngân hàng
         function showBankInfoModal(empId) {
             const emp = employees.find(e => e.id === empId);
@@ -607,10 +608,12 @@
                         <label>Lương cơ bản:</label>
                         <input id="editEmpSalary" type="text" class="emp-input" ${emp.salary_type === 'base' ? '' : 'disabled'} value="${emp.salary_type === 'base' ? formatVND(emp.base_salary) : ''}" oninput="formatCurrencyInput(this)">
                     </div>
+
                     <div style="margin-bottom:10px;">
                         <label>Thông tin ngân hàng:</label>
                         <input id="editEmpBankInfo" class="emp-input" value="${emp.bank_info ? emp.bank_info.replace(/"/g, '&quot;') : ''}" placeholder="Số TK, Ngân hàng, Chủ TK">
                     </div>
+
                     <div style="text-align:right;">
                         <button type="button" class="btn" onclick="closeEmpDetailModal()">Hủy</button>
                         <button type="submit" class="btn" style="background:#43a047">Lưu</button>
@@ -649,7 +652,6 @@
             emp.store = document.getElementById('editEmpStore').value;
             emp.salary_type = document.getElementById('editEmpSalaryType').value;
             emp.base_salary = emp.salary_type === 'base' ? parseCurrency(document.getElementById('editEmpSalary').value) : 0;
-            emp.bank_info = document.getElementById('editEmpBankInfo').value;
             saveEmployees();
             renderEmployees();
             closeEmpDetailModal();
