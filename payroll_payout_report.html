@@ -23,6 +23,7 @@
         .percent-change { font-size:13px; margin-left:6px;}
         .percent-up { color:#388e3c; }
         .percent-down { color:#d32f2f; }
+        #statBar { display: none !important; }
     </style>
     <script src="menu.js"></script>
     <script src="footer.js"></script>
@@ -302,7 +303,7 @@
                 Tổng số kỳ: ${data.length} | Tổng số nhân viên được trả lương: ${empCount}
             </div>`;
             document.getElementById('payoutTable').innerHTML = html;
-            renderStatBar(data);
+            // renderStatBar(data); // Ẩn biểu đồ, không gọi hàm này nữa
             // Gắn lại sự kiện khi select kỳ thay đổi
             let periodValueElem2 = document.getElementById('periodValue');
             if (periodValueElem2) {
