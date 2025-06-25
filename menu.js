@@ -1,9 +1,6 @@
 if (typeof CODE_VERSION === 'undefined') {
-<<<<<<< HEAD
     var CODE_VERSION = '2.2.1'; // cập nhật version mới nhất
-=======
-    var CODE_VERSION = '2.2.0'; // cập nhật version mới nhất
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
+
 }
 
 function renderMenu(active) {
@@ -381,11 +378,7 @@ function renderMenu(active) {
         <button onclick="showSupportBotPopup()" style="background:#fff; color:#1976d2; border:1px solid #1976d2; margin-left:8px; height:40px; display:flex; align-items:center;">🤖 Hỗ trợ</button>
         <div class="menu-data-dropdown" tabindex="0">
             <button type="button" class="menu-data-btn" onclick="toggleMenuDataDropdown(event)">
-<<<<<<< HEAD
                 🛠️ Tiện Ích
-=======
-                ⚙️ Cài Đặt
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
             </button>
             <div class="menu-data-list">
                 <button onclick="exportAllData()" class="menu-export-btn"${active==='export'?' class="active"':''}>Xuất dữ liệu</button>
@@ -396,13 +389,9 @@ function renderMenu(active) {
                 <button type="button" class="menu-setup-btn" onclick="location.href='setup.html'" style="color:#1976d2;">🔧 Thiết Lập</button>
                 <button type="button" class="menu-work-schedule-btn" onclick="location.href='work_schedule.html'" style="color:#1976d2;">📅 Lịch làm việc</button>
                 <button type="button" class="menu-payroll-full-btn" onclick="location.href='payroll_full.html'" style="color:#1976d2;">📊 Bảng lương chi tiết</button>
-<<<<<<< HEAD
                 <button type="button" class="menu-payroll-payout-report-btn" onclick="location.href='payroll_payout_report.html'" style="color:#1976d2;">📑 Báo Cáo Chi Trả Lương</button>
                 <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ Giới thiệu</button>
 
-=======
-                <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ Giới thiệu</button>
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
             </div>
         </div>
     `;
@@ -663,14 +652,11 @@ function renderMenu(active) {
         // Danh sách lịch sử phiên bản (từ 1.0.0 đến 2.2.0, mỗi bản một cải tiến)
         const history = [
             {
-<<<<<<< HEAD
                 version: '2.2.1',
                 date: '28/6/2025',
                 note: 'Cập Nhật Thông Tin Ngân Hàng Nhân viên / VietQR.<br>-Cập Nhật Vá Lỗi Hệ Thống.<br> - Cập nhật báo cáo lương chi tiết'
             },
             {
-=======
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
                 version: '2.2.0',
                 date: '25/6/2025',
                 note: 'Thêm chức năng thiết lập ngày lễ: Cho phép người dùng thêm, sửa, xóa các ngày lễ để tự động tính công và lương ngày lễ.'
@@ -910,12 +896,8 @@ function renderMenu(active) {
             // { id: 'setup', label: 'Thiết Lập', href: 'setup.html' },
             { id: 'att', label: 'Chấm công', href: 'att.html' },
             { id: 'payroll', label: 'Bảng lương', href: 'payroll.html' },
-<<<<<<< HEAD
             { id: 'payroll_report', label: 'Lập BC Lương', href: 'payroll_report.html' },
             { id: 'payroll_payout_report', label: 'Báo Cáo Chi Trả Lương', href: 'payroll_payout_report.html' }
-=======
-            { id: 'payroll_report', label: 'Lập BC Lương', href: 'payroll_report.html' }
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
             // { id: 'work_schedule', label: 'Lịch làm việc', href: 'work_schedule.html' },
             // { id: 'about', label: 'Giới thiệu', href: 'about-mksof.html' }
         ];
@@ -1340,10 +1322,6 @@ function renderMenu(active) {
     // Sau khi renderMenu xong, gán sự kiện click cho #app-version-number để mở popup lịch sử phiên bản
     setTimeout(() => {
         const versionEl = document.getElementById('app-version-number');
-<<<<<<< HEAD
-
-=======
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
         if (versionEl && typeof showVersionHistoryPopup === 'function') {
             versionEl.onclick = function(e) {
                 e.stopPropagation();

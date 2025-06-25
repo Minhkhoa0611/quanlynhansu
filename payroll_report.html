@@ -18,15 +18,9 @@
     <script src="data_io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-<<<<<<< HEAD
-    <!-- ĐÃ XÓA chart.js và qrcodejs vì không còn dùng biểu đồ ở trang này -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script> -->
-=======
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Thêm thư viện QRCode.js -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
 </head>
 <body>
     <script>renderMenu('payroll_report');</script>
@@ -47,12 +41,7 @@
             <!-- ĐÃ BỎ nút in báo cáo -->
         </div>
         <div id="payrollReportTable"></div>
-<<<<<<< HEAD
-        <!-- ĐÃ XÓA 2 biểu đồ khỏi trang này -->
-        <!--
-=======
         <!-- Đưa 2 biểu đồ xuống dưới bảng -->
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
         <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin:32px 0 12px 0;">
             <div style="flex:1;min-width:320px;max-width:520px;">
                 <canvas id="payrollBarChart" height="220"></canvas>
@@ -61,10 +50,6 @@
                 <canvas id="storeTotalBarChart" height="220"></canvas>
             </div>
         </div>
-<<<<<<< HEAD
-        -->
-=======
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
     </div>
     <script>
         function formatVND(val) {
@@ -105,8 +90,6 @@
             }
             return total;
         }
-<<<<<<< HEAD
-=======
         // Khai báo biến lưu chart để tái sử dụng
         let payrollBarChartInstance = null;
         let storeTotalBarChartInstance = null;
@@ -123,7 +106,6 @@
             'Khác': '#fbc02d'
         };
 
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
         function renderPayrollReport() {
             let employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
             // Lọc theo cửa hàng
@@ -166,14 +148,11 @@
                 <tbody>`;
             let totalAll = 0;
             let totalRevenue = 0;
-<<<<<<< HEAD
-=======
             // Thêm mảng lưu dữ liệu cho biểu đồ
             let chartLabels = [];
             let chartData = [];
             let chartColors = [];
             let storeTotals = {};
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
             employees.forEach((emp, idx) => {
                 let empAtt = (attendanceByMonth[month] && attendanceByMonth[month][emp.id]) || {};
                 // Lấy ngày công chuẩn và tiền công/ngày riêng cho từng nhân viên nếu có
@@ -276,12 +255,7 @@
                     </tr>
                     <tr>
                         <td colspan="9" style="text-align:left;font-style:italic;color:#1976d2;">
-<<<<<<< HEAD
-                            <span style="font-weight:bold;">SỐ TIỀN BẰNG CHỮ:</span>
-                            <span id="totalAllText" style="text-decoration:underline"></span>
-=======
                             Số tiền bằng chữ: <span id="totalAllText"></span>
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
                         </td>
                     </tr>
                     <tr>
@@ -314,11 +288,7 @@
             const yearLabel = year ? `năm ${year}` : '';
             document.getElementById('payrollReportTitle').textContent = `Báo Cáo Lương ${storeName} ${monthLabel} ${yearLabel}`.replace(/\s+/g, ' ').trim();
             // Chuyển số thành chữ và hiển thị
-<<<<<<< HEAD
-            document.getElementById('totalAllText').textContent = numberToVietnameseWords(totalAll).toUpperCase() + ' ĐỒNG';
-=======
             document.getElementById('totalAllText').textContent = numberToVietnameseWords(totalAll) + ' đồng';
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
 
             // Thêm các nút Save PNG - Copy PNG - Save Excel dưới bảng
             if (!document.getElementById('payrollReportActions')) {
@@ -332,8 +302,6 @@
                 `;
                 document.querySelector('.container').appendChild(actionsDiv);
             }
-<<<<<<< HEAD
-=======
 
             // Sau khi render bảng, vẽ biểu đồ
             renderPayrollBarChart(chartLabels, chartData, chartColors, store);
@@ -422,7 +390,6 @@
                     }
                 }
             });
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
         }
 
         // --- Các hàm xuất/chép PNG và Excel ---
@@ -705,13 +672,6 @@
     <script>renderFooter();</script>
 </body>
 
-<<<<<<< HEAD
-    <script src="footer.js"></script>
-    <script>renderFooter();</script>
-</body>
-
-=======
->>>>>>> 6ae7e4acfc2dfbc18b021b9a43b05d63c2cbd177
     </script>
     <script src="footer.js"></script>
     <script>renderFooter();</script>
