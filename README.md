@@ -1,2 +1,0 @@
-# QUAN LY NHAN SU
-
