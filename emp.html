@@ -183,6 +183,28 @@
             .form-row label { width: 100%; }
             table, th, td { font-size: 14px; }
         }
+        /* Thêm đoạn này để làm đẹp bảng preview Excel */
+        #excelPreviewTable input[type="text"],
+        #excelPreviewTable select {
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            outline: none !important;
+            font-size: 14px;
+            padding: 4px 6px;
+        }
+        #excelPreviewTable input[type="text"]:focus,
+        #excelPreviewTable select:focus {
+            background: #e3f0ff !important;
+        }
+        /* Widen the salary type column in Excel preview */
+        #excelPreviewTable td:nth-child(4) select {
+            width: 170px !important;
+        }
+        #excelPreviewTable th:nth-child(4) {
+            min-width: 160px;
+            width: 170px;
+        }
     </style>
     <script src="menu.js"></script>
     <script src="data_io.js"></script>
@@ -190,6 +212,8 @@
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
     <!-- Thư viện tạo Barcode -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <!-- Thư viện đọc Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <script>renderMenu('emp');</script>
@@ -198,37 +222,55 @@
         <!-- Nút xóa tất cả nhân viên -->
         <div style="text-align:right;margin-bottom:10px;">
             <button class="btn" style="background:#e53935" onclick="deleteAllEmployees()">Xóa tất cả nhân viên</button>
+            <!-- ĐÃ BỎ nút Nhập nhanh từ Excel -->
+            <label class="btn" style="background:#1976d2;margin-left:10px;display:inline-block;cursor:pointer;">
+                <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="importEmployeesFromExcel(event)">
+                Nhập từ file Excel
+            </label>
         </div>
         <!-- Snackbar hoàn tác xóa -->
         <div id="undoDeleteSnackbar" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:16px 28px;border-radius:8px;box-shadow:0 4px 24px #0005;z-index:3000;font-size:1.08rem;min-width:220px;text-align:center;">
             <span id="undoDeleteMsg"></span>
             <button id="undoDeleteBtn" style="margin-left:18px;background:#43a047;color:#fff;border:none;border-radius:6px;padding:6px 18px;font-size:1rem;font-weight:600;cursor:pointer;">Hoàn tác</button>
         </div>
+        <!-- Thêm tiêu đề Thiết Lập Nhân Viên -->
+        <div style="font-size:1.35rem;font-weight:600;color:#1976d2;margin-bottom:8px;margin-top:8px;text-align:left;">
+            Thiết Lập Nhân Viên
+        </div>
         <form id="addEmpForm">
-            <div class="form-row">
-                <label>Tên:</label>
-                <input id="empName" required class="emp-input">
-                <label>Chức vụ:</label>
-                <input id="empPos" class="emp-input">
+            <div class="form-row" style="gap:32px;">
+                <div style="flex:1;display:flex;flex-direction:column;">
+                    <label for="empName" style="margin-bottom:4px;">Tên:</label>
+                    <input id="empName" required class="emp-input" style="width:100%;">
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;">
+                    <label for="empPos" style="margin-bottom:4px;">Chức vụ:</label>
+                    <input id="empPos" class="emp-input" style="width:100%;">
+                </div>
             </div>
-            <div class="form-row">
-                <label>Cửa hàng:</label>
-                <select id="empStore" class="emp-input" required>
-                    <!-- Options sẽ được render động -->
-                </select>
-                <label style="width:110px"></label>
+            <div class="form-row" style="gap:32px;">
+                <div style="flex:1;display:flex;flex-direction:column;">
+                    <label for="empStore" style="margin-bottom:4px;">Cửa hàng:</label>
+                    <select id="empStore" class="emp-input" required style="width:100%;">
+                        <!-- Options sẽ được render động -->
+                    </select>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;">
+                    <label for="empSalaryType" style="margin-bottom:4px;">Hình thức trả lương:</label>
+                    <select id="empSalaryType" required onchange="toggleSalaryInput()" class="emp-input" style="width:100%;">
+                        <option value="base">Lương cơ bản</option>
+                        <option value="shift">Lương theo ca</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-row">
-                <label>Hình thức trả lương:</label>
-                <select id="empSalaryType" required onchange="toggleSalaryInput()" class="emp-input">
-                    <option value="base">Lương cơ bản</option>
-                    <option value="shift">Lương theo ca</option>
-                </select>
-                <label id="empSalaryLabel" style="margin-left:18px;">Lương cơ bản:</label>
-                <input id="empSalary" type="text" required oninput="formatCurrencyInput(this)">
-                <button class="btn" type="submit" id="empSubmitBtn">Thêm</button>
+            <div class="form-row" style="flex-direction:column;align-items:flex-start;margin-bottom:18px;">
+                <label id="empSalaryLabel" for="empSalary" style="margin-bottom:4px;">Lương cơ bản:</label>
+                <input id="empSalary" type="text" required oninput="formatCurrencyInput(this)" style="width:220px;">
             </div>
-
+            <div style="display:flex;justify-content:center;gap:18px;">
+                <button class="btn" type="submit" id="empSubmitBtn">Tạo</button>
+                <button class="btn" type="button" style="background:#e0e0e0;color:#1976d2;" onclick="document.getElementById('addEmpForm').reset();renderStoreOptions();empSalaryType.value='base';toggleSalaryInput();">Hủy Bỏ</button>
+            </div>
         </form>
         <table id="empTable">
             <thead>
@@ -275,6 +317,25 @@
             </div>
         </div>
     </div>
+    <!-- Modal nhập nhanh từ Excel -->
+    <div id="quickImportModal" style="display:none;position:fixed;z-index:2500;left:0;top:0;width:100vw;height:100vh;background:#0005;align-items:center;justify-content:center;">
+        <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:480px;min-width:260px;box-shadow:0 4px 24px #0003;position:relative;">
+            <div style="font-size:1.15rem;font-weight:600;color:#1976d2;margin-bottom:10px;">Nhập nhanh nhân viên từ Excel</div>
+            <div style="margin-bottom:8px;font-size:0.98rem;color:#444;">
+                Hãy copy các cột <b>Tên</b>, <b>Chức vụ</b>, <b>Cửa hàng</b>, <b>Hình thức trả lương</b>, <b>Lương cơ bản</b> từ Excel và dán vào ô dưới đây (mỗi nhân viên 1 dòng).
+            </div>
+            <textarea id="quickImportTextarea" style="width:100%;height:120px;border-radius:8px;border:1.5px solid #b3d1f7;padding:8px 10px;font-size:15px;resize:vertical;margin-bottom:10px;" placeholder="Ví dụ:
+Nguyễn Văn A	Thu ngân	LepShop	Lương cơ bản	8,000,000
+Trần Thị B	Bán hàng	H'Farm	Lương theo ca	
+"></textarea>
+            <div id="quickImportError" style="color:#e53935;font-size:0.97rem;margin-bottom:8px;display:none;"></div>
+            <div style="text-align:right;">
+                <button class="btn" type="button" onclick="closeQuickImportModal()">Hủy</button>
+                <button class="btn" style="background:#43a047" type="button" onclick="handleQuickImport()">Nhập</button>
+            </div>
+            <button onclick="closeQuickImportModal()" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#888;">&times;</button>
+        </div>
+    </div>
     <script>
         // Lấy dữ liệu nhân viên theo chuẩn trang minhkhoa0611.github.io/quanlynhansu (key: nhanvien)
         let employees = [];
@@ -296,8 +357,8 @@
         let editEmpId = null;
 
         function renderStoreOptions(selectedValue = '') {
-            // Chỉ cho phép chọn 2 cửa hàng: LepShop và H'farm
-            const storeList = ["LepShop", "H'farm"];
+            // Chỉ cho phép chọn 2 cửa hàng: LepShop và H'Farm
+            const storeList = ["LepShop", "H'Farm"];
             const empStore = document.getElementById('empStore');
             empStore.innerHTML = '<option value="">--Chọn cửa hàng--</option>';
             storeList.forEach(store => {
@@ -319,7 +380,7 @@
 
         // --- Tự động cập nhật trường 'store' cho nhân viên theo ID ---
         function autoUpdateEmployeeStores() {
-            // ID cho H'farm
+            // ID cho H'Farm
             const hfarmIds = [
                 "1748743379562",
                 "1748743529323"
@@ -328,7 +389,7 @@
                 // Nếu nhân viên chưa có trường store hoặc store rỗng/null thì tự động gán
                 if (!emp.store || emp.store === '') {
                     if (hfarmIds.includes(emp.id)) {
-                        emp.store = "H'farm";
+                        emp.store = "H'Farm";
                     } else {
                         emp.store = "LepShop";
                     }
@@ -594,7 +655,7 @@
                         <label>Cửa hàng:</label>
                         <select id="editEmpStore" class="emp-input" required>
                             <option value="LepShop" ${emp.store === 'LepShop' ? 'selected' : ''}>LepShop</option>
-                            <option value="H'farm" ${emp.store === "H'farm" ? 'selected' : ''}>H'farm</option>
+                            <option value="H'Farm" ${emp.store === "H'Farm" ? 'selected' : ''}>H'Farm</option>
                         </select>
                     </div>
                     <div style="margin-bottom:10px;">
@@ -872,13 +933,13 @@
             localStorage.setItem('attendanceByMonth', JSON.stringify(attendanceByMonth));
             // Phục hồi shiftsByEmp
             if (lastDeletedEmp.shiftsByEmp) {
-                let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+                let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp' || ''));
                 shiftsByEmp[lastDeletedEmp.emp.id] = lastDeletedEmp.shiftsByEmp;
                 localStorage.setItem('shiftsByEmp', JSON.stringify(shiftsByEmp));
             }
             // Phục hồi shiftsByEmpByMonth
             if (lastDeletedEmp.shiftsByEmpByMonth) {
-                let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+                let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth' || ''));
                 Object.keys(lastDeletedEmp.shiftsByEmpByMonth).forEach(month => {
                     if (!shiftsByEmpByMonth[month]) shiftsByEmpByMonth[month] = {};
                     shiftsByEmpByMonth[month][lastDeletedEmp.emp.id] = lastDeletedEmp.shiftsByEmpByMonth[month];
@@ -887,7 +948,7 @@
             }
             // Phục hồi payrollInputs
             if (lastDeletedEmp.payrollInputs) {
-                let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+                let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs' || ''));
                 payrollInputs[lastDeletedEmp.emp.id] = lastDeletedEmp.payrollInputs;
                 localStorage.setItem('payrollInputs', JSON.stringify(payrollInputs));
             }
@@ -1016,7 +1077,7 @@
                         }
 
                         // Merge shifts
-                        let oldShifts = JSON.parse(localStorage.getItem('shifts') || '[]');
+                        let oldShifts = JSON.parse(localStorage.getItem('shifts' || '[]'));
                         let newShifts = data.shifts || [];
                         let shiftMap = {};
                         oldShifts.forEach(s => shiftMap[s.id] = s);
@@ -1042,7 +1103,7 @@
                         }
 
                         // Merge shiftsByEmpByMonth
-                        let oldShiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+                        let oldShiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth' || ''));
                         let newShiftsByEmpByMonth = data.shiftsByEmpByMonth || {};
                         for (let month in newShiftsByEmpByMonth) {
                             if (!oldShiftsByEmpByMonth[month]) oldShiftsByEmpByMonth[month] = {};
@@ -1363,6 +1424,7 @@
                                 const img = new window.Image();
                                 img.onload = function() {
                                     // Phóng to kích thước canvas QR
+
                                     canvas.width = 220;
                                     canvas.height = 220;
                                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1386,7 +1448,7 @@
 
         function closeBankQRModal() {
             document.getElementById('bankQRModal').style.display = 'none';
-        }
+               }
         window.closeBankQRModal = closeBankQRModal;
 
         // Đóng modal QR chuyển khoản khi bấm ra ngoài
@@ -1396,9 +1458,362 @@
                 closeBankQRModal();
             }
         });
+
+        // Hiển thị modal nhập nhanh
+        function showQuickImportModal() {
+            document.getElementById('quickImportTextarea').value = '';
+            document.getElementById('quickImportError').style.display = 'none';
+            document.getElementById('quickImportModal').style.display = 'flex';
+        }
+        window.showQuickImportModal = showQuickImportModal;
+
+        function closeQuickImportModal() {
+            document.getElementById('quickImportModal').style.display = 'none';
+        }
+        window.closeQuickImportModal = closeQuickImportModal;
+
+        // Đóng modal khi bấm ra ngoài
+        document.addEventListener('mousedown', function(e) {
+            const modal = document.getElementById('quickImportModal');
+            if (modal && modal.style.display !== 'none') {
+                const box = modal.querySelector('div');
+                if (box && !box.contains(e.target)) {
+                    closeQuickImportModal();
+                }
+            }
+        });
+
+        // Xử lý nhập nhanh từ Excel
+        function handleQuickImport() {
+            const textarea = document.getElementById('quickImportTextarea');
+            const errorDiv = document.getElementById('quickImportError');
+            let text = textarea.value.trim();
+            if (!text) {
+                errorDiv.textContent = 'Vui lòng dán dữ liệu từ Excel!';
+                errorDiv.style.display = '';
+                return;
+            }
+            let lines = text.split('\n').map(l => l.trim()).filter(l => l);
+            let added = 0, skipped = 0, errors = [];
+            lines.forEach((line, idx) => {
+                // Tách theo tab hoặc nhiều dấu cách
+                let cols = line.split('\t');
+                if (cols.length < 3) cols = line.split(/\s{2,}/);
+                if (cols.length < 3) cols = line.split(/ {1,}/);
+                // Chuẩn hóa số cột
+                while (cols.length < 5) cols.push('');
+                let [name, position, store, salaryType, baseSalary] = cols.map(c => c.trim());
+                if (!name) { skipped++; errors.push(`Dòng ${idx+1}: Thiếu tên`); return; }
+                // Chuẩn hóa cửa hàng
+                if (store !== "LepShop" && store !== "H'Farm") store = '';
+                // Chuẩn hóa hình thức trả lương
+                let salary_type = 'base';
+                if (/ca/i.test(salaryType)) salary_type = 'shift';
+                // Chuẩn hóa lương cơ bản
+                let salary = salary_type === 'base' ? parseCurrency(baseSalary) : 0;
+                // Kiểm tra trùng tên và chức vụ
+                let exists = employees.some(e => e.name === name && e.position === position);
+                if (exists) { skipped++; errors.push(`Dòng ${idx+1}: Đã tồn tại "${name}"`); return; }
+                // Thêm nhân viên
+                employees.push({
+                    id: Date.now().toString(),
+                    name: empName.value,
+                    position: empPos.value,
+                    store: store,
+                    salary_type: salaryType,
+                    base_salary: salary,
+                    bank_info: '', // Không sao chép thông tin ngân hàng
+                    hidden: false // Mặc định là hiện
+                });
+                added++;
+            });
+            saveEmployees();
+            renderEmployees();
+            closeQuickImportModal();
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+            setTimeout(() => {
+                if (added > 0) alert(`Đã thêm ${added} nhân viên mới!${skipped ? `\nBỏ qua ${skipped} dòng lỗi/trùng.` : ''}`);
+                else alert('Không có nhân viên nào được thêm!');
+            }, 200);
+        }
+        window.handleQuickImport = handleQuickImport;
+
+        // Thêm hàm nhập nhân viên từ file Excel
+        function importEmployeesFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
+                    // Tìm dòng tiêu đề
+                    let headerIdx = rows.findIndex(r =>
+                        r.some(cell => typeof cell === 'string' && cell.trim().toLowerCase().includes('tên'))
+                    );
+                    if (headerIdx === -1) headerIdx = 0;
+                    const header = rows[headerIdx].map(h => h.toString().trim().toLowerCase());
+                    // Xác định vị trí các cột
+                    const colMap = {
+                        name: header.findIndex(h => h.includes('tên')),
+                        position: header.findIndex(h => h.includes('chức vụ')),
+                        store: header.findIndex(h => h.includes('cửa hàng')),
+                        salaryType: header.findIndex(h => h.includes('hình thức')),
+                        baseSalary: header.findIndex(h => h.includes('lương cơ bản'))
+                    };
+                    // Kiểm tra đủ cột
+                    if (Object.values(colMap).some(idx => idx === -1)) {
+                        alert('File Excel thiếu cột bắt buộc!');
+                        return;
+                    }
+                    let previewData = [];
+                    for (let i = headerIdx + 1; i < rows.length; ++i) {
+                        const row = rows[i];
+                        const name = (row[colMap.name] || '').toString().trim();
+                        const position = (row[colMap.position] || '').toString().trim();
+                        let store = (row[colMap.store] || '').toString().trim();
+                        let salaryType = (row[colMap.salaryType] || '').toString().trim();
+                        let baseSalary = (row[colMap.baseSalary] || '').toString().trim();
+                        if (!name) continue;
+                        // Chuẩn hóa cửa hàng
+                        if (store !== "LepShop" && store !== "H'Farm") store = '';
+                        // Chuẩn hóa hình thức trả lương
+                        let salary_type = /ca/i.test(salaryType) ? 'shift' : 'base';
+                        // Chuẩn hóa lương cơ bản
+                        let salary = salary_type === 'base' ? parseCurrency(baseSalary) : 0;
+                        previewData.push({
+                            name,
+                            position,
+                            store,
+                            salary_type,
+                            base_salary: salary
+                        });
+                    }
+                    event.target.value = ''; // reset input
+                    if (previewData.length === 0) {
+                        alert('Không có dữ liệu hợp lệ!');
+                        return;
+                    }
+                    showExcelPreviewModal(previewData);
+                } catch (err) {
+                    alert('Lỗi khi đọc file Excel!');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        window.importEmployeesFromExcel = importEmployeesFromExcel;
+
     </script>
     <script src="footer.js"></script>
     <script>renderFooter();</script>
 
+    <!-- Modal xác nhận nhập dữ liệu từ Excel -->
+    <div id="excelPreviewModal" style="display:none;position:fixed;z-index:2600;left:0;top:0;width:100vw;height:100vh;background:#0005;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:12px;max-width:860px;min-width:340px;box-shadow:0 8px 36px #0003;position:relative;overflow:hidden;">
+            <div style="background:#f4f8fc;padding:16px;border-bottom:1px solid #b3d1f7;">
+                <div style="font-size:1.2rem;font-weight:600;color:#1976d2;text-align:center;">
+                    Xác nhận dữ liệu nhân viên từ Excel
+                </div>
+                <div style="margin-top:8px;font-size:0.95rem;color:#555;text-align:center;">
+                    Kiểm tra và chỉnh sửa dữ liệu trước khi nhập vào hệ thống
+                </div>
+            </div>
+            
+            <div style="max-height:380px;overflow:auto;">
+                <table id="excelPreviewTable" style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#e3f0ff;position:sticky;top:0;z-index:1;">
+                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;white-space:nowrap;">Tên</th>
+                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;white-space:nowrap;">Chức vụ</th>
+                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;white-space:nowrap;">Cửa hàng</th>
+                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;white-space:nowrap;">Hình thức trả lương</th>
+                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;white-space:nowrap;">Lương cơ bản</th>
+                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;width:60px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div style="background:#f4f8fc;padding:12px;border-top:1px solid #b3d1f7;text-align:right;">
+                <button class="btn" type="button" onclick="closeExcelPreviewModal()" style="background:#e0e0e0;color:#1976d2;margin-right:8px;">Hủy</button>
+                <button class="btn" style="background:#43a047;min-width:80px;" type="button" onclick="confirmImportExcelEmployees()">OK</button>
+            </div>
+
+            <button onclick="closeExcelPreviewModal()" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#666;padding:4px;">&times;</button>
+        </div>
+    </div>
+    <script>
+    // Biến tạm lưu dữ liệu preview từ Excel
+    let excelPreviewEmployees = [];
+
+    function showExcelPreviewModal(previewData) {
+        excelPreviewEmployees = previewData;
+        const tbody = document.querySelector('#excelPreviewTable tbody');
+        tbody.innerHTML = '';
+        previewData.forEach((emp, idx) => {
+            // Ensure base_salary is always a number or empty string
+            let salaryVal = '';
+            if (emp.salary_type === 'base') {
+                let val = typeof emp.base_salary === 'number' && !isNaN(emp.base_salary) ? emp.base_salary : 0;
+                salaryVal = val > 0 ? formatVND(val) : '';
+            }
+            tbody.innerHTML += `
+                <tr style="border-bottom:1px solid #e3f0ff;">
+                    <td style="padding:6px 8px;">
+                        <input type="text" value="${emp.name || ''}" style="width:120px;padding:4px 6px;border:1px solid #b3d1f7;border-radius:4px;font-size:14px;" 
+                            onchange="excelPreviewEmployees[${idx}].name=this.value">
+                    </td>
+                    <td style="padding:6px 8px;">
+                        <input type="text" value="${emp.position || ''}" style="width:100px;padding:4px 6px;border:1px solid #b3d1f7;border-radius:4px;font-size:14px;" 
+                            onchange="excelPreviewEmployees[${idx}].position=this.value">
+                    </td>
+                    <td style="padding:6px 8px;">
+                        <select style="width:100px;padding:4px 6px;border:1px solid #b3d1f7;border-radius:4px;font-size:14px;" 
+                            onchange="excelPreviewEmployees[${idx}].store=this.value">
+                            <option value="">--</option>
+                            <option value="LepShop" ${emp.store==="LepShop"?"selected":""}>LepShop</option>
+                            <option value="H'Farm" ${emp.store==="H'Farm"?"selected":""}>H'Farm</option>
+                        </select>
+                    </td>
+                    <td style="padding:6px 8px;">
+                        <select style="width:170px;padding:4px 6px;border:1px solid #b3d1f7;border-radius:4px;font-size:14px;" 
+                            onchange="excelPreviewEmployees[${idx}].salary_type=this.value;showExcelPreviewModal(excelPreviewEmployees);">
+                            <option value="base" ${emp.salary_type==="base"?"selected":""}>Lương cơ bản</option>
+                            <option value="shift" ${emp.salary_type==="shift"?"selected":""}>Lương theo ca</option>
+                        </select>
+                    </td>
+                    <td style="padding:6px 8px;">
+                        <input type="text" value="${salaryVal}" 
+                            style="width:110px;padding:4px 6px;border:1px solid #b3d1f7;border-radius:4px;font-size:14px;" 
+                            ${emp.salary_type !== 'base' ? 'disabled' : ''}
+                            oninput="excelPreviewEmployees[${idx}].base_salary=excelPreviewEmployees[${idx}].salary_type==='base'?parseCurrency(this.value):0">
+                    </td>
+                    <td style="padding:6px 8px;text-align:center;">
+                        <button class="btn" style="background:#e53935;padding:3px 12px;font-size:13px;" onclick="removeExcelPreviewRow(${idx})">Xóa</button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.getElementById('excelPreviewModal').style.display = 'flex';
+    }
+    function closeExcelPreviewModal() {
+        document.getElementById('excelPreviewModal').style.display = 'none';
+        excelPreviewEmployees = [];
+    }
+    function removeExcelPreviewRow(idx) {
+        excelPreviewEmployees.splice(idx, 1);
+        showExcelPreviewModal(excelPreviewEmployees);
+    }
+    window.closeExcelPreviewModal = closeExcelPreviewModal;
+
+    function confirmImportExcelEmployees() {
+        // Kiểm tra dữ liệu trước khi nhập
+        let valid = 0, skipped = 0, errors = [];
+        excelPreviewEmployees.forEach((emp, idx) => {
+            emp.name = (emp.name||'').trim();
+            emp.position = (emp.position||'').trim();
+            if (!emp.name) { skipped++; errors.push(`Dòng ${idx+1}: Thiếu tên`); return; }
+            // Bỏ kiểm tra trùng tên và chức vụ
+            // let exists = employees.some(e => e.name === emp.name && e.position === emp.position);
+            // if (exists) { skipped++; errors.push(`Dòng ${idx+1}: Đã tồn tại "${emp.name}"`); return; }
+            // Chuẩn hóa lương
+            if (emp.salary_type === 'base') emp.base_salary = parseCurrency(emp.base_salary);
+            else emp.base_salary = 0;
+            // Thêm vào employees
+            employees.push({
+                id: Date.now().toString() + Math.floor(Math.random()*10000),
+                name: emp.name,
+                position: emp.position,
+                store: emp.store,
+                salary_type: emp.salary_type,
+                base_salary: emp.salary_type === 'base' ? emp.base_salary : 0,
+                bank_info: '',
+                hidden: false
+            });
+            valid++;
+        });
+        saveEmployees();
+        renderEmployees();
+        closeExcelPreviewModal();
+        if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        setTimeout(() => {
+            if (valid > 0) alert(`Đã thêm ${valid} nhân viên mới!${skipped ? `\nBỏ qua ${skipped} dòng lỗi/trùng.` : ''}`);
+            else alert('Không có nhân viên nào được thêm!');
+        }, 200);
+    }
+    window.confirmImportExcelEmployees = confirmImportExcelEmployees;
+    window.removeExcelPreviewRow = removeExcelPreviewRow;
+
+    // Sửa hàm nhập từ Excel để dùng modal preview
+    function importEmployeesFromExcel(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
+                // Tìm dòng tiêu đề
+                let headerIdx = rows.findIndex(r =>
+                    r.some(cell => typeof cell === 'string' && cell.trim().toLowerCase().includes('tên'))
+                );
+                if (headerIdx === -1) headerIdx = 0;
+                const header = rows[headerIdx].map(h => h.toString().trim().toLowerCase());
+                // Xác định vị trí các cột
+                const colMap = {
+                    name: header.findIndex(h => h.includes('tên')),
+                    position: header.findIndex(h => h.includes('chức vụ')),
+                    store: header.findIndex(h => h.includes('cửa hàng')),
+                    salaryType: header.findIndex(h => h.includes('hình thức')),
+                    baseSalary: header.findIndex(h => h.includes('lương cơ bản'))
+                };
+                // Kiểm tra đủ cột
+                if (Object.values(colMap).some(idx => idx === -1)) {
+                    alert('File Excel thiếu cột bắt buộc!');
+                    return;
+                }
+                let previewData = [];
+                for (let i = headerIdx + 1; i < rows.length; ++i) {
+                    const row = rows[i];
+                    const name = (row[colMap.name] || '').toString().trim();
+                    const position = (row[colMap.position] || '').toString().trim();
+                    let store = (row[colMap.store] || '').toString().trim();
+                    let salaryType = (row[colMap.salaryType] || '').toString().trim();
+                    let baseSalary = (row[colMap.baseSalary] || '').toString().trim();
+                    if (!name) continue;
+                    // Chuẩn hóa cửa hàng
+                    if (store !== "LepShop" && store !== "H'Farm") store = '';
+                    // Chuẩn hóa hình thức trả lương
+                    let salary_type = /ca/i.test(salaryType) ? 'shift' : 'base';
+                    // Chuẩn hóa lương cơ bản
+                    let salary = salary_type === 'base' ? parseCurrency(baseSalary) : 0;
+                    previewData.push({
+                        name,
+                        position,
+                        store,
+                        salary_type,
+                        base_salary: salary
+                    });
+                }
+                event.target.value = ''; // reset input
+                if (previewData.length === 0) {
+                    alert('Không có dữ liệu hợp lệ!');
+                    return;
+                }
+                showExcelPreviewModal(previewData);
+            } catch (err) {
+                alert('Lỗi khi đọc file Excel!');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+    window.importEmployeesFromExcel = importEmployeesFromExcel;
+
+    </script>
 </body>
 </html>
