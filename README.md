@@ -190,7 +190,7 @@
     <tr>
       <td>🤖 Android (APK)</td>
       <td>
-        <a href="https://minhkhoa0611.github.io/quanlynhansu/download/TimeProHRM_Android.apk">
+        <a href="#" onclick="alert('CHƯA PHÁT HÀNH'); return false;">
           <img src="https://img.shields.io/badge/Download-43a047?style=for-the-badge&logo=android&logoColor=white" alt="Download Android">
         </a>
       </td>
@@ -198,13 +198,15 @@
     <tr>
       <td>🍏 iOS</td>
       <td>
-        <img src="https://img.shields.io/badge/Sắp_ra_mắt-888?style=for-the-badge&logo=apple&logoColor=white" alt="Sắp ra mắt" />
+        <a href="#" onclick="alert('CHƯA PHÁT HÀNH'); return false;">
+          <img src="https://img.shields.io/badge/Sắp_ra_mắt-888?style=for-the-badge&logo=apple&logoColor=white" alt="Sắp ra mắt" />
+        </a>
       </td>
     </tr>
     <tr>
       <td>🪟 Windows</td>
       <td>
-        <a href="https://minhkhoa0611.github.io/quanlynhansu/download/TimeProHRM_Windows.zip">
+        <a href="#" onclick="alert('CHƯA PHÁT HÀNH'); return false;">
           <img src="https://img.shields.io/badge/Download-1976d2?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows">
         </a>
       </td>
@@ -212,7 +214,7 @@
     <tr>
       <td>🍎 MacOS</td>
       <td>
-        <a href="https://minhkhoa0611.github.io/quanlynhansu/download/TimeProHRM_MacOS.zip">
+        <a href="#" onclick="alert('CHƯA PHÁT HÀNH'); return false;">
           <img src="https://img.shields.io/badge/Download-1976d2?style=for-the-badge&logo=apple&logoColor=white" alt="Download MacOS">
         </a>
       </td>
@@ -220,7 +222,7 @@
     <tr>
       <td>🐧 Linux</td>
       <td>
-        <a href="https://minhkhoa0611.github.io/quanlynhansu/download/TimeProHRM_Linux.zip">
+        <a href="#" onclick="alert('CHƯA PHÁT HÀNH'); return false;">
           <img src="https://img.shields.io/badge/Download-1976d2?style=for-the-badge&logo=linux&logoColor=white" alt="Download Linux">
         </a>
       </td>
@@ -238,8 +240,6 @@
 Chúng tôi luôn đặt **chất lượng**, **bảo mật** và **sự hài lòng của khách hàng** lên hàng đầu.
 
 > 🏆 *MK SOF - Đồng hành cùng doanh nghiệp Việt trên hành trình chuyển đổi số!*
-        </a>
-      </td>
     </tr>
   </tbody>
 </table>
