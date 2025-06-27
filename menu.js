@@ -654,7 +654,7 @@ function renderMenu(active) {
             {
                 version: '2.2.1',
                 date: '28/6/2025',
-                note: 'Cập Nhật Thông Tin Ngân Hàng Nhân viên / VietQR.<br>-Cập Nhật Vá Lỗi Hệ Thống.<br> - Cập nhật báo cáo lương chi tiết'
+                note: 'Khắc phục sự cố nghiêm trọng về lập trình có nguy cơ ảnh hưởng toàn hệ thống.<br>- Cập nhật thông tin ngân hàng nhân viên / VietQR.<br>- Vá lỗi hệ thống và nâng cấp báo cáo lương chi tiết.'
             },
             {
                 version: '2.2.0',
@@ -1300,7 +1300,7 @@ function renderMenu(active) {
         chatDiv.innerHTML += `<div style="margin-bottom:6px;"><b>Bạn:</b> ${q}</div>`;
         chatDiv.innerHTML += `<div style="margin-bottom:12px;color:#388e3c;"><b>Bot:</b> ${answer}</div>`;
         input.value = '';
-        chatDiv.scrollTop = chatDiv.scrollHeight;
+               chatDiv.scrollTop = chatDiv.scrollHeight;
     };
 
     // Hàm chọn nhanh câu hỏi mẫu

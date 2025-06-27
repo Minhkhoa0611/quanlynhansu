@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html style="zoom:90%;">
-<head>
+<head><script type="text/javascript" src="/___vscode_livepreview_injected_script"></script><script type="text/javascript" src="/___vscode_livepreview_injected_script"></script>
     <meta charset="utf-8">
     <title>TimePro HRM-Danh sách nhân viên</title>
         <link rel="icon" type="image/png" href="iconlogo.png">
@@ -133,6 +133,28 @@
         .btn[style*="background:#43a047"]:hover {
             background: linear-gradient(90deg, #2e7d32 60%, #43a047 100%) !important;
         }
+        .btn-green {
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%) !important;
+            color: #222 !important;
+            box-shadow: 0 2px 8px #43e97b40, 0 1.5px 0 #fff3 inset;
+            border: none;
+        }
+        .btn-green:hover {
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%) !important;
+            color: #222 !important;
+            box-shadow: 0 4px 16px #43e97b60, 0 1.5px 0 #fff3 inset;
+        }
+        .btn-red {
+            background: linear-gradient(90deg, #ff5858 0%, #f09819 100%) !important;
+            color: #222 !important;
+            box-shadow: 0 2px 8px #ff585840, 0 1.5px 0 #fff3 inset;
+            border: none;
+        }
+        .btn-red:hover {
+            background: linear-gradient(90deg, #e52d27 0%, #b31217 100%) !important;
+            color: #222 !important;
+            box-shadow: 0 4px 16px #ff585860, 0 1.5px 0 #fff3 inset;
+        }
         #addEmpForm {
             background: #f4f8fc;
             border-radius: 12px;
@@ -183,27 +205,18 @@
             .form-row label { width: 100%; }
             table, th, td { font-size: 14px; }
         }
-        /* Thêm đoạn này để làm đẹp bảng preview Excel */
-        #excelPreviewTable input[type="text"],
-        #excelPreviewTable select {
-            border: none !important;
-            background: transparent !important;
-            box-shadow: none !important;
-            outline: none !important;
-            font-size: 14px;
-            padding: 4px 6px;
+        .emp-store-glossy {
+            background: linear-gradient(120deg, #e3f0ff 60%, #b3d1f7 100%);
+            box-shadow: 0 2px 8px #1976d220, 0 1.5px 0 #fff inset;
+            border: 1.5px solid #1976d2;
+            color: #1976d2;
+            font-weight: 600;
+            transition: box-shadow 0.2s, border 0.2s;
         }
-        #excelPreviewTable input[type="text"]:focus,
-        #excelPreviewTable select:focus {
-            background: #e3f0ff !important;
-        }
-        /* Widen the salary type column in Excel preview */
-        #excelPreviewTable td:nth-child(4) select {
-            width: 170px !important;
-        }
-        #excelPreviewTable th:nth-child(4) {
-            min-width: 160px;
-            width: 170px;
+        .emp-store-glossy:focus {
+            box-shadow: 0 4px 16px #1976d240, 0 1.5px 0 #fff inset;
+            border: 2px solid #1565c0;
+            background: linear-gradient(120deg, #e3f0ff 40%, #90caf9 100%);
         }
     </style>
     <script src="menu.js"></script>
@@ -212,69 +225,61 @@
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
     <!-- Thư viện tạo Barcode -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    <!-- Thư viện đọc Excel -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <script>renderMenu('emp');</script>
     <div class="container">
-        <h2>TimePro HRM-Quản Lý Nhân Sự</h2>
-        <!-- Nút xóa tất cả nhân viên -->
-        <div style="text-align:right;margin-bottom:10px;">
-            <button class="btn" style="background:#e53935" onclick="deleteAllEmployees()">Xóa tất cả nhân viên</button>
-            <!-- ĐÃ BỎ nút Nhập nhanh từ Excel -->
-            <label class="btn" style="background:#1976d2;margin-left:10px;display:inline-block;cursor:pointer;">
-                <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="importEmployeesFromExcel(event)">
-                Nhập từ file Excel
-            </label>
-        </div>
+        <h2>TimePro HRM - Danh Sách Nhân Viên</h2>
+
         <!-- Snackbar hoàn tác xóa -->
         <div id="undoDeleteSnackbar" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:16px 28px;border-radius:8px;box-shadow:0 4px 24px #0005;z-index:3000;font-size:1.08rem;min-width:220px;text-align:center;">
             <span id="undoDeleteMsg"></span>
             <button id="undoDeleteBtn" style="margin-left:18px;background:#43a047;color:#fff;border:none;border-radius:6px;padding:6px 18px;font-size:1rem;font-weight:600;cursor:pointer;">Hoàn tác</button>
         </div>
-        <!-- Thêm tiêu đề Thiết Lập Nhân Viên -->
-        <div style="font-size:1.35rem;font-weight:600;color:#1976d2;margin-bottom:8px;margin-top:8px;text-align:left;">
-            Thiết Lập Nhân Viên
-        </div>
         <form id="addEmpForm">
-            <div class="form-row" style="gap:32px;">
-                <div style="flex:1;display:flex;flex-direction:column;">
-                    <label for="empName" style="margin-bottom:4px;">Tên:</label>
-                    <input id="empName" required class="emp-input" style="width:100%;">
-                </div>
-                <div style="flex:1;display:flex;flex-direction:column;">
-                    <label for="empPos" style="margin-bottom:4px;">Chức vụ:</label>
-                    <input id="empPos" class="emp-input" style="width:100%;">
-                </div>
+            <div class="form-row">
+                <label>Tên:</label>
+                <input id="empName" required class="emp-input" style="flex:1;">
+                <label>Chức vụ:</label>
+                <input id="empPos" class="emp-input" style="flex:1;">
+                <label>Cửa hàng:</label>
+                <select id="empStore" class="emp-input emp-store-glossy" required style="flex:1;">
+                    <!-- Options sẽ được render động -->
+                </select>
             </div>
-            <div class="form-row" style="gap:32px;">
-                <div style="flex:1;display:flex;flex-direction:column;">
-                    <label for="empStore" style="margin-bottom:4px;">Cửa hàng:</label>
-                    <select id="empStore" class="emp-input" required style="width:100%;">
-                        <!-- Options sẽ được render động -->
-                    </select>
-                </div>
-                <div style="flex:1;display:flex;flex-direction:column;">
-                    <label for="empSalaryType" style="margin-bottom:4px;">Hình thức trả lương:</label>
-                    <select id="empSalaryType" required onchange="toggleSalaryInput()" class="emp-input" style="width:100%;">
-                        <option value="base">Lương cơ bản</option>
-                        <option value="shift">Lương theo ca</option>
-                    </select>
-                </div>
+            <div class="form-row">
+                <label>Hình thức trả lương:</label>
+                <select id="empSalaryType" required onchange="toggleSalaryInput()" class="emp-input" style="flex:1;">
+                    <option value="base">Lương cơ bản</option>
+                    <option value="shift">Lương theo ca</option>
+                </select>
+                <label id="empSalaryLabel" style="margin-left:18px;">Lương cơ bản:</label>
+                <input id="empSalary" type="text" required oninput="formatCurrencyInput(this)" style="flex:1;">
             </div>
-            <div class="form-row" style="flex-direction:column;align-items:flex-start;margin-bottom:18px;">
-                <label id="empSalaryLabel" for="empSalary" style="margin-bottom:4px;">Lương cơ bản:</label>
-                <input id="empSalary" type="text" required oninput="formatCurrencyInput(this)" style="width:220px;">
-            </div>
-            <div style="display:flex;justify-content:center;gap:18px;">
-                <button class="btn" type="submit" id="empSubmitBtn">Tạo</button>
-                <button class="btn" type="button" style="background:#e0e0e0;color:#1976d2;" onclick="document.getElementById('addEmpForm').reset();renderStoreOptions();empSalaryType.value='base';toggleSalaryInput();">Hủy Bỏ</button>
+            <div class="form-row" style="justify-content:center; gap:18px;">
+                <button class="btn btn-green" type="submit" id="empSubmitBtn" style="min-width:100px;">Tạo</button>
+                <button class="btn btn-red" type="button" id="empCancelBtn" style="min-width:100px;">Hủy bỏ</button>
             </div>
         </form>
+        <!-- Nút chọn/xóa nhiều nhân viên -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+
+        <div>
+            <button class="btn btn-red" type="button" id="toggleSelectBtn" style="min-width:140px;">Select</button>
+            <button class="btn btn-red" type="button" id="deleteSelectedBtn" style="min-width:140px;display:none;">Delete</button>
+        </div>
+
+        <div style="text-align:right; margin-top:10px;">
+            <button class="btn" style="background:#e53935" onclick="deleteAllEmployees()">Delete All</button>
+        </div>
+
+        </div>
         <table id="empTable">
             <thead>
                 <tr>
+                    <th id="selectColHeader" style="display:none; width:32px; text-align:center;">
+                        <input type="checkbox" id="selectAllEmp" style="transform:scale(1);margin:0;">
+                    </th>
                     <th>Tên</th>
                     <th>ID</th>
                     <th>Chức vụ</th>
@@ -312,28 +317,9 @@
 
         <!-- Modal Chi tiết nhân viên -->
         <div id="empDetailModal" style="display:none;position:fixed;z-index:2100;left:0;top:0;width:100vw;height:100vh;background:#0005;">
-            <div id="empDetailContent" style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:400px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;">
+            <div id="empDetailContent" style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:480px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;">
                 <!-- Nội dung sẽ render động -->
             </div>
-        </div>
-    </div>
-    <!-- Modal nhập nhanh từ Excel -->
-    <div id="quickImportModal" style="display:none;position:fixed;z-index:2500;left:0;top:0;width:100vw;height:100vh;background:#0005;align-items:center;justify-content:center;">
-        <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:480px;min-width:260px;box-shadow:0 4px 24px #0003;position:relative;">
-            <div style="font-size:1.15rem;font-weight:600;color:#1976d2;margin-bottom:10px;">Nhập nhanh nhân viên từ Excel</div>
-            <div style="margin-bottom:8px;font-size:0.98rem;color:#444;">
-                Hãy copy các cột <b>Tên</b>, <b>Chức vụ</b>, <b>Cửa hàng</b>, <b>Hình thức trả lương</b>, <b>Lương cơ bản</b> từ Excel và dán vào ô dưới đây (mỗi nhân viên 1 dòng).
-            </div>
-            <textarea id="quickImportTextarea" style="width:100%;height:120px;border-radius:8px;border:1.5px solid #b3d1f7;padding:8px 10px;font-size:15px;resize:vertical;margin-bottom:10px;" placeholder="Ví dụ:
-Nguyễn Văn A	Thu ngân	LepShop	Lương cơ bản	8,000,000
-Trần Thị B	Bán hàng	H'Farm	Lương theo ca	
-"></textarea>
-            <div id="quickImportError" style="color:#e53935;font-size:0.97rem;margin-bottom:8px;display:none;"></div>
-            <div style="text-align:right;">
-                <button class="btn" type="button" onclick="closeQuickImportModal()">Hủy</button>
-                <button class="btn" style="background:#43a047" type="button" onclick="handleQuickImport()">Nhập</button>
-            </div>
-            <button onclick="closeQuickImportModal()" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#888;">&times;</button>
         </div>
     </div>
     <script>
@@ -351,6 +337,10 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
         } else {
             employees = [];
         }
+        // Sửa tên cửa hàng H'farm thành H'Farm cho tất cả nhân viên
+        employees.forEach(emp => {
+            if (emp.store === "H'farm") emp.store = "H'Farm";
+        });
         // Luôn đồng bộ sang key nhanvien để tương thích
         localStorage.setItem('nhanvien', JSON.stringify(employees));
         let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
@@ -437,11 +427,26 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
             });
         }
 
+        // Thêm biến selectMode để tránh lỗi ReferenceError
+        let selectMode = false;
+
+        // Toggle select mode
+        document.getElementById('toggleSelectBtn').onclick = function() {
+            selectMode = !selectMode;
+            document.getElementById('selectColHeader').style.display = selectMode ? '' : 'none';
+            document.getElementById('deleteSelectedBtn').style.display = selectMode ? '' : 'none';
+            renderEmployees();
+            this.textContent = selectMode ? 'Bỏ chọn' : 'Select';
+        };
+
         function renderEmployees() {
             const tbody = document.querySelector('#empTable tbody');
             tbody.innerHTML = '';
             employees.forEach((emp, idx) => {
                 tbody.innerHTML += `<tr style="${emp.hidden ? 'opacity:0.5;background:#f8bbd0;' : ''}">
+                    <td style="text-align:center;${selectMode ? '' : 'display:none;'};width:32px;">
+                        <input type="checkbox" class="emp-checkbox" value="${emp.id}" style="transform:scale(1);margin:0;">
+                    </td>
                     <td>${emp.name}</td>
                     <td>
                         <span style="display:inline-flex;align-items:center;gap:6px;position:relative;">
@@ -477,6 +482,28 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
                 </tr>`;
             });
             enableEmpDragDrop();
+            // Gán lại sự kiện cho select all checkbox
+            const selectAll = document.getElementById('selectAllEmp');
+            if (selectAll) {
+                selectAll.checked = false;
+                selectAll.onclick = function() {
+                    document.querySelectorAll('.emp-checkbox').forEach(cb => cb.checked = selectAll.checked);
+                };
+            }
+        }
+
+        // Hàm lấy danh sách ngân hàng từ API (momo hoặc vban.vn)
+        async function fetchBankList() {
+            // Sử dụng API vban.vn miễn phí, trả về danh sách ngân hàng Việt Nam
+            try {
+                const res = await fetch('https://api.vietqr.io/v2/banks');
+                const data = await res.json();
+                if (data && data.data) {
+                    // Trả về mảng [{code, name, shortName, ...}]
+                    return data.data;
+                }
+            } catch (e) {}
+            return [];
         }
 
         // Modal chi tiết nhân viên
@@ -485,6 +512,25 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
             if (!emp) return;
             const modal = document.getElementById('empDetailModal');
             const content = document.getElementById('empDetailContent');
+            // Hiển thị tên ngân hàng kèm tên viết tắt nếu có
+            let bankDisplay = '';
+            if (emp.bank_name) {
+                bankDisplay = emp.bank_name;
+                if (emp.bank_short_name) {
+                    bankDisplay += ` (${emp.bank_short_name})`;
+                }
+            }
+            // QR chuyển khoản (nếu đủ thông tin)
+            let qrBankHtml = '';
+            if (emp.bank_name && emp.bank_account && emp.bank_account_holder) {
+                qrBankHtml = `
+                    <div style="margin:22px 0 0 0;text-align:center;">
+                        <div id="bankQrLabel" style="font-weight:500;margin-bottom:8px;color:#1976d2;font-size:1.08rem;">QR chuyển khoản ngân hàng</div>
+                        <img id="bankQrImg" style="margin:0 auto;display:block;max-width:240px;max-height:240px;" alt="QR chuyển khoản VietQR"/>
+                        <div style="font-size:14px;color:#888;margin-top:6px;">Quét bằng app ngân hàng để chuyển khoản</div>
+                    </div>
+                `;
+            }
             content.innerHTML = `
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                     <div style="font-size:1.2rem;font-weight:600;color:#1976d2;">Chi tiết nhân viên</div>
@@ -497,17 +543,11 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
                     <div><b>Cửa hàng:</b> ${emp.store || ''}</div>
                     <div><b>Hình thức trả lương:</b> ${emp.salary_type === 'shift' ? 'Lương theo ca' : 'Lương cơ bản'}</div>
                     <div><b>Lương cơ bản:</b> ${emp.salary_type === 'base' ? formatVND(emp.base_salary) : '<span style="color:#888">--</span>'}</div>
-                    <div style="margin-top:10px;">
-                        <b>Thông tin ngân hàng:</b>
-                        <div style="margin-left:10px;">
-                            <div><b>Số tài khoản:</b> ${emp.bank_account_number || '<span style="color:#888">--</span>'}</div>
-                            <div><b>Tên ngân hàng:</b> ${emp.bank_name || '<span style="color:#888">--</span>'}</div>
-                            <div><b>Chủ tài khoản:</b> ${emp.bank_account_holder || '<span style="color:#888">--</span>'}</div>
-                            <button class="btn" style="margin-top:8px;padding:4px 14px;font-size:0.95rem;" onclick="showBankInfoModal('${emp.id}')">Cập nhật tài khoản ngân hàng</button>
-                            <button class="btn" style="margin-top:8px;margin-left:8px;padding:4px 14px;font-size:0.95rem;background:#1976d2" onclick="showBankQRModal('${emp.id}')">QR Chuyển khoản</button>
-                        </div>
-                    </div>
+                    <div><b>Ngân hàng:</b> ${bankDisplay}</div>
+                    <div><b>Số tài khoản:</b> ${emp.bank_account || ''}</div>
+                    <div><b>Tên chủ tài khoản:</b> ${emp.bank_account_holder || ''}</div>
                 </div>
+                ${qrBankHtml}
                 <div id="empDetailActionBtns" style="display:flex;gap:10px;flex-wrap:wrap;">
                     <button class="btn" onclick="showEditEmpInModal('${emp.id}')">Sửa</button>
                     <button class="btn" style="background:#e53935" onclick="deleteEmployeeFromModal('${emp.id}')">Xóa</button>
@@ -516,105 +556,49 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
                 </div>
             `;
             modal.style.display = '';
+            // Tạo QR chuyển khoản VietQR nếu đủ thông tin
+            if (emp.bank_name && emp.bank_account && emp.bank_account_holder) {
+                // Lấy bankId từ API VietQR (dùng shortName để tìm)
+                fetch('https://api.vietqr.io/v2/banks')
+                    .then(res => res.json())
+                    .then(data => {
+                        let bankId = '';
+                        if (data && data.data && Array.isArray(data.data)) {
+                            // Ưu tiên tìm theo shortName, nếu không có thì thử theo name
+                            let found = data.data.find(b => b.shortName === emp.bank_name);
+                            if (!found) found = data.data.find(b => b.name === emp.bank_name);
+                            if (found) bankId = found.bin || found.code || found.id;
+                        }
+                        if (bankId && emp.bank_account) {
+                            fetch('https://api.vietqr.io/v2/generate', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    accountNo: emp.bank_account,
+                                    accountName: emp.bank_account_holder || '',
+                                    acqId: bankId,
+                                    amount: 0,
+                                    addInfo: '',
+                                    template: 'compact'
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data && data.data && data.data.qrDataURL) {
+                                    const img = document.getElementById('bankQrImg');
+                                    if (img) img.src = data.data.qrDataURL;
+                                }
+                            });
+                        } else {
+                            // fallback: không có mã ngân hàng, không hiển thị QR
+                            const img = document.getElementById('bankQrImg');
+                            if (img) img.style.display = 'none';
+                        }
+                    });
+            }
         }
         window.showEmpDetailModal = showEmpDetailModal;
 
-
-        // Popup cập nhật thông tin ngân hàng
-        function showBankInfoModal(empId) {
-            const emp = employees.find(e => e.id === empId);
-            if (!emp) return;
-            let modal = document.getElementById('bankInfoModal');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'bankInfoModal';
-                modal.style = 'position:fixed;z-index:2200;left:0;top:0;width:100vw;height:100vh;background:#0005;display:flex;align-items:center;justify-content:center;';
-                modal.innerHTML = `
-                    <div style="background:#fff;padding:22px 20px 16px 20px;border-radius:10px;max-width:370px;min-width:260px;box-shadow:0 4px 24px #0003;position:relative;">
-                        <div style="font-size:1.1rem;font-weight:600;color:#1976d2;margin-bottom:10px;">Cập nhật tài khoản ngân hàng</div>
-                        <form id="bankInfoForm">
-                            <div style="margin-bottom:10px;">
-                                <label>Số tài khoản:</label>
-                                <input id="bankAccNumber" class="emp-input" style="width:100%;" value="">
-                            </div>
-                            <div style="margin-bottom:10px;">
-                                <label>Tên ngân hàng:</label>
-                                <select id="bankName" class="emp-input" style="width:100%;"><option>Đang tải...</option></select>
-                            </div>
-                            <div style="margin-bottom:10px;">
-                                <label>Chủ tài khoản:</label>
-                                <input id="bankAccHolder" class="emp-input" style="width:100%;" value="">
-                            </div>
-                            <div style="text-align:right;">
-                                <button type="button" class="btn" onclick="closeBankInfoModal()">Hủy</button>
-                                <button type="submit" class="btn" style="background:#43a047">Lưu</button>
-                            </div>
-                        </form>
-                        <button onclick="closeBankInfoModal()" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#888;">&times;</button>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-            } else {
-                modal.style.display = 'flex';
-            }
-            // Set giá trị input
-            modal.querySelector('#bankAccNumber').value = emp.bank_account_number || '';
-            modal.querySelector('#bankAccHolder').value = emp.bank_account_holder || '';
-            // Fetch danh sách ngân hàng và render select
-            const bankSelect = modal.querySelector('#bankName');
-            bankSelect.innerHTML = '<option>Đang tải...</option>';
-            fetch('https://api.vietqr.io/v2/banks')
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.data && Array.isArray(data.data)) {
-                        bankSelect.innerHTML = '<option value="">--Chọn ngân hàng--</option>' +
-                            data.data.map(b =>
-                                `<option value="${b.shortName}" ${emp.bank_name === b.shortName ? 'selected' : ''}>${b.shortName} - ${b.name}</option>`
-                            ).join('');
-                        // Nếu emp.bank_name không khớp shortName, thử match theo tên đầy đủ
-                        if (emp.bank_name && !Array.from(bankSelect.options).some(opt => opt.selected)) {
-                            let found = Array.from(bankSelect.options).find(opt => opt.text.includes(emp.bank_name));
-                            if (found) found.selected = true;
-                        }
-                    } else {
-                        bankSelect.innerHTML = '<option value="">Không tải được danh sách ngân hàng</option>';
-                    }
-                })
-                .catch(() => {
-                    bankSelect.innerHTML = '<option value="">Không tải được danh sách ngân hàng</option>';
-                });
-
-            // Không tự động lấy tên chủ tài khoản, để người dùng tự nhập
-            modal.style.display = 'flex';
-            // Gắn lại sự kiện submit
-            modal.querySelector('#bankInfoForm').onsubmit = function(e) {
-                e.preventDefault();
-                emp.bank_account_number = modal.querySelector('#bankAccNumber').value.trim();
-                emp.bank_name = modal.querySelector('#bankName').value.trim();
-                emp.bank_account_holder = modal.querySelector('#bankAccHolder').value.trim();
-                saveEmployees();
-                closeBankInfoModal();
-                showEmpDetailModal(empId);
-            };
-        }
-        window.showBankInfoModal = showBankInfoModal;
-
-        function closeBankInfoModal() {
-            const modal = document.getElementById('bankInfoModal');
-            if (modal) modal.style.display = 'none';
-        }
-        window.closeBankInfoModal = closeBankInfoModal;
-
-        // Đóng popup khi bấm ra ngoài vùng modal
-        document.addEventListener('mousedown', function(e) {
-            const modal = document.getElementById('bankInfoModal');
-            if (modal && modal.style.display !== 'none') {
-                const box = modal.querySelector('div');
-                if (box && !box.contains(e.target)) {
-                    closeBankInfoModal();
-                }
-            }
-        });
         // Đóng popup chi tiết khi mở QR/Barcode
         function openQRModalAndHideDetail(empId) {
             closeEmpDetailModal();
@@ -669,25 +653,70 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
                         <label>Lương cơ bản:</label>
                         <input id="editEmpSalary" type="text" class="emp-input" ${emp.salary_type === 'base' ? '' : 'disabled'} value="${emp.salary_type === 'base' ? formatVND(emp.base_salary) : ''}" oninput="formatCurrencyInput(this)">
                     </div>
-
-                    <div style="margin-bottom:10px;">
-                        <label>Thông tin ngân hàng:</label>
-                        <input id="editEmpBankInfo" class="emp-input" value="${emp.bank_info ? emp.bank_info.replace(/"/g, '&quot;') : ''}" placeholder="Số TK, Ngân hàng, Chủ TK">
+                    <div style="margin-bottom:10px;display:flex;align-items:center;">
+                        <label style="flex-shrink:0;">Ngân hàng:</label>
+                        <div style="flex:1;min-width:0;">
+                            <select id="editEmpBankName" class="emp-input" style="width:100%;max-width:100%;"></select>
+                        </div>
                     </div>
-
+                    <div style="margin-bottom:10px;">
+                        <label>Số tài khoản:</label>
+                        <input id="editEmpBankAccount" class="emp-input" value="${emp.bank_account || ''}">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Tên chủ TK:</label>
+                        <input id="editEmpBankAccountHolder" class="emp-input" value="${emp.bank_account_holder || ''}">
+                    </div>
                     <div style="text-align:right;">
                         <button type="button" class="btn" onclick="closeEmpDetailModal()">Hủy</button>
                         <button type="submit" class="btn" style="background:#43a047">Lưu</button>
                     </div>
                 </form>
             `;
-            // Gắn lại sự kiện submit
             document.getElementById('editEmpModalForm').onsubmit = function(e) {
                 e.preventDefault();
                 updateEmpFromModal(empId);
             };
+            loadBankListToSelect(emp.bank_name || '', emp.bank_short_name || '');
         }
-        window.showEditEmpInModal = showEditEmpInModal;
+
+        // Hàm load danh sách ngân hàng vào select, lưu cả tên viết tắt
+        async function loadBankListToSelect(selectedBankName, selectedShortName) {
+            const select = document.getElementById('editEmpBankName');
+            if (!select) return;
+            select.innerHTML = '<option value="">--Chọn ngân hàng--</option>';
+            const banks = await fetchBankList();
+            banks.forEach(bank => {
+                const opt = document.createElement('option');
+                opt.value = bank.name;
+                opt.textContent = bank.name + (bank.shortName ? ` (${bank.shortName})` : '');
+                opt.setAttribute('data-short', bank.shortName || '');
+                if (
+                    (selectedBankName && selectedBankName === bank.name) ||
+                    (selectedShortName && selectedShortName === bank.shortName)
+                ) opt.selected = true;
+                select.appendChild(opt);
+            });
+            // Nếu selectedBankName không nằm trong danh sách thì thêm vào cuối
+            if (
+                selectedBankName &&
+                !banks.some(b => b.name === selectedBankName)
+            ) {
+                const opt = document.createElement('option');
+                opt.value = selectedBankName;
+                opt.textContent = selectedBankName + (selectedShortName ? ` (${selectedShortName})` : '');
+                opt.setAttribute('data-short', selectedShortName || '');
+                opt.selected = true;
+                select.appendChild(opt);
+            }
+            // Khi chọn ngân hàng, tự động lưu shortName vào biến tạm
+            select.onchange = function() {
+                const sel = select.options[select.selectedIndex];
+                select.setAttribute('data-selected-short', sel.getAttribute('data-short') || '');
+            };
+            // Gán shortName ban đầu nếu có
+            if (selectedShortName) select.setAttribute('data-selected-short', selectedShortName);
+        }
 
         function toggleEditSalaryInput() {
             const type = document.getElementById('editEmpSalaryType').value;
@@ -713,6 +742,12 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
             emp.store = document.getElementById('editEmpStore').value;
             emp.salary_type = document.getElementById('editEmpSalaryType').value;
             emp.base_salary = emp.salary_type === 'base' ? parseCurrency(document.getElementById('editEmpSalary').value) : 0;
+            // Thông tin ngân hàng
+            const bankSelect = document.getElementById('editEmpBankName');
+            emp.bank_name = bankSelect.value;
+            emp.bank_short_name = bankSelect.options[bankSelect.selectedIndex].getAttribute('data-short') || '';
+            emp.bank_account = document.getElementById('editEmpBankAccount').value;
+            emp.bank_account_holder = document.getElementById('editEmpBankAccountHolder').value;
             saveEmployees();
             renderEmployees();
             closeEmpDetailModal();
@@ -760,6 +795,9 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
         // Thêm biến lưu backup khi xóa tất cả
         let lastDeletedAllEmp = null;
 
+        // Thêm biến lưu backup khi xóa nhiều nhân viên
+        let lastDeletedMultiEmp = null;
+
         function deleteEmployee(empId) {
             const emp = employees.find(e => e.id === empId);
             if (!emp) return;
@@ -796,18 +834,6 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
                 }
             });
             // payrollInputs
-            let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
-            if (payrollInputs[empId]) backup.payrollInputs = JSON.parse(JSON.stringify(payrollInputs[empId]));
-            // notes
-            Object.keys(localStorage).forEach(k => {
-                if (k.startsWith('note_' + empId)) {
-                    backup.notes.push({ key: k, value: localStorage.getItem(k) });
-                }
-            });
-            // workDaysStd & salaryPerDay riêng
-            if (localStorage.getItem('workDaysStd_' + empId)) backup.workDaysStd = localStorage.getItem('workDaysStd_' + empId);
-            if (localStorage.getItem('salaryPerDay_' + empId)) backup.salaryPerDay = localStorage.getItem('salaryPerDay_' + empId);
-
             // Xóa nhân viên và dữ liệu liên quan như cũ
             employees = employees.filter(e => e.id !== empId);
             localStorage.setItem('employees', JSON.stringify(employees));
@@ -822,9 +848,6 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
                 } else {
                     localStorage.setItem('shiftsByEmp', JSON.stringify(shiftsByEmp));
                 }
-            }
-            let changed = false;
-            Object.keys(shiftsByEmpByMonth).forEach(month => {
                 if (shiftsByEmpByMonth[month][empId]) {
                     delete shiftsByEmpByMonth[month][empId];
                     changed = true;
@@ -833,7 +856,7 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
                     delete shiftsByEmpByMonth[month];
                     changed = true;
                 }
-            });
+            };
             if (changed) {
                 if (Object.keys(shiftsByEmpByMonth).length === 0) {
                     localStorage.removeItem('shiftsByEmpByMonth');
@@ -933,13 +956,13 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
             localStorage.setItem('attendanceByMonth', JSON.stringify(attendanceByMonth));
             // Phục hồi shiftsByEmp
             if (lastDeletedEmp.shiftsByEmp) {
-                let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp' || ''));
+                let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
                 shiftsByEmp[lastDeletedEmp.emp.id] = lastDeletedEmp.shiftsByEmp;
                 localStorage.setItem('shiftsByEmp', JSON.stringify(shiftsByEmp));
             }
             // Phục hồi shiftsByEmpByMonth
             if (lastDeletedEmp.shiftsByEmpByMonth) {
-                let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth' || ''));
+                let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
                 Object.keys(lastDeletedEmp.shiftsByEmpByMonth).forEach(month => {
                     if (!shiftsByEmpByMonth[month]) shiftsByEmpByMonth[month] = {};
                     shiftsByEmpByMonth[month][lastDeletedEmp.emp.id] = lastDeletedEmp.shiftsByEmpByMonth[month];
@@ -948,7 +971,7 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
             }
             // Phục hồi payrollInputs
             if (lastDeletedEmp.payrollInputs) {
-                let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs' || ''));
+                let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
                 payrollInputs[lastDeletedEmp.emp.id] = lastDeletedEmp.payrollInputs;
                 localStorage.setItem('payrollInputs', JSON.stringify(payrollInputs));
             }
@@ -973,7 +996,6 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
             const salaryType = empSalaryType.value;
             const salary = salaryType === 'base' ? parseCurrency(empSalary.value) : 0;
             const store = empStore.value;
-            const bankInfo = document.getElementById('empBankInfo').value;
             if (editEmpId) {
                 // Cập nhật
                 const emp = employees.find(e => e.id === editEmpId);
@@ -982,10 +1004,9 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
                 emp.store = store;
                 emp.salary_type = salaryType;
                 emp.base_salary = salary;
-                emp.bank_info = bankInfo;
                 // Khi cập nhật không thay đổi trạng thái ẩn/hiện
                 editEmpId = null;
-                document.getElementById('empSubmitBtn').textContent = 'Thêm';
+                document.getElementById('empSubmitBtn').textContent = 'Tạo';
             } else {
                 // Thêm mới
                 const emp = {
@@ -995,7 +1016,6 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
                     store: store,
                     salary_type: salaryType,
                     base_salary: salary,
-                    bank_info: bankInfo,
                     hidden: false // Mặc định là hiện
                 };
                 employees.push(emp);
@@ -1007,6 +1027,16 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
             empSalaryType.value = 'base';
             toggleSalaryInput();
             if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        };
+
+        // Thêm sự kiện cho nút Hủy bỏ để reset form và trạng thái chỉnh sửa
+        document.getElementById('empCancelBtn').onclick = function() {
+            document.getElementById('addEmpForm').reset();
+            renderStoreOptions();
+            document.getElementById('empSalaryType').value = 'base';
+            toggleSalaryInput();
+            editEmpId = null;
+            document.getElementById('empSubmitBtn').textContent = 'Tạo';
         };
 
         function saveEmployees() {
@@ -1077,7 +1107,7 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
                         }
 
                         // Merge shifts
-                        let oldShifts = JSON.parse(localStorage.getItem('shifts' || '[]'));
+                        let oldShifts = JSON.parse(localStorage.getItem('shifts') || '[]');
                         let newShifts = data.shifts || [];
                         let shiftMap = {};
                         oldShifts.forEach(s => shiftMap[s.id] = s);
@@ -1103,7 +1133,7 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
                         }
 
                         // Merge shiftsByEmpByMonth
-                        let oldShiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth' || ''));
+                        let oldShiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
                         let newShiftsByEmpByMonth = data.shiftsByEmpByMonth || {};
                         for (let month in newShiftsByEmpByMonth) {
                             if (!oldShiftsByEmpByMonth[month]) oldShiftsByEmpByMonth[month] = {};
@@ -1350,470 +1380,192 @@ Trần Thị B	Bán hàng	H'Farm	Lương theo ca
         }
         window.deleteAllEmployees = deleteAllEmployees;
 
-        // Thêm modal QR chuyển khoản (nếu chưa có)
-        if (!document.getElementById('bankQRModal')) {
-            const qrModal = document.createElement('div');
-            qrModal.id = 'bankQRModal';
-            qrModal.style = 'display:none;position:fixed;z-index:2300;left:0;top:0;width:100vw;height:100vh;background:#0005;align-items:center;justify-content:center;';
-            qrModal.innerHTML = `
-                <div style="
-                    background:#fff;
-                    padding:28px 22px 18px 22px;
-                    border-radius:16px;
-                    max-width:370px;
-                    min-width:260px;
-                    margin:auto;
-                    position:relative;
-                    box-shadow:0 8px 36px #0003;
-                    text-align:center;
-                    display:flex;
-                    flex-direction:column;
-                    align-items:center;
-                    ">
-                    <h3 style="margin-top:0;color:#1976d2;font-size:22px;margin-bottom:12px;">QR Chuyển khoản</h3>
-                    <div id="bankQRModalName" style="font-weight:500;margin-bottom:10px;font-size:1.13rem;"></div>
-                    <div style="background:#f7fafd;border-radius:12px;padding:14px 8px 8px 8px;box-shadow:0 2px 10px #1976d210;">
-                        <canvas id="bankQRModalCanvas" style="margin:0 auto;display:block;width:220px;height:220px;max-width:220px;max-height:220px;"></canvas>
-                    </div>
-                    <div id="bankQRModalNote" style="font-size:1rem;color:#888;margin-top:10px;">Quét để chuyển khoản</div>
-                    <div style="margin-top:18px;text-align:right;width:100%;">
-                        <button class="btn" style="background:#e53935" onclick="closeBankQRModal()">Đóng</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(qrModal);
-        }
-
-        // Hàm hiển thị modal QR chuyển khoản
-        function showBankQRModal(empId) {
-            const emp = employees.find(e => e.id === empId);
-            if (!emp) return;
-            // Kiểm tra đủ thông tin
-            if (!emp.bank_account_number || !emp.bank_name) {
-                alert('Nhân viên chưa có đủ thông tin ngân hàng!');
+        // Xóa nhiều nhân viên đã chọn
+        document.getElementById('deleteSelectedBtn').onclick = function() {
+            const checked = Array.from(document.querySelectorAll('.emp-checkbox:checked')).map(cb => cb.value);
+            if (!checked.length) {
+                alert('Vui lòng chọn ít nhất 1 nhân viên để xóa!');
                 return;
             }
-            document.getElementById('bankQRModalName').textContent = emp.name + (emp.position ? ' - ' + emp.position : '');
-            // Lấy bankId từ API
-            fetch('https://api.vietqr.io/v2/banks')
-                .then(res => res.json())
-                .then(data => {
-                    let bankId = '';
-                    if (data && data.data && Array.isArray(data.data)) {
-                        const found = data.data.find(b => b.shortName === emp.bank_name);
-                        if (found) bankId = found.bin;
+            if (!confirm('Bạn có chắc chắn muốn xóa các nhân viên đã chọn?')) return;
+
+            // Lưu lại backup cho hoàn tác
+            let backups = [];
+            checked.forEach(empId => {
+                const emp = employees.find(e => e.id === empId);
+                if (!emp) return;
+                let backup = {
+                    emp: JSON.parse(JSON.stringify(emp)),
+                    attendance: {},
+                    shiftsByEmp: null,
+                    shiftsByEmpByMonth: {},
+                    payrollInputs: null,
+                    notes: [],
+                    workDaysStd: null,
+                    salaryPerDay: null
+                };
+                // Attendance
+                Object.keys(attendanceByMonth).forEach(month => {
+                    if (attendanceByMonth[month][empId]) {
+                        backup.attendance[month] = JSON.parse(JSON.stringify(attendanceByMonth[month][empId]));
                     }
-                    if (bankId && emp.bank_account_number) {
-                        fetch('https://api.vietqr.io/v2/generate', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                accountNo: emp.bank_account_number,
-                                accountName: emp.bank_account_holder || '',
-                                acqId: bankId,
-                                amount: 0,
-                                addInfo: '',
-                                template: 'compact'
-                            })
-                        })
-                        .then(res => res.json())
-                        .then(qrData => {
-                            if (qrData && qrData.data && qrData.data.qrDataURL) {
-                                const canvas = document.getElementById('bankQRModalCanvas');
-                                const ctx = canvas.getContext('2d');
-                                const img = new window.Image();
-                                img.onload = function() {
-                                    // Phóng to kích thước canvas QR
-
-                                    canvas.width = 220;
-                                    canvas.height = 220;
-                                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                                    // Vẽ ảnh QR vào giữa canvas lớn
-                                    ctx.drawImage(img, 0, 0, 220, 220);
-                                };
-                                img.src = qrData.data.qrDataURL;
-                                document.getElementById('bankQRModal').style.display = 'flex';
-                            } else {
-                                alert('Không tạo được QR chuyển khoản!');
-                            }
-                        })
-                        .catch(() => { alert('Không tạo được QR chuyển khoản!'); });
-                    } else {
-                        alert('Không tìm thấy mã ngân hàng!');
-                    }
-                })
-                .catch(() => { alert('Không lấy được danh sách ngân hàng!'); });
-        }
-        window.showBankQRModal = showBankQRModal;
-
-        function closeBankQRModal() {
-            document.getElementById('bankQRModal').style.display = 'none';
-               }
-        window.closeBankQRModal = closeBankQRModal;
-
-        // Đóng modal QR chuyển khoản khi bấm ra ngoài
-        document.addEventListener('mousedown', function(e) {
-            const qrModal = document.getElementById('bankQRModal');
-            if (qrModal && qrModal.style.display !== 'none' && !qrModal.querySelector('div').contains(e.target)) {
-                closeBankQRModal();
-            }
-        });
-
-        // Hiển thị modal nhập nhanh
-        function showQuickImportModal() {
-            document.getElementById('quickImportTextarea').value = '';
-            document.getElementById('quickImportError').style.display = 'none';
-            document.getElementById('quickImportModal').style.display = 'flex';
-        }
-        window.showQuickImportModal = showQuickImportModal;
-
-        function closeQuickImportModal() {
-            document.getElementById('quickImportModal').style.display = 'none';
-        }
-        window.closeQuickImportModal = closeQuickImportModal;
-
-        // Đóng modal khi bấm ra ngoài
-        document.addEventListener('mousedown', function(e) {
-            const modal = document.getElementById('quickImportModal');
-            if (modal && modal.style.display !== 'none') {
-                const box = modal.querySelector('div');
-                if (box && !box.contains(e.target)) {
-                    closeQuickImportModal();
-                }
-            }
-        });
-
-        // Xử lý nhập nhanh từ Excel
-        function handleQuickImport() {
-            const textarea = document.getElementById('quickImportTextarea');
-            const errorDiv = document.getElementById('quickImportError');
-            let text = textarea.value.trim();
-            if (!text) {
-                errorDiv.textContent = 'Vui lòng dán dữ liệu từ Excel!';
-                errorDiv.style.display = '';
-                return;
-            }
-            let lines = text.split('\n').map(l => l.trim()).filter(l => l);
-            let added = 0, skipped = 0, errors = [];
-            lines.forEach((line, idx) => {
-                // Tách theo tab hoặc nhiều dấu cách
-                let cols = line.split('\t');
-                if (cols.length < 3) cols = line.split(/\s{2,}/);
-                if (cols.length < 3) cols = line.split(/ {1,}/);
-                // Chuẩn hóa số cột
-                while (cols.length < 5) cols.push('');
-                let [name, position, store, salaryType, baseSalary] = cols.map(c => c.trim());
-                if (!name) { skipped++; errors.push(`Dòng ${idx+1}: Thiếu tên`); return; }
-                // Chuẩn hóa cửa hàng
-                if (store !== "LepShop" && store !== "H'Farm") store = '';
-                // Chuẩn hóa hình thức trả lương
-                let salary_type = 'base';
-                if (/ca/i.test(salaryType)) salary_type = 'shift';
-                // Chuẩn hóa lương cơ bản
-                let salary = salary_type === 'base' ? parseCurrency(baseSalary) : 0;
-                // Kiểm tra trùng tên và chức vụ
-                let exists = employees.some(e => e.name === name && e.position === position);
-                if (exists) { skipped++; errors.push(`Dòng ${idx+1}: Đã tồn tại "${name}"`); return; }
-                // Thêm nhân viên
-                employees.push({
-                    id: Date.now().toString(),
-                    name: empName.value,
-                    position: empPos.value,
-                    store: store,
-                    salary_type: salaryType,
-                    base_salary: salary,
-                    bank_info: '', // Không sao chép thông tin ngân hàng
-                    hidden: false // Mặc định là hiện
                 });
-                added++;
-            });
-            saveEmployees();
-            renderEmployees();
-            closeQuickImportModal();
-            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
-            setTimeout(() => {
-                if (added > 0) alert(`Đã thêm ${added} nhân viên mới!${skipped ? `\nBỏ qua ${skipped} dòng lỗi/trùng.` : ''}`);
-                else alert('Không có nhân viên nào được thêm!');
-            }, 200);
-        }
-        window.handleQuickImport = handleQuickImport;
-
-        // Thêm hàm nhập nhân viên từ file Excel
-        function importEmployeesFromExcel(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
-                    // Tìm dòng tiêu đề
-                    let headerIdx = rows.findIndex(r =>
-                        r.some(cell => typeof cell === 'string' && cell.trim().toLowerCase().includes('tên'))
-                    );
-                    if (headerIdx === -1) headerIdx = 0;
-                    const header = rows[headerIdx].map(h => h.toString().trim().toLowerCase());
-                    // Xác định vị trí các cột
-                    const colMap = {
-                        name: header.findIndex(h => h.includes('tên')),
-                        position: header.findIndex(h => h.includes('chức vụ')),
-                        store: header.findIndex(h => h.includes('cửa hàng')),
-                        salaryType: header.findIndex(h => h.includes('hình thức')),
-                        baseSalary: header.findIndex(h => h.includes('lương cơ bản'))
-                    };
-                    // Kiểm tra đủ cột
-                    if (Object.values(colMap).some(idx => idx === -1)) {
-                        alert('File Excel thiếu cột bắt buộc!');
-                        return;
+                // shiftsByEmp
+                let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+                if (shiftsByEmp[empId]) backup.shiftsByEmp = JSON.parse(JSON.stringify(shiftsByEmp[empId]));
+                // shiftsByEmpByMonth
+                let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+                Object.keys(shiftsByEmpByMonth).forEach(month => {
+                    if (shiftsByEmpByMonth[month][empId]) {
+                        if (!backup.shiftsByEmpByMonth[month]) backup.shiftsByEmpByMonth[month] = {};
+                        backup.shiftsByEmpByMonth[month] = JSON.parse(JSON.stringify(shiftsByEmpByMonth[month][empId]));
                     }
-                    let previewData = [];
-                    for (let i = headerIdx + 1; i < rows.length; ++i) {
-                        const row = rows[i];
-                        const name = (row[colMap.name] || '').toString().trim();
-                        const position = (row[colMap.position] || '').toString().trim();
-                        let store = (row[colMap.store] || '').toString().trim();
-                        let salaryType = (row[colMap.salaryType] || '').toString().trim();
-                        let baseSalary = (row[colMap.baseSalary] || '').toString().trim();
-                        if (!name) continue;
-                        // Chuẩn hóa cửa hàng
-                        if (store !== "LepShop" && store !== "H'Farm") store = '';
-                        // Chuẩn hóa hình thức trả lương
-                        let salary_type = /ca/i.test(salaryType) ? 'shift' : 'base';
-                        // Chuẩn hóa lương cơ bản
-                        let salary = salary_type === 'base' ? parseCurrency(baseSalary) : 0;
-                        previewData.push({
-                            name,
-                            position,
-                            store,
-                            salary_type,
-                            base_salary: salary
+                });
+                // payrollInputs
+                let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+                if (payrollInputs[empId]) backup.payrollInputs = JSON.parse(JSON.stringify(payrollInputs[empId]));
+                // notes
+                Object.keys(localStorage).forEach(k => {
+                    if (k.startsWith('note_' + empId)) {
+                        backup.notes.push({ key: k, value: localStorage.getItem(k) });
+                    }
+                });
+                // workDaysStd & salaryPerDay riêng
+                if (localStorage.getItem('workDaysStd_' + empId)) backup.workDaysStd = localStorage.getItem('workDaysStd_' + empId);
+                if (localStorage.getItem('salaryPerDay_' + empId)) backup.salaryPerDay = localStorage.getItem('salaryPerDay_' + empId);
+
+                backups.push(backup);
+            });
+
+            // Xóa các nhân viên đã chọn và dữ liệu liên quan
+            employees = employees.filter(e => !checked.includes(e.id));
+            localStorage.setItem('employees', JSON.stringify(employees));
+            checked.forEach ( empId => {
+                Object.keys(attendanceByMonth).forEach(month => {
+                    if (attendanceByMonth[month][empId]) delete attendanceByMonth[month][empId];
+                });
+            });
+            localStorage.setItem('attendanceByMonth', JSON.stringify(attendanceByMonth));
+            let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+            checked.forEach(empId => {
+                if (shiftsByEmp[empId]) delete shiftsByEmp[empId];
+            });
+            localStorage.setItem('shiftsByEmp', JSON.stringify(shiftsByEmp));
+            let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            let changed = false;
+            Object.keys(shiftsByEmpByMonth).forEach(month => {
+                checked.forEach(empId => {
+                    if (shiftsByEmpByMonth[month][empId]) {
+                        delete shiftsByEmpByMonth[month][empId];
+                        changed = true;
+                    }
+                });
+                if (Object.keys(shiftsByEmpByMonth[month]).length === 0) {
+                    delete shiftsByEmpByMonth[month];
+                    changed = true;
+                }
+            });
+            if (changed) {
+                localStorage.setItem('shiftsByEmpByMonth', JSON.stringify(shiftsByEmpByMonth));
+            }
+            let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+                       checked.forEach(empId => {
+                if (payrollInputs[empId]) delete payrollInputs[empId];
+            });
+            localStorage.setItem('payrollInputs', JSON.stringify(payrollInputs));
+            checked.forEach(empId => {
+                Object.keys(localStorage).forEach(k => {
+                    if (k.startsWith('note_' + empId)) localStorage.removeItem(k);
+                });
+                localStorage.removeItem('workDaysStd_' + empId);
+                localStorage.removeItem('salaryPerDay_' + empId);
+            });
+            renderEmployees();
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+
+            // Hiển thị snackbar hoàn tác
+            lastDeletedMultiEmp = backups;
+            showUndoDeleteSnackbar('các nhân viên đã chọn');
+        };
+
+        // Undo cho xóa nhiều nhân viên
+        const oldUndoDeleteBtn = document.getElementById('undoDeleteBtn').onclick;
+        document.getElementById('undoDeleteBtn').onclick = function() {
+            if (lastDeletedMultiEmp) {
+                lastDeletedMultiEmp.forEach(backup => {
+                    employees.push(backup.emp);
+                    // Phục hồi attendance
+                    let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+                    Object.keys(backup.attendance).forEach(month => {
+                        if (!attendanceByMonth[month]) attendanceByMonth[month] = {};
+                        attendanceByMonth[month][backup.emp.id] = backup.attendance[month];
+                    });
+                    localStorage.setItem('attendanceByMonth', JSON.stringify(attendanceByMonth));
+                    // Phục hồi shiftsByEmp
+                    if (backup.shiftsByEmp) {
+                        let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+                        shiftsByEmp[backup.emp.id] = backup.shiftsByEmp;
+                        localStorage.setItem('shiftsByEmp', JSON.stringify(shiftsByEmp));
+                    }
+                    // Phục hồi shiftsByEmpByMonth
+                    if (backup.shiftsByEmpByMonth) {
+                        let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+                        Object.keys(backup.shiftsByEmpByMonth).forEach(month => {
+                            if (!shiftsByEmpByMonth[month]) shiftsByEmpByMonth[month] = {};
+                            shiftsByEmpByMonth[month][backup.emp.id] = backup.shiftsByEmpByMonth[month];
+                        });
+                        localStorage.setItem('shiftsByEmpByMonth', JSON.stringify(shiftsByEmpByMonth));
+                    }
+                    // Phục hồi payrollInputs
+                    if (backup.payrollInputs) {
+                        let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+                        payrollInputs[backup.emp.id] = backup.payrollInputs;
+                        localStorage.setItem('payrollInputs', JSON.stringify(payrollInputs));
+                    }
+                    // Phục hồi notes
+                    if (backup.notes && backup.notes.length > 0) {
+                        backup.notes.forEach(n => {
+                            localStorage.setItem(n.key, n.value);
                         });
                     }
-                    event.target.value = ''; // reset input
-                    if (previewData.length === 0) {
-                        alert('Không có dữ liệu hợp lệ!');
-                        return;
-                    }
-                    showExcelPreviewModal(previewData);
-                } catch (err) {
-                    alert('Lỗi khi đọc file Excel!');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-        window.importEmployeesFromExcel = importEmployeesFromExcel;
+                    // Phục hồi workDaysStd & salaryPerDay riêng
+                    if (backup.workDaysStd) localStorage.setItem('workDaysStd_' + backup.emp.id, backup.workDaysStd);
+                    if (backup.salaryPerDay) localStorage.setItem('salaryPerDay_' + backup.emp.id, backup.salaryPerDay);
+                });
+                localStorage.setItem('employees', JSON.stringify(employees));
+                renderEmployees();
+                document.getElementById('undoDeleteSnackbar').style.display = 'none';
+                lastDeletedMultiEmp = null;
+                if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+                return;
+            }
+            // fallback: gọi undo mặc định (xóa 1 hoặc tất cả)
+            if (typeof oldUndoDeleteBtn === 'function') oldUndoDeleteBtn();
+        };
 
+        document.getElementById('empSubmitBtn').onclick = function() {
+            const empName = document.getElementById('empName').value.trim();
+            const empPos = document.getElementById('empPos').value.trim();
+            const empStore = document.getElementById('empStore').value;
+            const empSalaryType = document.getElementById('empSalaryType').value;
+            const empSalary = document.getElementById('empSalary').value.replace(/[^\d]/g, '');
+            if (!empName || !empPos || !empStore || !empSalaryType) {
+                alert('Vui lòng điền đầy đủ thông tin!');
+                return;
+            }
+            if (empSalaryType === 'base' && (!empSalary || isNaN(empSalary))) {
+                alert('Vui lòng nhập lương cơ bản hợp lệ!');
+                return;
+            }
+            // Tự động thêm ID nếu không có
+            if (!editEmpId) {
+                document.getElementById('empId').value = 'NV' + Date.now();
+            }
+            document.getElementById('addEmpForm').submit();
+        }
     </script>
     <script src="footer.js"></script>
     <script>renderFooter();</script>
-
-    <!-- Modal xác nhận nhập dữ liệu từ Excel -->
-    <div id="excelPreviewModal" style="display:none;position:fixed;z-index:2600;left:0;top:0;width:100vw;height:100vh;background:#0005;align-items:center;justify-content:center;">
-        <div style="background:#fff;border-radius:12px;max-width:860px;min-width:340px;box-shadow:0 8px 36px #0003;position:relative;overflow:hidden;">
-            <div style="background:#f4f8fc;padding:16px;border-bottom:1px solid #b3d1f7;">
-                <div style="font-size:1.2rem;font-weight:600;color:#1976d2;text-align:center;">
-                    Xác nhận dữ liệu nhân viên từ Excel
-                </div>
-                <div style="margin-top:8px;font-size:0.95rem;color:#555;text-align:center;">
-                    Kiểm tra và chỉnh sửa dữ liệu trước khi nhập vào hệ thống
-                </div>
-            </div>
-            
-            <div style="max-height:380px;overflow:auto;">
-                <table id="excelPreviewTable" style="width:100%;border-collapse:collapse;">
-                    <thead>
-                        <tr style="background:#e3f0ff;position:sticky;top:0;z-index:1;">
-                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;white-space:nowrap;">Tên</th>
-                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;white-space:nowrap;">Chức vụ</th>
-                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;white-space:nowrap;">Cửa hàng</th>
-                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;white-space:nowrap;">Hình thức trả lương</th>
-                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;white-space:nowrap;">Lương cơ bản</th>
-                            <th style="padding:8px;font-size:0.95rem;font-weight:600;border-bottom:1px solid #b3d1f7;width:60px;"></th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-
-            <div style="background:#f4f8fc;padding:12px;border-top:1px solid #b3d1f7;text-align:right;">
-                <button class="btn" type="button" onclick="closeExcelPreviewModal()" style="background:#e0e0e0;color:#1976d2;margin-right:8px;">Hủy</button>
-                <button class="btn" style="background:#43a047;min-width:80px;" type="button" onclick="confirmImportExcelEmployees()">OK</button>
-            </div>
-
-            <button onclick="closeExcelPreviewModal()" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#666;padding:4px;">&times;</button>
-        </div>
-    </div>
-    <script>
-    // Biến tạm lưu dữ liệu preview từ Excel
-    let excelPreviewEmployees = [];
-
-    function showExcelPreviewModal(previewData) {
-        excelPreviewEmployees = previewData;
-        const tbody = document.querySelector('#excelPreviewTable tbody');
-        tbody.innerHTML = '';
-        previewData.forEach((emp, idx) => {
-            // Ensure base_salary is always a number or empty string
-            let salaryVal = '';
-            if (emp.salary_type === 'base') {
-                let val = typeof emp.base_salary === 'number' && !isNaN(emp.base_salary) ? emp.base_salary : 0;
-                salaryVal = val > 0 ? formatVND(val) : '';
-            }
-            tbody.innerHTML += `
-                <tr style="border-bottom:1px solid #e3f0ff;">
-                    <td style="padding:6px 8px;">
-                        <input type="text" value="${emp.name || ''}" style="width:120px;padding:4px 6px;border:1px solid #b3d1f7;border-radius:4px;font-size:14px;" 
-                            onchange="excelPreviewEmployees[${idx}].name=this.value">
-                    </td>
-                    <td style="padding:6px 8px;">
-                        <input type="text" value="${emp.position || ''}" style="width:100px;padding:4px 6px;border:1px solid #b3d1f7;border-radius:4px;font-size:14px;" 
-                            onchange="excelPreviewEmployees[${idx}].position=this.value">
-                    </td>
-                    <td style="padding:6px 8px;">
-                        <select style="width:100px;padding:4px 6px;border:1px solid #b3d1f7;border-radius:4px;font-size:14px;" 
-                            onchange="excelPreviewEmployees[${idx}].store=this.value">
-                            <option value="">--</option>
-                            <option value="LepShop" ${emp.store==="LepShop"?"selected":""}>LepShop</option>
-                            <option value="H'Farm" ${emp.store==="H'Farm"?"selected":""}>H'Farm</option>
-                        </select>
-                    </td>
-                    <td style="padding:6px 8px;">
-                        <select style="width:170px;padding:4px 6px;border:1px solid #b3d1f7;border-radius:4px;font-size:14px;" 
-                            onchange="excelPreviewEmployees[${idx}].salary_type=this.value;showExcelPreviewModal(excelPreviewEmployees);">
-                            <option value="base" ${emp.salary_type==="base"?"selected":""}>Lương cơ bản</option>
-                            <option value="shift" ${emp.salary_type==="shift"?"selected":""}>Lương theo ca</option>
-                        </select>
-                    </td>
-                    <td style="padding:6px 8px;">
-                        <input type="text" value="${salaryVal}" 
-                            style="width:110px;padding:4px 6px;border:1px solid #b3d1f7;border-radius:4px;font-size:14px;" 
-                            ${emp.salary_type !== 'base' ? 'disabled' : ''}
-                            oninput="excelPreviewEmployees[${idx}].base_salary=excelPreviewEmployees[${idx}].salary_type==='base'?parseCurrency(this.value):0">
-                    </td>
-                    <td style="padding:6px 8px;text-align:center;">
-                        <button class="btn" style="background:#e53935;padding:3px 12px;font-size:13px;" onclick="removeExcelPreviewRow(${idx})">Xóa</button>
-                    </td>
-                </tr>
-            `;
-        });
-        document.getElementById('excelPreviewModal').style.display = 'flex';
-    }
-    function closeExcelPreviewModal() {
-        document.getElementById('excelPreviewModal').style.display = 'none';
-        excelPreviewEmployees = [];
-    }
-    function removeExcelPreviewRow(idx) {
-        excelPreviewEmployees.splice(idx, 1);
-        showExcelPreviewModal(excelPreviewEmployees);
-    }
-    window.closeExcelPreviewModal = closeExcelPreviewModal;
-
-    function confirmImportExcelEmployees() {
-        // Kiểm tra dữ liệu trước khi nhập
-        let valid = 0, skipped = 0, errors = [];
-        excelPreviewEmployees.forEach((emp, idx) => {
-            emp.name = (emp.name||'').trim();
-            emp.position = (emp.position||'').trim();
-            if (!emp.name) { skipped++; errors.push(`Dòng ${idx+1}: Thiếu tên`); return; }
-            // Bỏ kiểm tra trùng tên và chức vụ
-            // let exists = employees.some(e => e.name === emp.name && e.position === emp.position);
-            // if (exists) { skipped++; errors.push(`Dòng ${idx+1}: Đã tồn tại "${emp.name}"`); return; }
-            // Chuẩn hóa lương
-            if (emp.salary_type === 'base') emp.base_salary = parseCurrency(emp.base_salary);
-            else emp.base_salary = 0;
-            // Thêm vào employees
-            employees.push({
-                id: Date.now().toString() + Math.floor(Math.random()*10000),
-                name: emp.name,
-                position: emp.position,
-                store: emp.store,
-                salary_type: emp.salary_type,
-                base_salary: emp.salary_type === 'base' ? emp.base_salary : 0,
-                bank_info: '',
-                hidden: false
-            });
-            valid++;
-        });
-        saveEmployees();
-        renderEmployees();
-        closeExcelPreviewModal();
-        if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
-        setTimeout(() => {
-            if (valid > 0) alert(`Đã thêm ${valid} nhân viên mới!${skipped ? `\nBỏ qua ${skipped} dòng lỗi/trùng.` : ''}`);
-            else alert('Không có nhân viên nào được thêm!');
-        }, 200);
-    }
-    window.confirmImportExcelEmployees = confirmImportExcelEmployees;
-    window.removeExcelPreviewRow = removeExcelPreviewRow;
-
-    // Sửa hàm nhập từ Excel để dùng modal preview
-    function importEmployeesFromExcel(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
-                // Tìm dòng tiêu đề
-                let headerIdx = rows.findIndex(r =>
-                    r.some(cell => typeof cell === 'string' && cell.trim().toLowerCase().includes('tên'))
-                );
-                if (headerIdx === -1) headerIdx = 0;
-                const header = rows[headerIdx].map(h => h.toString().trim().toLowerCase());
-                // Xác định vị trí các cột
-                const colMap = {
-                    name: header.findIndex(h => h.includes('tên')),
-                    position: header.findIndex(h => h.includes('chức vụ')),
-                    store: header.findIndex(h => h.includes('cửa hàng')),
-                    salaryType: header.findIndex(h => h.includes('hình thức')),
-                    baseSalary: header.findIndex(h => h.includes('lương cơ bản'))
-                };
-                // Kiểm tra đủ cột
-                if (Object.values(colMap).some(idx => idx === -1)) {
-                    alert('File Excel thiếu cột bắt buộc!');
-                    return;
-                }
-                let previewData = [];
-                for (let i = headerIdx + 1; i < rows.length; ++i) {
-                    const row = rows[i];
-                    const name = (row[colMap.name] || '').toString().trim();
-                    const position = (row[colMap.position] || '').toString().trim();
-                    let store = (row[colMap.store] || '').toString().trim();
-                    let salaryType = (row[colMap.salaryType] || '').toString().trim();
-                    let baseSalary = (row[colMap.baseSalary] || '').toString().trim();
-                    if (!name) continue;
-                    // Chuẩn hóa cửa hàng
-                    if (store !== "LepShop" && store !== "H'Farm") store = '';
-                    // Chuẩn hóa hình thức trả lương
-                    let salary_type = /ca/i.test(salaryType) ? 'shift' : 'base';
-                    // Chuẩn hóa lương cơ bản
-                    let salary = salary_type === 'base' ? parseCurrency(baseSalary) : 0;
-                    previewData.push({
-                        name,
-                        position,
-                        store,
-                        salary_type,
-                        base_salary: salary
-                    });
-                }
-                event.target.value = ''; // reset input
-                if (previewData.length === 0) {
-                    alert('Không có dữ liệu hợp lệ!');
-                    return;
-                }
-                showExcelPreviewModal(previewData);
-            } catch (err) {
-                alert('Lỗi khi đọc file Excel!');
-            }
-        };
-        reader.readAsArrayBuffer(file);
-    }
-    window.importEmployeesFromExcel = importEmployeesFromExcel;
-
-    </script>
 </body>
+</html>
 </html>
