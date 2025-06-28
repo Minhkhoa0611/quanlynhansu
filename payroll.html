@@ -154,6 +154,13 @@
     </div>
     <script>
         // --- SIDEBAR DƯỚI LOGIC ---
+        // Đảm bảo mặc định ẩn sidebar khi vào trang
+        (function() {
+            if (localStorage.getItem('payrollChartSidebarVisible') === null) {
+                localStorage.setItem('payrollChartSidebarVisible', '0');
+            }
+        })();
+
         function setChartSidebarVisible(visible) {
             const sidebar = document.getElementById('payrollChartSidebar');
             const content = document.getElementById('payrollChartSidebarContent');
@@ -174,7 +181,8 @@
         }
         (function(){
             const btn = document.getElementById('payrollChartSidebarToggleBtn');
-            let visible = localStorage.getItem('payrollChartSidebarVisible') !== '0';
+            // Lấy trạng thái từ localStorage, mặc định là ẩn (false)
+            let visible = localStorage.getItem('payrollChartSidebarVisible') === '1';
             setChartSidebarVisible(visible);
             btn.onclick = function() {
                 visible = !visible;
@@ -1203,10 +1211,6 @@
             renderPayrollEmpSelect();
             calcPayroll();
         })();
-        if(typeof renderFooter==='function')renderFooter();
-    </script>
-</body>
-</html>
         if(typeof renderFooter==='function')renderFooter();
     </script>
 </body>

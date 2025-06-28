@@ -241,7 +241,16 @@
                 <label>Tên:</label>
                 <input id="empName" required class="emp-input" style="flex:1;">
                 <label>Chức vụ:</label>
-                <input id="empPos" class="emp-input" style="flex:1;">
+                <select id="empPos" class="emp-input" style="flex:1;">
+                    <option value="">--Chọn chức vụ--</option>
+                    <option value="Nhân viên">Nhân viên</option>
+                    <option value="Tổ trưởng">Tổ trưởng</option>
+                    <option value="Quản lý">Quản lý</option>
+                    <option value="Phó cửa hàng trưởng">Phó cửa hàng trưởng</option>
+                    <option value="Cửa hàng trưởng">Cửa hàng trưởng</option>
+                    <option value="Giám sát">Giám sát</option>
+                    <option value="Giám đốc">Giám đốc</option>
+                </select>
                 <label>Cửa hàng:</label>
                 <select id="empStore" class="emp-input emp-store-glossy" required style="flex:1;">
                     <!-- Options sẽ được render động -->
@@ -633,7 +642,16 @@
                     </div>
                     <div style="margin-bottom:10px;">
                         <label>Chức vụ:</label>
-                        <input id="editEmpPos" class="emp-input" value="${emp.position || ''}">
+                        <select id="editEmpPos" class="emp-input">
+                            <option value="">--Chọn chức vụ--</option>
+                            <option value="Nhân viên" ${emp.position === 'Nhân viên' ? 'selected' : ''}>Nhân viên</option>
+                            <option value="Tổ trưởng" ${emp.position === 'Tổ trưởng' ? 'selected' : ''}>Tổ trưởng</option>
+                            <option value="Quản lý" ${emp.position === 'Quản lý' ? 'selected' : ''}>Quản lý</option>
+                            <option value="Phó cửa hàng trưởng" ${emp.position === 'Phó cửa hàng trưởng' ? 'selected' : ''}>Phó cửa hàng trưởng</option>
+                            <option value="Cửa hàng trưởng" ${emp.position === 'Cửa hàng trưởng' ? 'selected' : ''}>Cửa hàng trưởng</option>
+                            <option value="Giám sát" ${emp.position === 'Giám sát' ? 'selected' : ''}>Giám sát</option>
+                            <option value="Giám đốc" ${emp.position === 'Giám đốc' ? 'selected' : ''}>Giám đốc</option>
+                        </select>
                     </div>
                     <div style="margin-bottom:10px;">
                         <label>Cửa hàng:</label>
@@ -760,7 +778,11 @@
             if (!emp) return;
             if (!confirm(`Bạn có chắc chắn muốn xóa nhân viên "${emp.name}"?`)) return;
             closeEmpDetailModal();
-            setTimeout(() => deleteEmployee(empId), 200);
+            // Xóa và cập nhật bảng ngay, hiển thị snackbar hoàn tác
+            setTimeout(() => {
+                deleteEmployee(empId);
+                renderEmployees(); // Đảm bảo cập nhật bảng ngay lập tức
+            }, 100);
         }
         window.deleteEmployeeFromModal = deleteEmployeeFromModal;
 
