@@ -86,7 +86,43 @@
                         });
                         total += sum * factor;
                     } else {
-                        total += factor;
+                        // Nếu không có shifts, mỗi lần chấm công là 1 công
+                        total += arr.length * factor;
+                    }
+                }
+            }
+            return total;
+        }
+        // Thêm hàm lấy tổng công giống payroll.html
+        function getTongCong(empId, month) {
+            const attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            const shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            const workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+            let total = 0;
+            if (
+                attendanceByMonth[month] &&
+                attendanceByMonth[month][empId] &&
+                shiftsByEmpByMonth[month] &&
+                shiftsByEmpByMonth[month][empId]
+            ) {
+                const empAtt = attendanceByMonth[month][empId];
+                const shifts = shiftsByEmpByMonth[month][empId];
+                for (let d in empAtt) {
+                    let arr = empAtt[d];
+                    if (Array.isArray(arr)) {
+                        arr.forEach(shiftIdx => {
+                            let shiftVal = shifts[shiftIdx]?.half ? 0.5 : 1;
+                            let factor = 1;
+                            // factor key giống payroll.html: `${d}_${shiftIdx}`
+                            if (
+                                workFactorByMonth[month] &&
+                                workFactorByMonth[month][empId] &&
+                                typeof workFactorByMonth[month][empId][`${d}_${shiftIdx}`] !== 'undefined'
+                            ) {
+                                factor = parseFloat(workFactorByMonth[month][empId][`${d}_${shiftIdx}`]) || 1;
+                            }
+                            total += shiftVal * factor;
+                        });
                     }
                 }
             }
@@ -138,7 +174,7 @@
                     <tr>
                         <th>STT</th>
                         <th>Họ tên</th>
-                        <th>Ngày công / Số ca</th>
+                        <th>Ngày Công</th>
                         <th>Phụ cấp</th>
                         <th>Thưởng lễ</th>
                         <th>Doanh thu</th>
@@ -189,24 +225,13 @@
                     let totalCaSalary = caSalaries.reduce((a, b) => a + b, 0);
                     total = totalCaSalary + allowance + bonus - penalty - advance;
                     workdays = caCong.reduce((a, b) => a + b, 0); // workdays cho lương ca là tổng số ca
-                    // Sửa: Hiển thị tổng số ca/tháng (có thể là số thập phân)
-                    var workDisplay = workdays % 1 === 0 ? workdays : workdays.toFixed(1);
-                } else if (emp.salary_type === 'em') {
-                    // Nhân viên lương cơ bản kiểu "em" (có hoa hồng doanh thu)
-                    // Ngày công = công thực tế + TC/LT
-                    workdays = getWorkdaysWithFactor(emp, month) + extraShifts;
-                    let baseSalary = emp.base_salary || 0;
-                    let commissionPercent = parseFloat(emp.commission_percent) || 0;
-                    let commission = Math.round(revenue * commissionPercent) / 100;
-                    let salary = baseSalary;
-                    // SỬA: KHÔNG cộng extraShifts * perDayEmp vào tổng lương nữa vì đã tính trong workdays
-                    total = salary + allowance + bonus + commission - penalty - advance;
-                    totalRevenue += revenue;
-                    var workDisplay = workdays % 1 === 0 ? workdays : workdays.toFixed(2);
+                    var workDisplay = workdays;
                 } else {
-                    // Lương cơ bản thường
-                    // Ngày công = công thực tế + TC/LT
-                    workdays = getWorkdaysWithFactor(emp, month) + extraShifts;
+                    // Lương cơ bản
+                    // Ngày công = tổng công thực tế (attendance) + TC/LT (extraShifts)
+                    let workdays_att = getTongCong(emp.id, month); // dùng getTongCong thay vì getWorkdaysWithFactor
+                    let workdays = workdays_att + extraShifts; // cộng thêm TC/LT
+                    // Không làm tròn, giữ nguyên số thực
                     let baseSalary = emp.base_salary || 0;
                     let salary = 0;
                     if (workdays >= stdDays) {
@@ -215,10 +240,10 @@
                         salary = baseSalary - ((stdDays - workdays) * (perDayEmp || 0));
                         if (salary < 0) salary = 0;
                     }
-                    // SỬA: KHÔNG cộng extraShifts * perDayEmp vào tổng lương nữa vì đã tính trong workdays
+                    // Doanh thu là số tiền nhập riêng, không liên quan ngày công
                     total = salary + allowance + bonus + revenue - penalty - advance;
                     totalRevenue += revenue;
-                    var workDisplay = workdays % 1 === 0 ? workdays : workdays.toFixed(2);
+                    var workDisplay = workdays;
                 }
                 if (total < 0) total = 0;
                 totalAll += total;
@@ -290,97 +315,9 @@
                 document.querySelector('.container').appendChild(actionsDiv);
             }
 
-            // Sau khi render bảng, vẽ biểu đồ
-            // renderPayrollBarChart(chartLabels, chartData, chartColors, store);
-            // renderStoreTotalBarChart(storeTotals);
         }
 
-        // Hàm vẽ biểu đồ lương nhân viên
-        // function renderPayrollBarChart(labels, data, colors, store) {
-        //     const ctx = document.getElementById('payrollBarChart').getContext('2d');
-        //     if (payrollBarChartInstance) payrollBarChartInstance.destroy();
-        //     payrollBarChartInstance = new Chart(ctx, {
-        //         type: 'bar',
-        //         data: {
-        //             labels: labels,
-        //             datasets: [{
-        //                 label: 'Lương nhân viên',
-        //                 data: data,
-        //                 backgroundColor: colors,
-        //             }]
-        //         },
-        //         options: {
-        //             responsive: true,
-        //             plugins: {
-        //                 legend: { display: false },
-        //                 title: {
-        //                     display: true,
-        //                     text: store ? `So sánh lương nhân viên (${store})` : 'So sánh lương nhân viên 2 cửa hàng'
-        //                 },
-        //                 tooltip: {
-        //                     callbacks: {
-        //                         label: ctx => formatVND(ctx.parsed.y)
-        //                 }
-        //             }
-        //         },
-        //         scales: {
-        //             y: {
-        //                 beginAtZero: true,
-        //                 ticks: {
-        //                     callback: value => formatVND(value)
-        //                 }
-        //             }
-        //         }
-        //     });
-        // }
-
-        // Hàm vẽ biểu đồ tổng lương từng cửa hàng
-        // function renderStoreTotalBarChart(storeTotals) {
-        //     const ctx = document.getElementById('storeTotalBarChart').getContext('2d');
-        //     if (storeTotalBarChartInstance) storeTotalBarChartInstance.destroy();
-        //     const labels = Object.keys(storeTotals);
-        //     const data = Object.values(storeTotals);
-        //     // Đổi màu: mỗi cửa hàng 1 màu
-        //     const colors = labels.map(s => storeColors[s] || '#bdbdbd');
-        //     storeTotalBarChartInstance = new Chart(ctx, {
-        //         type: 'bar',
-        //         data: {
-        //             labels: labels,
-        //             datasets: [{
-        //                 label: 'Tổng lương cửa hàng',
-        //                 data: data,
-        //                 backgroundColor: colors,
-        //             }]
-        //         },
-        //         options: {
-        //             responsive: true,
-        //             plugins: {
-        //                 legend: { display: false },
-        //                 title: {
-        //                     display: true,
-        //                     text: 'So sánh tổng lương giữa các cửa hàng'
-        //                 },
-        //                 tooltip: {
-        //                     callbacks: {
-        //                         label: ctx => formatVND(ctx.parsed.y)
-        //                 }
-        //             }
-        //         },
-        //         scales: {
-        //             y: {
-        //                 beginAtZero: true,
-        //                 ticks: {
-        //                     callback: value => formatVND(value)
-        //                 }
-        //             }
-        //         }
-        //     });
-        // }
-
-        // --- Các hàm xuất/chép PNG và Excel ---
-        // Yêu cầu thư viện html2canvas và SheetJS (xlsx) đã được nhúng vào dự án
-
-        function savePayrollReportImage() {
+               function savePayrollReportImage() {
             if (typeof html2canvas !== 'function') {
                 alert('Thiếu thư viện html2canvas!');
                 return;
@@ -656,9 +593,6 @@
     <script src="footer.js"></script>
     <script>renderFooter();</script>
 </body>
-
-    </script>
-    <script src="footer.js"></script>
-    <script>renderFooter();</script>
-
+</html>
+</html>
 </html>

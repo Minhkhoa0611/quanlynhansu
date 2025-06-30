@@ -951,16 +951,7 @@
                     </thead>
                     <tbody></tbody>
                 </table>`;
-                // Thêm hàng tiêu đề lớn cho bảng chấm công
-                // let tableStyle = '';
-                // let tableClass = '';
-                // if (emp.salary_type !== 'shift') {
-                //     tableStyle = 'font-size:18px;zoom:1.12;';
-                // } else {
-                //     tableClass = 'shift-salary-table-big';
-                // }
-                // html += `<table style="margin-bottom:0;${tableStyle}"${tableClass ? ` class="${tableClass}"` : ''}><thead>`;
-                // Sửa lại: luôn dùng style bảng mặc định cho mọi loại nhân viên
+
                 html += `<table style="margin-bottom:0;"><thead>`;
                 html += `<tr>
                     <th colspan="${days + (emp.salary_type === 'shift' ? 6 : 5)}" style="background:#1976d2;color:#fff;font-size:20px;font-weight:700;text-align:center;letter-spacing:1px;">
@@ -1409,25 +1400,8 @@
             return false;
         }
 
-        // Khi render bảng chấm công
-        function renderAttendanceTable() {
-            // ...existing code...
-            // Với mỗi ô ngày:
-            /*
-            for (let day = 1; day <= daysInMonth; ++day) {
-                let dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                let canCheck = canCheckIn(dateStr);
-                if (canCheck) {
-                    // render nút/input chấm công
-                } else {
-                    // render nút vô hiệu hoặc thông báo
-                }
-            }
-            */
-            // ...existing code...
-        }
+ 
 
-        // Gọi hàm này trong renderAttendance() sau khi render xong bảng chấm công
         function updateCheckInButtons() {
             const month = getCurrentMonth();
             const days = daysInMonth(month);
