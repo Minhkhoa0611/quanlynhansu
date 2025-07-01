@@ -550,6 +550,8 @@
             <button type="button" class="btn" id="noteBtn" style="margin-left:12px;" onclick="openNoteModal()">Note</button>
             <!-- Thêm nút quét QR -->
             <button type="button" class="btn" style="margin-left:12px;background:#43a047;" onclick="openQRModal()">Quét QR chấm công</button>
+            <!-- Thêm nút CC để nhập mật khẩu override -->
+            <button type="button" class="btn" style="margin-left:12px;background:#ff9800;" onclick="openCCModal()">MỞ KHÓA</button>
         </div>
         <div class="form-row" id="salaryTypeRow" style="display:none;">
             <label>Hình thức trả lương:</label>
@@ -643,6 +645,24 @@
             </div>
         </div>
     </div>
+    <!-- Modal nhập mật khẩu CC -->
+    <div id="ccModal" style="display:none;position:fixed;z-index:5000;left:0;top:0;width:100vw;height:100vh;background:#0005;">
+        <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:340px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;">
+            <h3 style="margin-top:0;color:#ff9800;font-size:20px;">Nhập mật khẩu để mở khóa chấm công</h3>
+            <div style="position:relative;">
+                <input type="password" id="ccPasswordInput" style="width:88%;padding:8px 38px 8px 10px;font-size:16px;border-radius:6px;border:1.5px solid #b3d1f7;margin-bottom:14px;">
+                <span id="ccTogglePw" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;color:#888;" onclick="toggleCCPassword()">
+                    <svg id="ccEyeOpen" style="display:block;" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"><path stroke="#888" stroke-width="2" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3" stroke="#888" stroke-width="2"/></svg>
+                    <svg id="ccEyeClosed" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"><path stroke="#888" stroke-width="2" d="M3 3l18 18M1 12s4-7 11-7c2.5 0 4.7.7 6.5 1.8M23 12s-4 7-11 7c-2.5 0-4.7-.7-6.5-1.8"/><circle cx="12" cy="12" r="3" stroke="#888" stroke-width="2"/></svg>
+                </span>
+            </div>
+            <div id="ccErrorMsg" style="color:#e53935;font-size:14px;min-height:18px;"></div>
+            <div style="margin-top:14px;text-align:right;">
+                <button class="btn" onclick="submitCCPassword()">OK</button>
+                <button class="btn" style="background:#e53935" onclick="closeCCModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
     <script>
         // ====== DỮ LIỆU VÀ HÀM TIỆN ÍCH ======
         let employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
@@ -674,6 +694,8 @@
 
         // Hàm kiểm tra trạng thái cửa hàng (ON/OFF)
         function isStoreAllowFutureCheckIn(store) {
+            // Nếu đã override bằng CC thì luôn cho phép
+            if (isCCOverride()) return true;
             if (!store) return true; // Nếu chọn tất cả thì cho phép
             return (storeStatus[store] || 'ON') === 'ON';
         }
@@ -1335,7 +1357,7 @@
             // Nếu không còn ca nào thì xóa key ngày
             if (attendanceByMonth[month][empId][day].length === 0) {
                 delete attendanceByMonth[month][empId][day];
-            }
+ }
             saveAttendanceMonth();
             renderAttendance();
             showQRSuccessPopup(`Chấm công thành công cho <b>${empName}</b> ngày ${day} (${selected.length} ca)`);
@@ -1369,8 +1391,7 @@
             // Tính ngày đầu tuần của tháng
             const [y, m] = month.split('-').map(Number);
             const firstDay = new Date(y, m - 1, 1).getDay(); // 0=CN, 1=T2,...
-            // Đổi về 1=Thứ 2, 7=CN cho lịch VN
-            let startCol = firstDay === 0 ? 7 : firstDay;
+            // Đổi về 1=Thứ 2,  7=CN cho lịch VN
             // Render header
             let html = '<table class="holiday-calendar-table"><thead><tr>';
             const weekdays = ['T2','T3','T4','T5','T6','T7','CN'];
@@ -1535,6 +1556,61 @@
         document.getElementById('notAllowedPopup').style.display = 'none';
     }
     </script>
+    <script>
+        // ====== OVERRIDE CHẤM CÔNG BẰNG MẬT KHẨU (CC) ======
+function isCCOverride() {
+    // Chỉ cho phép override trong cùng phiên và chỉ khi chưa reload
+    // Nếu đã nhập mật khẩu, cho phép override cho đến khi reload (không xóa ngay khi dùng)
+    return sessionStorage.getItem('cc_override') === '1';
+}
+function openCCModal() {
+    document.getElementById('ccModal').style.display = '';
+    document.getElementById('ccPasswordInput').value = '';
+    document.getElementById('ccErrorMsg').textContent = '';
+    setTimeout(() => { document.getElementById('ccPasswordInput').focus(); }, 100);
+}
+function closeCCModal() {
+    document.getElementById('ccModal').style.display = 'none';
+}
+function submitCCPassword() {
+    const pw = document.getElementById('ccPasswordInput').value;
+    // Đổi mật khẩu tại đây nếu muốn
+    if (pw === '79797979') {
+        sessionStorage.setItem('cc_override', '1');
+        closeCCModal();
+        renderAttendance();
+        showStoreStatusAlert();
+    } else {
+        document.getElementById('ccErrorMsg').textContent = 'Mật khẩu không đúng!';
+    }
+}
+// Đóng modal khi click ngoài
+document.addEventListener('mousedown', function(e) {
+    const modal = document.getElementById('ccModal');
+    if (modal && modal.style.display !== 'none' && !modal.querySelector('div').contains(e.target)) {
+        closeCCModal();
+    }
+});
+// Khi load lại trang, xóa quyền override (chỉ giữ cho đến khi reload)
+window.addEventListener('beforeunload', function() {
+    sessionStorage.removeItem('cc_override');
+});
+
+// Thêm hàm này để ẩn/hiện mật khẩu
+function toggleCCPassword() {
+    var input = document.getElementById('ccPasswordInput');
+    var eyeOpen = document.getElementById('ccEyeOpen');
+    var eyeClosed = document.getElementById('ccEyeClosed');
+    if (input.type === 'password') {
+        input.type = 'text';
+        eyeOpen.style.display = 'none';
+        eyeClosed.style.display = 'block';
+    } else {
+        input.type = 'password';
+        eyeOpen.style.display = 'block';
+        eyeClosed.style.display = 'none';
+    }
+}
+    </script>
 </body>
-</html>
 </html>
