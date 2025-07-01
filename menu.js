@@ -390,7 +390,7 @@ function renderMenu(active) {
                 <button type="button" class="menu-work-schedule-btn" onclick="location.href='work_schedule.html'" style="color:#1976d2;">📅 Lịch làm việc</button>
                 <button type="button" class="menu-payroll-full-btn" onclick="location.href='payroll_full.html'" style="color:#1976d2;">📊 Bảng lương chi tiết</button>
                 <button type="button" class="menu-payroll-payout-report-btn" onclick="location.href='payroll_payout_report.html'" style="color:#1976d2;">📑 Báo Cáo Chi Trả Lương</button>
-                <button type="button" class="menu-edit-trangthai-btn" onclick="location.href='edit-trangthai.html'" style="color:#2563eb;">🛡️ Quản Trị Admin</button>
+                <button type="button" class="menu-ckbank" onclick="location.href='CKBANK/bank-qr.html'" style="color:#2563eb;">🏦BANK</button>
                 <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ Giới thiệu</button>
 
             </div>
@@ -899,14 +899,11 @@ function renderMenu(active) {
         const defaultMenus = [
             { id: 'index', label: 'Trang Chủ', href: 'index.html' },
             { id: 'emp', label: 'Danh sách nhân viên', href: 'emp.html' },
-            // { id: 'setup', label: 'Thiết Lập', href: 'setup.html' },
             { id: 'att', label: 'Chấm công', href: 'att.html' },
             { id: 'attendance_type', label: 'Quản Lý Hình Thức Chấm Công', href: 'attendance_type.html' }, // TÍNH NĂNG MỚI
             { id: 'payroll', label: 'Bảng lương', href: 'payroll.html' },
             { id: 'payroll_report', label: 'Lập BC Lương', href: 'payroll_report.html' },
             { id: 'payroll_payout_report', label: 'Báo Cáo Chi Trả Lương', href: 'payroll_payout_report.html' }
-            // { id: 'work_schedule', label: 'Lịch làm việc', href: 'work_schedule.html' },
-            // { id: 'about', label: 'Giới thiệu', href: 'about-mksof.html' }
         ];
         // Lấy cấu hình menu từ localStorage (nếu có)
         let menuConfig = [];

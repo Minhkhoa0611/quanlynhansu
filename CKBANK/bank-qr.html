@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Mã QR chuyển khoản ngân hàng</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="image.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="image.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="image.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#a18cd1">
+    <!-- Font Awesome CDN for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #a18cd1 50%, #fbc2eb 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 {
+            margin-top: 40px;
+            color: #3b3b3b;
+            letter-spacing: 1px;
+        }
+        .bank-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+            padding: 32px 28px 24px 28px;
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+        .bank-section:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .bank-title {
+            font-size: 1.3em;
+            margin-bottom: 14px;
+            color: #5a3ec8;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
+        }
+        .account-info {
+            margin-bottom: 14px;
+            color: #444;
+            font-size: 1.08em;
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        img {
+            border-radius: 10px;
+            border: 1.5px solid #e0e7ef;
+            box-shadow: 0 2px 8px rgba(90,62,200,0.07);
+            background: #f6f8fa;
+        }
+        .account-selector {
+            margin: 32px 0 18px 0;
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+        }
+        .account-btn {
+            background: #f3f0ff;
+            color: #5a3ec8;
+            border: 1.5px solid #d1c4e9;
+            border-radius: 8px;
+            padding: 10px 22px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.16s, color 0.16s, border 0.16s;
+        }
+        .account-btn.selected,
+        .account-btn:hover {
+            background: #5a3ec8;
+            color: #fff;
+            border-color: #5a3ec8;
+        }
+        @media (max-width: 600px) {
+            .bank-section {
+                margin: 18px 0;
+                padding: 18px 8px 16px 8px;
+                width: 90vw;
+                max-width: 340px;
+            }
+            img {
+                width: 90vw;
+                max-width: 220px;
+            }
+        }
+    </style>
+    <script>
+        // Thay đổi tài khoản hiển thị
+        function showAccount(idx) {
+            document.querySelectorAll('.bank-section').forEach((el, i) => {
+                el.style.display = (i === idx) ? 'inline-block' : 'none';
+            });
+            document.querySelectorAll('.account-btn').forEach((btn, i) => {
+                btn.classList.toggle('selected', i === idx);
+            });
+        }
+        window.onload = function() {
+            showAccount(0);
+        };
+    </script>
+</head>
+<body>
+    <h2><i class="fa-solid fa-qrcode" style="color:#5a3ec8"></i> Mã QR chuyển khoản</h2>
+    <div class="account-selector">
+        <button class="account-btn selected" onclick="showAccount(0)">TRAN MINH KHOA</button>
+        <button class="account-btn" onclick="showAccount(1)">TRAN HOANG THAO VY</button>
+    </div>
+    <div class="bank-section">
+        <div class="bank-title">TPBank</div>
+        <div class="account-info">
+            Số tài khoản: <b>0867544809</b><br>
+            Chủ tài khoản: <b>TRAN MINH KHOA</b>
+        </div>
+        <div>
+            <img src="https://img.vietqr.io/image/tpb-0867544809-compact2.png?accountName=TRAN%20MINH%20KHOA" alt="QR TPBank" width="220">
+        </div>
+    </div>
+    <div class="bank-section" style="display:none">
+        <div class="bank-title">TPBank</div>
+        <div class="account-info">
+            Số tài khoản: <b>40868442054</b><br>
+            Chủ tài khoản: <b>TRAN HOANG THAO VY</b>
+        </div>
+        <div>
+            <img src="https://img.vietqr.io/image/tpb-40868442054-compact2.png?accountName=TRAN%20HOANG%20THAO%20VY" alt="QR TPBank" width="220">
+        </div>
+    </div>
+    <button id="a2hs-btn" style="display:none;position:fixed;bottom:24px;right:24px;z-index:1000;padding:12px 20px;background:#5a3ec8;color:#fff;border:none;border-radius:8px;font-size:1em;box-shadow:0 2px 8px rgba(90,62,200,0.18);cursor:pointer;">
+        <i class="fa-solid fa-download"></i> Thêm vào màn hình chính
+    </button>
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+
+    // PWA Add to Home Screen
+    let deferredPrompt;
+    const a2hsBtn = document.getElementById('a2hs-btn');
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        a2hsBtn.style.display = 'block';
+    });
+    a2hsBtn && a2hsBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                a2hsBtn.style.display = 'none';
+            }
+            deferredPrompt = null;
+        }
+    });
+    </script>
+</body>
+</html>
