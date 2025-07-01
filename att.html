@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html style="zoom:90%;">
+<head>
+    <meta charset="utf-8">
+    <title>TimePro HRM-Chấm công</title>
+    <link rel="icon" type="image/png" href="iconlogo.png">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(120deg, #e3f0ff 0%, #f7f7f7 100%);
+            margin: 0;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 38px auto 30px auto;
+            background: #ffffffee; /* làm sáng hơn, thêm độ trong suốt nhẹ */
+            padding: 32px 28px 28px 28px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001;
+        }
+        h2 {
+            color: #1976d2;
+            font-size: 2rem;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px #1976d220;
+        }
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fafcff;
+            box-shadow: 0 2px 8px #0001;
+        }
+        table, th, td {
+            border: 1px solid #e3eaf3;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px 6px;
+            text-align: center;
+            font-size: 15px;
+        }
+        th {
+            background: #e3f0ff;
+            color: #1976d2;
+            font-weight: 600;
+        }
+        input[type="number"], input[type="text"], input[type="time"], input[type="month"] {
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid #b0bec5;
+            font-size: 15px;
+            background: #f7fafd;
+            transition: border 0.2s;
+        }
+        input[type="number"]:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="month"]:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+            background: #e3f0ff;
+        }
+        .form-row {
+            margin-bottom: 18px;
+        }
+        .form-row label {
+            display: inline-block;
+            width: 120px;
+            font-weight: 500;
+            color: #1976d2;
+        }
+        .btn {
+            background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
+            color: #fff;
+            border: none;
+            padding: 7px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px #1976d220;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+            box-shadow: 0 4px 16px #1976d220;
+        }
+        .shift-setup-table input[type="text"], .shift-setup-table input[type="time"] {
+            width: 90px;
+        }
+        .shift-setup-table th, .shift-setup-table td {
+            padding: 7px 4px;
+        }
+        .shift-setup-table tr td:last-child {
+            text-align: center;
+        }
+        .shift-setup-table tr td button {
+            padding: 5px 14px;
+            font-size: 14px;
+        }
+        .shift-setup-table tr td button.btn {
+            background: #e53935;
+            background: linear-gradient(90deg, #e53935 60%, #ff7043 100%);
+        }
+        .shift-setup-table tr td button.btn:hover {
+            background: #b71c1c;
+        }
+        .emp-row-color-0 { background: #e8f5e9; }
+        .emp-row-color-1 { background: #f3e5f5; }
+        .emp-row-color-2 { background: #e3f2fd; }
+        .emp-row-color-3 { background: #fffde7; }
+        .emp-row-color-4 { background: #fce4ec; }
+        .emp-row-color-5 { background: #e0f2f1; }
+        .emp-row-color-6 { background: #fbe9e7; }
+        /* Employee table wrapper */
+        #attTableWrap > div {
+            background: #f7fafd;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px #1976d210;
+            padding: 18px 18px 10px 18px;
+            margin-bottom: 36px;
+            border: 1.5px solid #e3f0ff;
+            transition: box-shadow 0.2s;
+        }
+        #attTableWrap > div:hover {
+            box-shadow: 0 6px 24px #1976d230;
+        }
+        /* Employee name */
+        #attTableWrap > div > div {
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #1976d2;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 8px #1976d220;
+        }
+        /* Shift legend */
+        #shiftLegend span {
+            background: #e3f0ff;
+            color: #1976d2;
+            border-radius: 6px;
+            padding: 4px 12px;
+            margin-right: 8px;
+            font-size: 15px;
+            box-shadow: 0 1px 4px #1976d210;
+            display: inline-block;
+        }
+        #shiftLegend i {
+            color: #888;
+            font-size: 15px;
+        }
+        /* Checkbox style */
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #1976d2;
+            cursor: pointer;
+            vertical-align: middle; /* Thêm dòng này để căn giữa checkbox */
+        }
+        /* Sologan fire effect */
+        .sologan-fire {
+            background: linear-gradient(90deg, #ff9800 0%, #ff5722 40%, #ffd600 60%, #ff9800 100%);
+            color: #fff;
+            font-size: 1.35rem;
+            font-weight: bold;
+            margin-bottom: 22px;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px #ff980080, 0 0 16px #ffd60080 inset;
+            padding: 16px 0 14px 0;
+            letter-spacing: 1.5px;
+            text-shadow:
+                0 2px 8px #ff9800cc,
+                0 0 12px #ffd600cc,
+                0 0 2px #fff;
+            position: relative;
+            overflow: hidden;
+            animation: fireGlow 2s infinite alternate;
+            cursor: pointer;
+            user-select: none;
+        }
+        @keyframes fireGlow {
+            0% {
+                box-shadow: 0 4px 24px #ff980080, 0 0 16px #ffd60080 inset;
+                text-shadow:
+                    0 2px 8px #ff9800cc,
+                    0 0 12px #ffd600cc,
+                    0 0 2px #fff;
+            }
+            100% {
+                box-shadow: 0 8px 36px #ff5722cc, 0 0 32px #ffd600cc inset;
+                text-shadow:
+                    0 4px 16px #ff5722cc,
+                    0 0 24px #ffd600cc,
+                    0 0 6px #fff;
+            }
+        }
+        .sologan-fire .flame {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            width: 38px;
+            height: 38px;
+            pointer-events: none;
+            z-index: 2;
+            animation: flameMove 1.2s infinite alternate;
+        }
+        @keyframes flameMove {
+            0% { transform: translateX(-50%) scaleY(1); opacity: 1; }
+            100% { transform: translateX(-50%) scaleY(1.18); opacity: 0.85; }
+        }
+        .sologan-fire .flame svg {
+            display: block;
+            width: 38px;
+            height: 38px;
+        }
+        /* Làm nổi bật cột ngày hôm nay */
+        .today-col {
+            background: #ffe0ef !important; /* màu hồng nhạt */
+            color: #d32f2f !important;
+            font-weight: bold;
+            box-shadow: 0 0 8px #ffd6e6 inset;
+        }
+        /* Thêm style cho ngày lễ */
+        .holiday-col {
+            background: #ffe082 !important; /* vàng nhạt */
+            color: #b8860b !important;
+            font-weight: bold;
+            box-shadow: 0 0 8px #ffe082 inset;
+        }
+        .holiday-marker {
+            color: #b8860b;
+            font-size: 13px;
+            display: block;
+            margin-top: 2px;
+        }
+        /* Responsive */
+        @media (max-width: 900px) {
+            .container { padding: 12px 2vw; }
+            table, th, td { font-size: 13px; }
+            #attTableWrap > div > div { font-size: 17px; }
+        }
+        @media (max-width: 600px) {
+            .navbar { flex-direction: column; gap: 8px; padding: 10px 6px; }
+            .container { padding: 6px 1vw; }
+            h2 { font-size: 1.2rem; }
+        }
+        /* --- Thêm đoạn này để fix lật ngược camera sau khi quét QR --- */
+        #qr-reader video, #qr-reader canvas {
+            transform: scaleX(-1) !important;
+        }
+        /* Khung quét QR nổi bật */
+        .qr-scan-frame {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 220px;
+            height: 220px;
+            transform: translate(-50%, -50%);
+            border: 4px solid #00e676;
+            border-radius: 18px;
+            box-shadow: 0 0 16px #00e67680, 0 0 0 4px #fff8 inset;
+            pointer-events: none;
+            z-index: 10;
+            animation: qrFrameGlow 1.2s infinite alternate;
+        }
+        @keyframes qrFrameGlow {
+            0% { box-shadow: 0 0 16px #00e67680, 0 0 0 4px #fff8 inset; }
+            100% { box-shadow: 0 0 32px #00e676cc, 0 0 0 4px #fff8 inset; }
+        }
+        /* --- Hiệu ứng scan line cho QR --- */
+        .qr-scan-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #00e676 0%, #fff 50%, #00e676 100%);
+            opacity: 0.85;
+            border-radius: 2px;
+            box-shadow: 0 0 12px #00e676cc, 0 0 4px #fff;
+            animation: qrScanLineMove 1.6s linear infinite;
+            z-index: 11;
+        }
+        @keyframes qrScanLineMove {
+            0% { top: 0; }
+            100% { top: calc(100% - 3px); }
+        }
+        #qr-reader {
+            position: relative;
+            min-height: 240px;
+        }
+        .qr-animated-wrap {
+            position: relative;
+            display: inline-block;
+        }
+        .qr-animated-border {
+            position: absolute;
+            top: -8px; left: -8px; right: -8px; bottom: -8px;
+            border-radius: 16px;
+            pointer-events: none;
+            z-index: 2;
+            border: 3px solid #1976d2;
+            box-shadow: 0 0 18px 4px #1976d2a0, 0 0 0 0 #fff;
+            animation: qrBorderColor 3s linear infinite;
+        }
+        @keyframes qrBorderColor {
+            0%   { border-color: #1976d2; box-shadow: 0 0 18px 4px #1976d2a0; }
+            20%  { border-color: #43a047; box-shadow: 0 0 18px 4px #43a047a0; }
+            40%  { border-color: #ff9800; box-shadow: 0 0 18px 4px #ff9800a0; }
+            60%  { border-color: #e53935; box-shadow: 0 0 18px 4px #e53935a0; }
+            80%  { border-color: #8e24aa; box-shadow: 0 0 18px 4px #8e24aaa0; }
+            100% { border-color: #1976d2; box-shadow: 0 0 18px 4px #1976d2a0; }
+        }
+        /* --- Thay đổi: làm to bảng chấm công lương ca vừa phải --- */
+        .shift-salary-table-big {
+            font-size: 18px !important;
+            zoom: 1.12;
+        }
+        .shift-salary-table-big th, .shift-salary-table-big td {
+            padding: 10px 6px !important;
+            font-size: 15px !important;
+        }
+        .shift-salary-table-big input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+        .shift-salary-table-big input[type="number"],
+        .shift-salary-table-big input[type="text"] {
+            font-size: 15px !important;
+        }
+        @media (max-width: 900px) {
+            .shift-salary-table-big {
+                font-size: 13px !important;
+                zoom: 1;
+            }
+            .shift-salary-table-big th, .shift-salary-table-big td {
+                font-size: 13px !important;
+                padding: 8px 4px !important;
+            }
+        }
+        @media (max-width: 600px) {
+            .shift-salary-table-big {
+                font-size: 12px !important;
+                zoom: 1;
+            }
+            .shift-salary-table-big th, .shift-salary-table-big td {
+                font-size: 12px !important;
+                padding: 5px 2px !important;
+            }
+        }
+        /* --- Thu nhỏ phần cảnh báo Lưu ý --- */
+        .notice-warning {
+            background: #fff3cd;
+            color: #b8860b;
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 1rem;
+            font-weight: 500;
+            box-shadow: 0 2px 8px #ffc10730;
+            border: 1.5px solid #ffc107;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .notice-warning .notice-main {
+            flex: 1;
+            min-width: 0;
+        }
+        .notice-warning .notice-title {
+            font-size: 1.1rem;
+            color: #d32f2f;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            font-family: 'Segoe UI Semibold','Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .notice-bold {
+            color: #d32f2f;
+            font-size: 1.05rem;
+            font-weight: 700;
+            display: block;
+            margin: 6px 0 6px 0;
+            font-family: 'Segoe UI Semibold','Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .notice-small {
+            color: #d32f2f;
+            font-size: 0.98rem;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0;
+            font-family: 'Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .notice-qr {
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .notice-warning .notice-qr span {
+            font-size: 0.98rem;
+            color: #1976d2;
+            display: block;
+            margin-bottom: 6px;
+            font-family: 'Segoe UI Semibold','Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .qr-animated-wrap img {
+            width: 80px !important;
+            height: 80px !important;
+            border-radius: 8px;
+            border: 1.5px solid #1976d2;
+        }
+        /* Popup holiday calendar style */
+        .holiday-calendar-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 4px;
+            margin: 0 auto 10px auto;
+            background: #f7fafd;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #b8860b20;
+        }
+        .holiday-calendar-table th {
+            background: #ffe082;
+            color: #b8860b;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 6px 0;
+            border: none;
+        }
+        .holiday-calendar-table td {
+            text-align: center;
+            padding: 0;
+            border-radius: 8px;
+            border: none;
+            height: 38px;
+            width: 38px;
+            position: relative;
+            background: #fff;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .holiday-calendar-table td .holiday-checkbox-modal {
+            display: none;
+        }
+        .holiday-calendar-table td label {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            border-radius: 8px;
+            line-height: 38px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #b8860b;
+            transition: background 0.2s, color 0.2s;
+            user-select: none;
+            position: relative;
+        }
+        .holiday-calendar-table td.selected label {
+            background: linear-gradient(90deg, #ffe082 60%, #ffd54f 100%);
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 2px 8px #ffe08280;
+            border: 2px solid #b8860b;
+        }
+        .holiday-calendar-table td.selected label::after {
+            content: "★";
+            color: #ff9800;
+            font-size: 18px;
+            position: absolute;
+            top: 2px;
+            right: 6px;
+            pointer-events: none;
+            text-shadow: 0 1px 4px #fff8, 0 0 2px #ff9800;
+        }
+        .holiday-calendar-table td.today label {
+            border: 2px solid #1976d2;
+            background: #e3f0ff;
+            color: #1976d2;
+        }
+        .holiday-calendar-table td:hover label {
+            background: #ffe08280;
+            color: #b8860b;
+        }
+        .holiday-calendar-table td.disabled label {
+            color: #ccc;
+            background: #f5f5f5;
+            cursor: default;
+        }
+        @media (max-width: 600px) {
+            .holiday-calendar-table td, .holiday-calendar-table th {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+                line-height: 28px;
+            }
+        }
+    </style>
+    <script src="menu.js"></script>
+    <script src="data_io.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- Thêm Chart.js CDN cho biểu đồ -->
+         <script src="ad_ai_image_tool.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <script>
+        if (typeof renderMenu === 'function') renderMenu();
+    </script>
+    
+    <div class="container">
+
+        <div style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 18px;
+    ">
+            <div style="
+                /* border: 2.5px solid #1976d2; */ /* Bỏ viền ngoài */
+                border-radius: 14px;
+                padding: 12px 36px;
+                background: #e3f0ff;
+                color: #1976d2;
+                font-size: 2.1rem;
+                font-weight: bold;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                text-align: center;
+                box-shadow: 0 2px 12px #1976d220;
+            ">
+                Time Pro HRM - CHẤM CÔNG THEO THÁNG
+            </div>
+        </div>
+        <!-- Ghi chú nhỏ trước bảng chấm công -->
+        <div style="color:#d32f2f;font-size:15px;font-weight:600;margin-bottom:10px;text-align:center;">
+            CÔNG CỤ CHỈ HỖ TRỢ CHẤM CÔNG TRÊN THIẾT BỊ TẠI CỬA HÀNG, KHÔNG THỂ CHẤM CÔNG Ở THIẾT BỊ KHÁC
+        </div>
+        <div class="form-row">
+            <label style="width:130px;">Chọn cửa hàng:</label>
+            <select id="attStoreSelect" onchange="renderEmpSelect();renderAttendance();updateSalaryTypeDisplay()" style="font-size:18px;padding:8px 18px;min-width:180px;border-radius:8px;border:1.5px solid #b3d1f7;background:#f7fbff;color:#1976d2;font-weight:500;box-shadow:0 1px 6px #1976d210;">
+                <option value="">--Tất cả--</option>
+                <option value="LepShop">LepShop</option>
+                <option value="H'Farm">H'Farm</option>
+            </select>
+            <label>Chọn nhân viên:</label>
+            <select id="empSelect" onchange="renderAttendance();updateSalaryTypeDisplay()" style="font-size:20px;padding:8px 18px;min-width:220px;border-radius:8px;">
+            </select>
+            <button type="button" class="btn" id="noteBtn" style="margin-left:12px;" onclick="openNoteModal()">Note</button>
+            <!-- Thêm nút quét QR -->
+            <button type="button" class="btn" style="margin-left:12px;background:#43a047;" onclick="openQRModal()">Quét QR chấm công</button>
+        </div>
+        <div class="form-row" id="salaryTypeRow" style="display:none;">
+            <label>Hình thức trả lương:</label>
+            <span id="salaryTypeDisplay" style="font-size:16px;color:#1976d2;font-weight:500"></span>
+        </div>
+        <div class="form-row">
+            <label>Chọn tháng:</label>
+            <input type="month" id="attMonth" onchange="renderAttendance()">
+            <!-- <button class="btn" onclick="saveAttendanceMonth()" style="display:none;">Lưu chấm công</button> -->
+        </div>
+        <!-- Thêm vùng chọn ngày lễ -->
+        <div class="form-row" id="holidayRow">
+            <label>Ngày lễ:</label>
+            <button type="button" class="btn" onclick="openHolidayModal()" style="padding:6px 18px;">Chọn ngày lễ</button>
+            <span id="holidaySummary" style="font-size:13px;color:#b8860b;margin-left:10px;"></span>
+        </div>
+        <!-- Thêm vùng cảnh báo trạng thái cửa hàng (nên đặt ở đây) -->
+        <div id="storeStatusAlert" style="display:none;margin-bottom:12px;font-size:15px;font-weight:600;color:#d32f2f;text-align:center;background:#fff3cd;border-radius:8px;padding:8px 0;border:1.5px solid #ffc107;"></div>
+        <div id="attTableWrap" style="overflow-x:auto"></div>
+        <!-- Thêm vùng chứa biểu đồ ngay sau bảng chấm công -->
+        <div id="attChartWrap" style="max-width:420px;margin:18px auto 0 auto;"></div>
+    </div>
+    <!-- Modal ghi chú -->
+    <div id="noteModal" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:#0005;">
+        <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:400px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;">
+            <h3 style="margin-top:0;color:#1976d2;font-size:20px;">Ghi chú nhân viên</h3>
+            <div id="noteEmpName" style="font-weight:500;margin-bottom:8px;"></div>
+            <textarea id="noteContent" rows="6" style="width:100%;border-radius:6px;border:1.5px solid #b3d1f7;padding:8px;font-size:15px;resize:vertical;"></textarea>
+            <div style="margin-top:14px;text-align:right;">
+                <button class="btn" onclick="saveNote()">Lưu</button>
+                <button class="btn" style="background:#e53935" onclick="closeNoteModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal copy ca -->
+    <div id="copyShiftModal" style="display:none;position:fixed;z-index:1001;left:0;top:0;width:100vw;height:100vh;background:#0005;">
+        <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:400px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;">
+            <h3 style="margin-top:0;color:#1976d2;font-size:20px;">Copy ca làm từ nhân viên khác</h3>
+            <div style="margin-bottom:10px;">
+                <label for="copyShiftEmpSelect" style="font-weight:500;color:#1976d2;">Chọn nhân viên nguồn:</label>
+                <select id="copyShiftEmpSelect" style="width:100%;padding:6px 8px;border-radius:6px;margin-top:4px;"></select>
+            </div>
+            <div style="margin-bottom:10px;">
+                <label for="copyShiftMonthSelect" style="font-weight:500;color:#1976d2;">Chọn tháng nguồn:</label>
+                <input type="month" id="copyShiftMonthSelect" style="width:100%;padding:6px 8px;border-radius:6px;margin-top:4px;">
+            </div>
+            <div style="margin-top:14px;text-align:right;">
+                <button class="btn" onclick="doCopyShifts()">Copy</button>
+                <button class="btn" style="background:#e53935" onclick="closeCopyShiftModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal quét QR -->
+    <div id="qrModal" style="display:none;position:fixed;z-index:2000;left:0;top:0;width:100vw;height:100vh;background:#0005;">
+        <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:400px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;">
+            <h3 style="margin-top:0;color:#1976d2;font-size:20px;">Quét mã QR/BarCode Để Chấm Công</h3>
+            <div id="qr-reader" style="width:320px;position:relative;">
+                <!-- Khung quét QR -->
+                <div class="qr-scan-frame">
+                    <div class="qr-scan-line"></div>
+                </div>
+            </div>
+            <div style="margin-top:14px;text-align:right;">
+                <button class="btn" style="background:#e53935" onclick="closeQRModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal chọn ca khi quét QR cho NV lương ca -->
+    <div id="shiftSelectModal" style="display:none;position:fixed;z-index:2100;left:0;top:0;width:100vw;height:100vh;background:#0005;">
+        <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:400px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;">
+            <h3 style="margin-top:0;color:#1976d2;font-size:20px;">Chọn ca làm để chấm công</h3>
+            <div id="shiftSelectList" style="margin-bottom:18px;"></div>
+            <div style="margin-top:14px;text-align:right;">
+                <button class="btn" onclick="confirmShiftSelection()">OK</button>
+                <button class="btn" style="background:#e53935" onclick="closeShiftSelectModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+    <!-- Popup thông báo chấm công thành công -->
+    <div id="qrSuccessPopup" style="display:none;position:fixed;z-index:3000;left:0;top:0;width:100vw;height:100vh;pointer-events:none;">
+        <div style="position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);background:#e3f9e5;color:#388e3c;padding:28px 36px 22px 36px;border-radius:16px;box-shadow:0 6px 32px #388e3c40;font-size:1.25rem;font-weight:600;text-align:center;min-width:260px;pointer-events:auto;" id="qrSuccessPopupContent"></div>
+    </div>
+    <!-- Modal chọn ngày lễ -->
+    <div id="holidayModal" style="display:none;position:fixed;z-index:3001;left:0;top:0;width:100vw;height:100vh;background:#0005;">
+        <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:420px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;">
+            <h3 style="margin-top:0;color:#b8860b;font-size:20px;">Chọn ngày lễ trong tháng</h3>
+            <div id="holidayPicker" style="margin-bottom:18px;"></div>
+            <div style="margin-top:14px;text-align:right;">
+                <button class="btn" onclick="saveHolidayModal()">Lưu</button>
+                <button class="btn" style="background:#e53935" onclick="closeHolidayModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // ====== DỮ LIỆU VÀ HÀM TIỆN ÍCH ======
+        let employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
+        let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+        let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+        let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+        // Thêm biến lưu hệ số công từng ngày
+        let workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+        // Thêm biến lưu ngày lễ từng tháng
+        let holidayDaysByMonth = JSON.parse(localStorage.getItem('holidayDaysByMonth') || '{}');
+        // Thêm biến lưu trạng thái cửa hàng
+        let storeStatus = {};
+
+        // Hàm đọc trạng thái cửa hàng từ Trangthai.txt
+        async function loadStoreStatus() {
+            try {
+                const res = await fetch('Trangthai.txt');
+                const text = await res.text();
+                // Parse: Lepshop : OFF\r\nH'Farm : ON
+                storeStatus = {};
+                text.split('\n').forEach(line => {
+                    let [name, status] = line.split(':').map(s => s && s.trim());
+                    if (name && status) storeStatus[name] = status.toUpperCase();
+                });
+            } catch (e) {
+                storeStatus = {};
+            }
+        }
+
+        // Hàm kiểm tra trạng thái cửa hàng (ON/OFF)
+        function isStoreAllowFutureCheckIn(store) {
+            if (!store) return true; // Nếu chọn tất cả thì cho phép
+            return (storeStatus[store] || 'ON') === 'ON';
+        }
+
+        // Hàm hiển thị cảnh báo trạng thái cửa hàng
+        function showStoreStatusAlert() {
+            const store = document.getElementById('attStoreSelect').value;
+            const alertDiv = document.getElementById('storeStatusAlert');
+            if (!store) {
+                alertDiv.style.display = 'none';
+                return;
+            }
+            if (isStoreAllowFutureCheckIn(store)) {
+                alertDiv.style.display = 'none';
+            } else {
+                alertDiv.textContent = `Cửa hàng "${store}" đang ở trạng thái OFF: Không được phép chấm công cho ngày mai hoặc ngày tương lai!`;
+                alertDiv.style.display = '';
+            }
+        }
+
+        // Hàm lấy danh sách ngày lễ của tháng
+        function getHolidayDays(month) {
+            if (!holidayDaysByMonth[month]) holidayDaysByMonth[month] = [];
+            return holidayDaysByMonth[month];
+        }
+        // Hàm lưu ngày lễ từ input
+        function saveHolidayDays() {
+            const month = getCurrentMonth();
+            const val = document.getElementById('holidayInput').value;
+            let arr = val.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x) && x > 0);
+            holidayDaysByMonth[month] = arr;
+            localStorage.setItem('holidayDaysByMonth', JSON.stringify(holidayDaysByMonth));
+            renderAttendance();
+        }
+        function renderHolidayPicker() {
+            const month = getCurrentMonth();
+            const days = daysInMonth(month);
+            const arr = getHolidayDays(month);
+            let html = '';
+            for (let d = 1; d <= days; ++d) {
+                html += `<label style="margin-right:6px;display:inline-block;width:32px;">
+                    <input type="checkbox" class="holiday-checkbox" value="${d}" ${arr.includes(d) ? 'checked' : ''} onchange="onHolidayCheckboxChange(this)">
+                    <span style="font-size:13px;">${d}</span>
+                </label>`;
+                // Xuống dòng sau mỗi 10 ngày cho gọn
+                if (d % 10 === 0) html += '<br>';
+            }
+            document.getElementById('holidayPicker').innerHTML = html;
+        }
+        function onHolidayCheckboxChange(cb) {
+            const month = getCurrentMonth();
+            let arr = getHolidayDays(month);
+            const day = parseInt(cb.value);
+            if (cb.checked) {
+                if (!arr.includes(day)) arr.push(day);
+            } else {
+                arr = arr.filter(x => x !== day);
+            }
+            holidayDaysByMonth[month] = arr;
+            localStorage.setItem('holidayDaysByMonth', JSON.stringify(holidayDaysByMonth));
+            renderAttendance();
+        }
+        // Khi đổi tháng thì cập nhật input ngày lễ
+        function updateHolidayInput() {
+            renderHolidaySummary();
+        }
+        function getCurrentMonth() {
+            let m = document.getElementById('attMonth').value;
+            if (!m) {
+                const now = new Date();
+                // SỬA: Lấy tháng hiện tại theo giờ địa phương
+                m = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+                document.getElementById('attMonth').value = m;
+            }
+            return m;
+        }
+        function getPrevMonth(month) {
+            let [y, m] = month.split('-').map(Number);
+            if (m === 1) { y--; m = 12; } else { m--; }
+            return `${y}-${String(m).padStart(2, '0')}`;
+        }
+        function daysInMonth(month) {
+            const [y, m] = month.split('-').map(Number);
+            return new Date(y, m, 0).getDate();
+        }
+        function formatVND(val) {
+            if (isNaN(val)) return '';
+            return Number(val).toLocaleString('vi-VN') + ' ₫';
+        }
+        function parseCurrency(val) {
+            return Number((val+'').replace(/[^\d]/g, '')) || 0;
+        }
+        function formatCurrencyInput(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            if (!value) value = '0';
+            input.value = Number(value).toLocaleString('vi-VN');
+        }
+        function formatTime24h(val) {
+            if (!val) return '';
+            const [h, m] = val.split(':');
+            return `${h.padStart(2, '0')}:${m.padStart(2, '0')}`;
+        }
+        function formatTime12h(val) {
+            if (!val) return '';
+            const [h, m] = val.split(':').map(Number);
+            let hour = h % 12 || 12;
+            let ampm = h < 12 ? 'AM' : 'PM';
+            return `${hour}:${m.toString().padStart(2, '0')} ${ampm}`;
+        }
+
+        // ====== QUẢN LÝ CA LÀM ======
+        function getShiftsForEmpMonth(empId, month) {
+            if (!shiftsByEmpByMonth[month]) shiftsByEmpByMonth[month] = {};
+            if (!shiftsByEmpByMonth[month][empId]) {
+                let prevMonth = getPrevMonth(month);
+                if (shiftsByEmpByMonth[prevMonth] && shiftsByEmpByMonth[prevMonth][empId]) {
+                    shiftsByEmpByMonth[month][empId] = JSON.parse(JSON.stringify(shiftsByEmpByMonth[prevMonth][empId]));
+                } else if (shiftsByEmp[empId]) {
+                    shiftsByEmpByMonth[month][empId] = JSON.parse(JSON.stringify(shiftsByEmp[empId]));
+                } else {
+                    shiftsByEmpByMonth[month][empId] = [];
+                }
+                saveShiftsByEmpByMonth();
+            }
+            return shiftsByEmpByMonth[month][empId];
+        }
+        function saveShiftsByEmpByMonth() {
+            localStorage.setItem('shiftsByEmpByMonth', JSON.stringify(shiftsByEmpByMonth));
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        }
+        function renderShifts(empId) {
+            shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            const month = getCurrentMonth();
+            const tbody = document.querySelector(`#shiftTable_${empId} tbody`);
+            const shifts = getShiftsForEmpMonth(empId, month);
+            const emp = employees.find(e => e.id == empId);
+            let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay_' + empId)) 
+                || parseInt(localStorage.getItem('salaryPerDay') || '0');
+            tbody.innerHTML = '';
+            shifts.forEach((shift, idx) => {
+                if (typeof shift.half === 'undefined') shift.half = false;
+                let caSalaryDisplay = salaryPerDay;
+                if (emp && emp.salary_type !== 'shift') {
+                    caSalaryDisplay = shift.half ? Math.round(salaryPerDay / 2) : salaryPerDay;
+                }
+                tbody.innerHTML += `<tr>
+                    <td><input type="text" value="${shift.name}" onchange="updateShift('${empId}',${idx},'name',this.value)"></td>
+                    <td>
+                        <input type="time" value="${shift.start}" 
+                            onchange="updateShift('${empId}',${idx},'start',this.value)" 
+                            step="60"
+                            min="00:00"
+                            max="23:59"
+                            onkeydown="if(event.key==='ArrowDown'){this.blur();}">
+                    </td>
+                    <td>
+                        <input type="time" value="${shift.end}" 
+                            onchange="updateShift('${empId}',${idx},'end',this.value)" 
+                            step="60"
+                            min="00:00"
+                            max="23:59"
+                            onkeydown="if(event.key==='ArrowDown'){this.blur();}">
+                    </td>
+                    <td>` +
+                        (emp && emp.salary_type !== 'shift'
+                            ? `<input type="text" value="${formatVND(caSalaryDisplay)}" style="width:90px;background:#eee;color:#888;" readonly tabindex="-1">`
+                            : `<input type="text" value="${formatVND(shift.salary)}" style="width:90px" oninput="formatCurrencyInput(this)" onchange="updateShift('${empId}',${idx},'salary',parseCurrency(this.value))">`
+                        ) +
+                    `</td>
+                    <!-- Bỏ cột Nửa ca -->
+                    <td><button class="btn" style="background:#e53935" onclick="deleteShift('${empId}',${idx})">Xóa</button></td>
+                </tr>`;
+            });
+        }
+        function onHalfShiftChange(empId, idx, checked) {
+            const month = getCurrentMonth();
+            let shifts = getShiftsForEmpMonth(empId, month);
+            shifts[idx].half = checked;
+            saveShiftsByEmpByMonth();
+            renderShifts(empId);
+            renderAttendance();
+        }
+        function addShiftRow(empId) {
+            const month = getCurrentMonth();
+            let shifts = getShiftsForEmpMonth(empId, month);
+            shifts.push({ name: '', start: '', end: '', salary: 0, half: false });
+            saveShiftsByEmpByMonth();
+            renderShifts(empId);
+            renderAttendance();
+        }
+        function updateShift(empId, idx, key, value) {
+            const month = getCurrentMonth();
+            let shifts = getShiftsForEmpMonth(empId, month);
+            shifts[idx][key] = value;
+            saveShiftsByEmpByMonth();
+            renderAttendance();
+        }
+        function deleteShift(empId, idx) {
+            const month = getCurrentMonth();
+            let shifts = getShiftsForEmpMonth(empId, month);
+            shifts.splice(idx, 1);
+            for (const m in attendanceByMonth) {
+                if (attendanceByMonth[m][empId]) {
+                    for (const day in attendanceByMonth[m][empId]) {
+                        let arr = attendanceByMonth[m][empId][day];
+                        if (!Array.isArray(arr)) arr = [];
+                        arr = arr.filter(shiftIdx => shiftIdx !== idx);
+                        arr = arr.map(shiftIdx => shiftIdx > idx ? shiftIdx - 1 : shiftIdx);
+                        if (arr.length > 0) {
+                            attendanceByMonth[m][empId][day] = arr;
+                        } else {
+                            delete attendanceByMonth[m][empId][day];
+                        }
+                    }
+                }
+            }
+            saveShiftsByEmpByMonth();
+            saveAttendanceMonth();
+            renderShifts(empId);
+            renderAttendance();
+        }
+
+        // ====== CHẤM CÔNG ======
+        function renderEmpSelect() {
+            const sel = document.getElementById('empSelect');
+            const store = document.getElementById('attStoreSelect').value;
+            const savedEmpId = localStorage.getItem('att_selectedEmpId');
+            let filtered = employees;
+            if (store) filtered = employees.filter(e => (e.store || '') === store);
+            sel.innerHTML = filtered.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            if (savedEmpId && filtered.some(e => e.id === savedEmpId)) {
+                sel.value = savedEmpId;
+            }
+        }
+        document.getElementById('empSelect').addEventListener('change', function() {
+            localStorage.setItem('att_selectedEmpId', this.value);
+            renderAttendance();
+            updateSalaryTypeDisplay();
+            showMissingAttendanceAlert();
+        });
+        document.getElementById('attMonth').addEventListener('change', function() {
+            // Khi đổi tháng, luôn nạp lại dữ liệu và render lại bảng chấm công
+            renderAttendance();
+            showMissingAttendanceAlert();
+            updateHolidayInput();
+        });
+        // --- Thêm hàm này để tránh lỗi nếu chưa có định nghĩa ---
+        function showMissingAttendanceAlert() {
+            // Để trống hoặc có thể thêm cảnh báo nếu muốn
+        }
+
+        function updateSalaryTypeDisplay() {
+            const empId = document.getElementById('empSelect').value;
+            const emp = employees.find(e => e.id == empId);
+            const row = document.getElementById('salaryTypeRow');
+            const span = document.getElementById('salaryTypeDisplay');
+            if (emp) {
+                row.style.display = '';
+                span.textContent = emp.salary_type === 'shift' ? 'Lương theo ca' : 'Lương cơ bản';
+            } else {
+                row.style.display = 'none';
+                span.textContent = '';
+            }
+        }
+        function getWorkFactor(month, empId, dayShift) {
+            if (!workFactorByMonth[month]) workFactorByMonth[month] = {};
+            if (!workFactorByMonth[month][empId]) workFactorByMonth[month][empId] = {};
+            if (typeof workFactorByMonth[month][empId][dayShift] === 'undefined') {
+                workFactorByMonth[month][empId][dayShift] = 1;
+            }
+            return workFactorByMonth[month][empId][dayShift];
+        }
+        function setWorkFactor(month, empId, dayShift, value) {
+            if (!workFactorByMonth[month]) workFactorByMonth[month] = {};
+            if (!workFactorByMonth[month][empId]) workFactorByMonth[month][empId] = {};
+            workFactorByMonth[month][empId][dayShift] = value;
+            localStorage.setItem('workFactorByMonth', JSON.stringify(workFactorByMonth));
+            renderAttendance();
+        }
+        function renderAttendance() {
+            
+ // Luôn nạp lại dữ liệu từ localStorage khi render để đảm bảo dữ liệu mới nhất khi chuyển tháng
+            shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+            holidayDaysByMonth = JSON.parse(localStorage.getItem('holidayDaysByMonth') || '{}');
+            attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            const month = getCurrentMonth();
+            const days = daysInMonth(month);
+            const empId = document.getElementById('empSelect').value;
+            const now = new Date();
+            const [curY, curM, curD] = [now.getFullYear(), now.getMonth() + 1, now.getDate()];
+            const [tableY, tableM] = month.split('-').map(Number);
+            // Lấy danh sách ngày lễ
+            const holidayDays = getHolidayDays(month);
+
+            if (!attendanceByMonth[month]) attendanceByMonth[month] = {};
+            let html = '';
+            if (employees.length === 0) {
+                html = `<div style="color:#e53935;font-size:18px;padding:24px 0;text-align:center;">
+                    Chưa có nhân viên nào.<br>Vui lòng thêm nhân viên trước khi chấm công.
+                </div>`;
+                document.getElementById('attTableWrap').innerHTML = html;
+                return;
+            }
+            const emp = employees.find(e => e.id == empId);
+            let workDaysStd = parseInt(localStorage.getItem('workDaysStd_' + empId)) 
+                || parseInt(localStorage.getItem('workDaysStd') || '26');
+            let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay_' + empId)) 
+                || parseInt(localStorage.getItem('salaryPerDay') || '0');
+            if (emp) {
+                let empAtt = attendanceByMonth[month][emp.id] || {};
+                let shifts = getShiftsForEmpMonth(emp.id, month);
+                html += `<div style="margin-bottom:32px;">`;
+                html += `<div style="font-weight:bold;font-size:18px;margin-bottom:8px;color:#1976d2">${emp.name}</div>`;
+                html += `<div><b>Thiết lập ca làm:</b> 
+                    <button class="btn" type="button" onclick="addShiftRow('${emp.id}')">Thêm ca</button>
+                    <button class="btn" type="button" style="background:#43a047;margin-left:8px;" onclick="openCopyShiftModal()">Copy ca từ NV khác</button>
+                </div>`;
+                html += `<table class="shift-setup-table" id="shiftTable_${emp.id}" style="margin-top:10px;">
+                    <thead>
+                        <tr>
+                            <th>Tên ca</th>
+                            <th>Giờ bắt đầu</th>
+                            <th>Giờ kết thúc</th>
+                            <th>Tiền ca</th>
+                            <!-- <th>Nửa ca</th> -->
+                            <th>Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>`;
+
+                html += `<table style="margin-bottom:0;"><thead>`;
+                html += `<tr>
+                    <th colspan="${days + (emp.salary_type === 'shift' ? 6 : 5)}" style="background:#1976d2;color:#fff;font-size:20px;font-weight:700;text-align:center;letter-spacing:1px;">
+                        BẢNG CHẤM CÔNG ${emp.name ? emp.name.toUpperCase() : ''} THÁNG ${String(tableM).padStart(2, '0')}/${tableY}
+                    </th>
+                </tr>`;
+                html += `<tr><th style="min-width:100px">Ca</th>`;
+                html += `<th style="min-width:110px">Thời gian</th>`;
+                for(let d=1; d<=days; ++d) {
+                    const [y, m] = month.split('-').map(Number);
+                    let isToday = (curY === y && curM === m && curD === d);
+                    let isHoliday = holidayDays.includes(d);
+                    html += `<th${isToday ? ' class="today-col"' : ''}${isHoliday ? ' class="holiday-col"' : ''}>${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}`;
+                    if (isHoliday) html += `<span class="holiday-marker">Lễ</span>`;
+                    html += `</th>`;
+                }
+                html += `<th style="min-width:90px">Tổng ca</th><th style="min-width:120px">Tổng công</th>`;
+                if (emp.salary_type === 'shift') {
+                    html += `<th style="min-width:120px">Lương từng ca</th>`;
+                }
+                html += `<th style="min-width:140px">Lương thực nhận</th>`;
+                html += `</tr>`;
+                // Bỏ dòng nhập hệ số công phía trên
+                html += `<tr><th></th><th></th>`;
+                for(let d=1; d<=days; ++d) {
+                    const [y, m] = month.split('-').map(Number);
+                    const date = new Date(y, m-1, d);
+                    const weekday = ['CN','T2','T3','T4','T5','T6','T7'][date.getDay()];
+                    let isToday = (curY === y && curM === m && curD === d);
+                    let isHoliday = holidayDays.includes(d);
+                    html += `<th${isToday ? ' class="today-col"' : ''}${isHoliday ? ' class="holiday-col"' : ''}>${weekday}</th>`;
+                }
+                html += `<th></th><th></th><th></th><th></th>`;
+                html += `</tr></thead><tbody>`;
+                let caCong = [];
+                let caSalaries = [];
+                let daysWithWork = new Set();
+                let numShifts = shifts.length || 1;
+                for(let s=0; s<numShifts; ++s) {
+                    let rowWork = 0;
+                    html += `<tr>`;
+                    html += `<td style="text-align:left">${shifts[s]?.name || 'Ca '+(s+1)}</td>`;
+                    let start = (typeof shifts[s]?.start === 'string' && shifts[s].start) ? formatTime24h(shifts[s].start) : '--';
+                    let end = (typeof shifts[s]?.end === 'string' && shifts[s].end) ? formatTime24h(shifts[s].end) : '--';
+                    html += `<td>${start} - ${end}</td>`;
+                    for(let d=1; d<=days; ++d) {
+                        let checked = (empAtt[d] && empAtt[d].includes(s)) ? 'checked' : '';
+                        let shiftVal = shifts[s]?.half ? 0.5 : 1;
+                        let factor = getWorkFactor(month, emp.id, `${d}_${s}`);
+                        if (checked) rowWork += shiftVal * factor;
+                        if (empAtt[d] && empAtt[d].length > 0) daysWithWork.add(d);
+                        let isToday = (curY === tableY && curM === tableM && curD === d);
+                        let isHoliday = holidayDays.includes(d);
+                        // --- Thêm kiểm tra trạng thái cửa hàng ---
+                        let store = emp.store || '';
+                        let allowFuture = isStoreAllowFutureCheckIn(store);
+                        let isFuture = false;
+                        if (tableY > curY || (tableY === curY && tableM > curM) || (tableY === curY && tableM === curM && d > curD)) {
+                            isFuture = true;
+                        }
+                        // --- Sửa logic: chỉ cấm nếu là ngày tương lai và trạng thái cửa hàng là OFF ---
+                        let disableCheck = (isFuture && !isStoreAllowFutureCheckIn(emp.store || ''));
+                        html += `<td${isToday ? ' class="today-col"' : ''}${isHoliday ? ' class="holiday-col"' : ''}>`;
+                        if (disableCheck) {
+                            html += `<span onclick="showNotAllowedPopup(event)" style="display:inline-block;">`;
+                            html += `<input type="checkbox" onchange="toggleAttendanceShift('${emp.id}',${d},${s},this.checked)" ${(checked ? 'checked' : '')} style="width:24px;height:24px;pointer-events:none;" disabled>`;
+                            html += `</span>`;
+                        } else {
+                            html += `<input type="checkbox" onchange="toggleAttendanceShift('${emp.id}',${d},${s},this.checked)" ${(checked ? 'checked' : '')} style="width:24px;height:24px;">`;
+                        }
+                        // Luôn hiện input hệ số công cho từng ca, từng ngày
+                        html += `<input type="number" min="0" step="0.1" value="${factor}" 
+                            style="width:54px;font-size:15px;padding:3px 4px;margin-left:2px;text-align:center;"
+                            title="Hệ số công"
+                            onchange="setWorkFactor('${month}','${emp.id}','${d}_${s}',parseFloat(this.value)||1)">`;
+                        html += `</td>`;
+                    }
+                    caCong[s] = rowWork;
+                    let caSalary = parseInt(shifts[s]?.salary || 0);
+                    let salary = rowWork * caSalary;
+                    caSalaries[s] = salary;
+                    html += `<td>${rowWork}</td>`;
+                    if (s === numShifts - 1) {
+                        let tongCong = caCong.reduce((a, b) => a + b, 0);
+                        let tongLuong = 0;
+                        if (emp.salary_type === 'shift') {
+                            tongLuong = caSalaries.reduce((a, b) => a + b, 0);
+                        } else {
+                            let baseSalary = emp.base_salary || 0;
+                            let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay' + empId)) 
+                                || parseInt(localStorage.getItem('salaryPerDay') || '0');
+                            let workDaysStd = parseInt(localStorage.getItem('workDaysStd_' + empId)) 
+                                || parseInt(localStorage.getItem('workDaysStd') || '26');
+                            if (tongCong >= workDaysStd) {
+                                tongLuong = baseSalary + ((tongCong - workDaysStd) * salaryPerDay);
+                            } else {
+                                tongLuong = baseSalary - ((workDaysStd - tongCong) * salaryPerDay);
+                                if (tongLuong < 0) tongLuong = 0;
+                            }
+                        }
+                        html += `<td>${tongCong}</td>`;
+                        if (emp.salary_type === 'shift') {
+                            html += `<td>${formatVND(caSalaries[s])}</td>`;
+                        }
+                        html += `<td>${formatVND(tongLuong)}</td>`;
+                    } else {
+                        html += `<td></td>`;
+                        if (emp.salary_type === 'shift') {
+                            html += `<td>${formatVND(caSalaries[s])}</td>`;
+                        }
+                        html += `<td></td>`;
+                    }
+                    html += `</tr>`;
+                }
+                html += `</tbody></table></div>`;
+            }
+            document.getElementById('attTableWrap').innerHTML = html;
+            if (emp) renderShifts(emp.id);
+            // XÓA DÒNG NÀY: setTimeout(() => renderShiftPieChartInAtt(emp, month), 0);
+
+            // Thêm ghi chú nhỏ về vấn đề kỹ thuật chấm công dưới bảng chấm công
+            let note = document.getElementById('attTechNote');
+            if (!note) {
+                note = document.createElement('div');
+                note.id = 'attTechNote';
+                note.style = 'margin:10px 0 0 0;font-size:13px;color:#d32f2f;text-align:center;';
+                document.getElementById('attTableWrap').after(note);
+            }
+            note.innerHTML = 'Nếu gặp sự cố kỹ thuật khi chấm công, vui lòng liên hệ quản lý hoặc bộ phận kỹ thuật để được hỗ trợ kịp thời.';
+            // Cập nhật giao diện chọn ngày lễ khi render lại
+            updateHolidayInput();
+        }
+        function toggleAttendanceShift(empId, day, shiftIdx, checked) {
+            const month = getCurrentMonth();
+            if (!attendanceByMonth[month]) attendanceByMonth[month] = {};
+            if (!attendanceByMonth[month][empId]) attendanceByMonth[month][empId] = {};
+            if (!attendanceByMonth[month][empId][day]) attendanceByMonth[month][empId][day] = [];
+            let arr = attendanceByMonth[month][empId][day];
+            if (checked) {
+                if (!arr.includes(shiftIdx)) arr.push(shiftIdx);
+            } else {
+                attendanceByMonth[month][empId][day] = arr.filter(x => x !== shiftIdx);
+            }
+            if (attendanceByMonth[month][empId][day].length === 0) {
+                delete attendanceByMonth[month][empId][day];
+            }
+            saveAttendanceMonth();
+            renderAttendance();
+        }
+        function saveAttendanceMonth() {
+            localStorage.setItem('attendanceByMonth', JSON.stringify(attendanceByMonth));
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        }
+
+        // ====== GHI CHÚ NHÂN VIÊN ======
+        function getNoteKey() {
+            const empId = document.getElementById('empSelect').value;
+            const month = document.getElementById('attMonth').value;
+            return `note_${empId}_${month}`;
+        }
+        function openNoteModal() {
+            const empId = document.getElementById('empSelect').value;
+            const month = document.getElementById('attMonth').value;
+            const emp = employees.find(e => e.id == empId);
+            document.getElementById('noteEmpName').textContent = emp ? `${emp.name} - Tháng ${month}` : '';
+            document.getElementById('noteContent').value = localStorage.getItem(getNoteKey()) || '';
+            document.getElementById('noteModal').style.display = '';
+        }
+        function closeNoteModal() {
+            document.getElementById('noteModal').style.display = 'none';
+        }
+        function saveNote() {
+            localStorage.setItem(getNoteKey(), document.getElementById('noteContent').value);
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+            closeNoteModal();
+        }
+        document.addEventListener('mousedown', function(e) {
+            const modal = document.getElementById('noteModal');
+            if (modal.style.display !== 'none' && !modal.querySelector('div').contains(e.target)) {
+                closeNoteModal();
+            }
+        });
+
+        // ====== COPY CA LÀM ======
+        function openCopyShiftModal() {
+            const empId = document.getElementById('empSelect').value;
+            const sel = document.getElementById('copyShiftEmpSelect');
+            sel.innerHTML = employees
+                .filter(e => e.id != empId)
+                .map(e => `<option value="${e.id}">${e.name}</option>`)
+                .join('');
+            document.getElementById('copyShiftMonthSelect').value = getCurrentMonth();
+            document.getElementById('copyShiftModal').style.display = '';
+        }
+        function closeCopyShiftModal() {
+            document.getElementById('copyShiftModal').style.display = 'none';
+        }
+        function doCopyShifts() {
+            const empId = document.getElementById('empSelect').value;
+            const month = getCurrentMonth();
+            const sourceEmpId = document.getElementById('copyShiftEmpSelect').value;
+            const sourceMonth = document.getElementById('copyShiftMonthSelect').value;
+            if (!sourceEmpId) return;
+            let sourceShifts = getShiftsForEmpMonth(sourceEmpId, sourceMonth);
+            let backupShifts = JSON.parse(JSON.stringify(shiftsByEmpByMonth));
+            shiftsByEmpByMonth[month][empId] = JSON.parse(JSON.stringify(sourceShifts));
+            saveShiftsByEmpByMonth();
+            let resultMsg = 'Copy ca làm thành công!';
+            let isChanged = false;
+            let sourceShiftNames = sourceShifts.map(s => s.name).join(', ');
+            let targetShiftNames = backupShifts[month][empId]?.map(s => s.name).join(', ') || 'Không có ca làm nào';
+            if (JSON.stringify(backupShifts[month][empId]) !== JSON.stringify(shiftsByEmpByMonth[month][empId])) {
+                isChanged = true;
+                resultMsg += `\n- Ca nguồn: ${sourceShiftNames}\n- Ca đích: ${targetShiftNames}`;
+            }
+            alert(resultMsg);
+            closeCopyShiftModal();
+            renderAttendance();
+        }
+
+        // ====== QUÉT QR CHẤM CÔNG ======
+        let qrScanner = null;
+        // Biến lưu tạm thông tin QR quét cho NV lương ca
+        let pendingQRCheckin = null;
+
+        // Hiển thị popup thông báo chấm công thành công
+        function showQRSuccessPopup(msg) {
+            const popup = document.getElementById('qrSuccessPopup');
+            const content = document.getElementById('qrSuccessPopupContent');
+            content.innerHTML = msg;
+            popup.style.display = '';
+            setTimeout(() => { popup.style.display = 'none'; }, 1800);
+        }
+
+        function openQRModal() {
+            document.getElementById('qrModal').style.display = '';
+            if (!qrScanner) {
+                qrScanner = new Html5Qrcode("qr-reader");
+            }
+            qrScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250, disableFlip: false },
+                qrCodeMessage => {
+                    handleQRCheckin(qrCodeMessage);
+                    closeQRModal();
+                },
+                errorMessage => { }
+            );
+        }
+        function closeQRModal() {
+            document.getElementById('qrModal').style.display = 'none';
+            if (qrScanner) qrScanner.stop();
+        }
+
+        // Hàm xử lý khi quét QR
+        function handleQRCheckin(qrData) {
+            let emp = employees.find(e => e.id == qrData);
+            if (!emp) {
+                alert('Mã QR không hợp lệ hoặc không tìm thấy nhân viên!');
+                return;
+            }
+            document.getElementById('empSelect').value = emp.id;
+            localStorage.setItem('att_selectedEmpId', emp.id);
+            renderAttendance();
+            updateSalaryTypeDisplay();
+            const now = new Date();
+            // SỬA: Lấy tháng hiện tại theo giờ địa phương
+            const month = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            const day = now.getDate();
+            // Nếu là NV lương ca thì mở modal chọn ca
+            if (emp.salary_type === 'shift') {
+                // Lưu lại thông tin tạm
+                pendingQRCheckin = { empId: emp.id, month, day, empName: emp.name };
+                openShiftSelectModal(emp.id, month, day, emp.name);
+                return;
+            }
+            // ...chấm công như cũ cho NV không phải lương ca...
+            if (!attendanceByMonth[month]) attendanceByMonth[month] = {};
+            if (!attendanceByMonth[month][emp.id]) attendanceByMonth[month][emp.id] = {};
+            if (!attendanceByMonth[month][emp.id][day]) attendanceByMonth[month][emp.id][day] = [];
+            if (!attendanceByMonth[month][emp.id][day].includes(0)) attendanceByMonth[month][emp.id][day].push(0);
+            saveAttendanceMonth();
+            renderAttendance();
+            showQRSuccessPopup(`Chấm công thành công cho <b>${emp.name}</b> ngày ${day}/${now.getMonth()+1}`);
+        }
+
+        // ====== MODAL CHỌN CA KHI QUÉT QR ======
+        function openShiftSelectModal(empId, month, day, empName) {
+            // Lấy danh sách ca của nhân viên trong tháng
+            let shifts = getShiftsForEmpMonth(empId, month);
+            let html = '';
+            if (!shifts || shifts.length === 0) {
+                html = `<div style="color:#e53935;font-size:16px;">Nhân viên chưa có ca làm nào!</div>`;
+            } else {
+                html = shifts.map((s, idx) =>
+                    `<label style="display:block;margin-bottom:8px;">
+                        <input type="checkbox" class="shift-select-checkbox" value="${idx}" style="margin-right:8px;">
+                        ${s.name ? s.name : 'Ca ' + (idx+1)} (${s.start || '--'} - ${s.end || '--'})
+                    </label>`
+                ).join('');
+            }
+            document.getElementById('shiftSelectList').innerHTML = html;
+            document.getElementById('shiftSelectModal').style.display = '';
+        }
+        function closeShiftSelectModal() {
+            document.getElementById('shiftSelectModal').style.display = 'none';
+            pendingQRCheckin = null;
+        }
+        function confirmShiftSelection() {
+            if (!pendingQRCheckin) return;
+            const checkboxes = document.querySelectorAll('.shift-select-checkbox');
+            let selected = [];
+            checkboxes.forEach(cb => { if (cb.checked) selected.push(Number(cb.value)); });
+            if (selected.length === 0) {
+                alert('Vui lòng chọn ít nhất một ca để chấm công!');
+                return;
+            }
+            let { empId, month, day, empName } = pendingQRCheckin;
+            if (!attendanceByMonth[month]) attendanceByMonth[month] = {};
+            if (!attendanceByMonth[month][empId]) attendanceByMonth[month][empId] = {};
+            // Đảm bảo luôn là mảng
+            attendanceByMonth[month][empId][day] = Array.isArray(attendanceByMonth[month][empId][day])
+                ? attendanceByMonth[month][empId][day]
+                : [];
+            // Gán lại đúng các ca được chọn, bỏ các ca không tích
+            attendanceByMonth[month][empId][day] = selected;
+            // Nếu không còn ca nào thì xóa key ngày
+            if (attendanceByMonth[month][empId][day].length === 0) {
+                delete attendanceByMonth[month][empId][day];
+            }
+            saveAttendanceMonth();
+            renderAttendance();
+            showQRSuccessPopup(`Chấm công thành công cho <b>${empName}</b> ngày ${day} (${selected.length} ca)`);
+            closeShiftSelectModal();
+        }
+        // ====== KHỞI TẠO ======
+        (async function(){
+            await loadStoreStatus();
+            const now = new Date();
+            // Lấy tháng hiện tại theo giờ địa phương
+            const ym = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            const attMonthInput = document.getElementById('attMonth');
+            // Nếu tháng đang chọn khác tháng hiện tại thì tự động chuyển về tháng hiện tại
+            if (attMonthInput.value !== ym) attMonthInput.value = ym;
+            renderEmpSelect();
+            renderAttendance();
+            updateSalaryTypeDisplay();
+            showMissingAttendanceAlert();
+            updateHolidayInput();
+        })();
+    </script>
+    <script>
+        // ====== CHỌN NGÀY LỄ POPUP ======
+        // Đảm bảo các hàm này ở phạm vi global
+        let holidayModalDays = [];
+        window.openHolidayModal = function() {
+            const month = getCurrentMonth();
+            const days = daysInMonth(month);
+            const arr = getHolidayDays(month);
+            holidayModalDays = [...arr];
+            // Tính ngày đầu tuần của tháng
+            const [y, m] = month.split('-').map(Number);
+            const firstDay = new Date(y, m - 1, 1).getDay(); // 0=CN, 1=T2,...
+            // Đổi về 1=Thứ 2, 7=CN cho lịch VN
+            let startCol = firstDay === 0 ? 7 : firstDay;
+            // Render header
+            let html = '<table class="holiday-calendar-table"><thead><tr>';
+            const weekdays = ['T2','T3','T4','T5','T6','T7','CN'];
+            for (let wd of weekdays) html += `<th>${wd}</th>`;
+            html += '</tr></thead><tbody><tr>';
+            // Đệm các ô trống đầu tháng
+            for (let i = 1; i < startCol; ++i) html += '<td class="disabled"></td>';
+            // Render ngày
+            const now = new Date();
+            let col = startCol;
+            for (let d = 1; d <= days; ++d, ++col) {
+                let isSelected = holidayModalDays.includes(d);
+                let isToday = (now.getFullYear() === y && now.getMonth() + 1 === m && now.getDate() === d);
+                html += `<td${isSelected ? ' class="selected"' : ''}${isToday ? (isSelected ? ' today' : ' class="today"') : ''}>`;
+                html += `<label>
+
+                    <input type="checkbox" class="holiday-checkbox-modal" value="${d}" ${isSelected ? 'checked' : ''} onchange="window.onHolidayCheckboxModalChange(this)">
+                    ${d}
+                </label></td>`;
+                if (col % 7 === 0 && d !== days) html += '</tr><tr>';
+            }
+            // Đệm các ô trống cuối tháng
+            while (col % 7 !== 1) { html += '<td class="disabled"></td>'; ++col; }
+            html += '</tr></tbody></table>';
+            document.getElementById('holidayPicker').innerHTML = html;
+            document.getElementById('holidayModal').style.display = '';
+               }
+        window.closeHolidayModal = function() {
+            document.getElementById('holidayModal').style.display = 'none';
+        }
+        window.onHolidayCheckboxModalChange = function(cb) {
+            const day = parseInt(cb.value);
+            if (cb.checked) {
+                if (!holidayModalDays.includes(day)) holidayModalDays.push(day);
+            } else {
+                holidayModalDays = holidayModalDays.filter(x => x !== day);
+            }
+            // Cập nhật lại giao diện đánh dấu ngay lập tức
+            // Tìm ô td chứa checkbox này
+            let td = cb.closest('td');
+            if (td) {
+                if (cb.checked) {
+                    td.classList.add('selected');
+                } else {
+                    td.classList.remove('selected');
+                }
+            }
+        }
+        window.saveHolidayModal = function() {
+            const month = getCurrentMonth();
+            holidayDaysByMonth[month] = holidayModalDays.sort((a,b)=>a-b);
+            localStorage.setItem('holidayDaysByMonth', JSON.stringify(holidayDaysByMonth));
+            window.closeHolidayModal();
+            renderAttendance();
+        }
+
+        function renderHolidaySummary() {
+            const month = getCurrentMonth();
+            const arr = getHolidayDays(month);
+            const el = document.getElementById('holidaySummary');
+            if (!el) return;
+            if (arr.length === 0) {
+               
+                el.textContent = '(Chưa chọn ngày lễ)';
+            } else {
+                el.textContent = 'Ngày lễ: ' + arr.sort((a,b)=>a-b).join(', ');
+            }
+        }
+        window.renderHolidaySummary = renderHolidaySummary;
+    </script>
+    <script src="footer.js"></script>
+    <script>renderFooter();</script>
+    <script>
+        // ====== KIỂM TRA VÀ THIẾT LẬP QUYỀN CHẤM CÔNG ======
+        function getCheckInOptions() {
+            let allowCorrect = localStorage.getItem('allowCheckInOnCorrectDay');
+            let allowWrong = localStorage.getItem('allowCheckInOnWrongDay');
+            return {
+                allowCorrect: (allowCorrect === null ? true : allowCorrect === 'true'),
+                allowWrong: (allowWrong === null ? true : allowWrong === 'true')
+            };
+        }
+
+        function canCheckIn(date) {
+            const opts = getCheckInOptions();
+            const today = new Date();
+            const d = new Date(date);
+            if (!opts.allowCorrect && !opts.allowWrong) return false;
+            if (opts.allowCorrect && !opts.allowWrong) {
+                // Only allow check-in for today
+                return d.getFullYear() === today.getFullYear() &&
+                       d.getMonth() === today.getMonth() &&
+                       d.getDate() === today.getDate();
+            }
+            if (!opts.allowCorrect && opts.allowWrong) {
+                // Allow check-in for any day
+                return true;
+            }
+            if (opts.allowCorrect && opts.allowWrong) {
+                // Allow check-in for any day (default)
+                return true;
+            }
+            return false;
+        }
+
+        function updateCheckInButtons() {
+            const month = getCurrentMonth();
+            const days = daysInMonth(month);
+            const empId = document.getElementById('empSelect').value;
+            for (let d = 1; d <= days; ++d) {
+                let dateStr = `${month}-${String(d).padStart(2,'0')}`;
+                let canCheck = canCheckIn(dateStr);
+                let cell = document.querySelector(`#attTableWrap td[data-date="${dateStr}"]`);
+                if (cell) {
+                    let checkbox = cell.querySelector('input[type="checkbox"]');
+                    let message = cell.querySelector('.checkin-message');
+                    if (canCheck) {
+                        if (checkbox) {
+                            checkbox.disabled = false;
+                            checkbox.closest('td').style.opacity = 1;
+                        }
+                        if (message) {
+                            message.remove();
+                        }
+                    } else {
+                        if (checkbox) {
+                            checkbox.disabled = true;
+                            checkbox.closest('td').style.opacity = 0.5;
+                        }
+                        if (!message) {
+                            message = document.createElement('div');
+                            message.className = 'checkin-message';
+                            message.style = 'font-size:12px;color:#d32f2f;margin-top:4px;text-align:center;';
+                            message.innerHTML = 'Chấm công không khả dụng';
+                            cell.appendChild(message);
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Popup cảnh báo không được phép chấm công -->
+    <div id="notAllowedPopup" style="display:none;position:fixed;z-index:4000;left:0;top:0;width:100vw;height:100vh;pointer-events:auto;">
+        <div style="position:absolute;left:50%;top:35%;transform:translate(-50%,-50%);background:#fff3cd;color:#d32f2f;padding:28px 36px 22px 36px;border-radius:16px;box-shadow:0 6px 32px #d32f2f40;font-size:1.15rem;font-weight:600;text-align:center;min-width:320px;pointer-events:auto;" id="notAllowedPopupContent">
+            <div style="font-size:1.1rem;margin-bottom:10px;">
+                Xin Lỗi<br>
+                <span style="color:#1976d2;">Từ Ngày 1/7/2025</span> Hệ Thống Chấm Công Sẽ Không Cho Phép Chấm Trước Ngày Công Tương Lai.
+            </div>
+            <div style="margin-bottom:12px;">
+                Không được phép chấm công cho ngày này!
+            </div>
+            <button onclick="closeNotAllowedPopup()" style="background:#e53935;color:#fff;border:none;padding:8px 24px;border-radius:6px;font-size:1rem;font-weight:500;cursor:pointer;box-shadow:0 2px 8px #d32f2f20;">Đóng</button>
+        </div>
+    </div>
+    <script>
+    function showNotAllowedPopup(e) {
+        if (e) e.preventDefault();
+        const popup = document.getElementById('notAllowedPopup');
+        popup.style.display = '';
+    }
+    function closeNotAllowedPopup() {
+        document.getElementById('notAllowedPopup').style.display = 'none';
+    }
+    </script>
+</body>
+</html>
+</html>

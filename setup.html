@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html style="zoom:90%;">
+<head>
+    <meta charset="utf-8">
+    <title>TimePro HRM-Thiết lập ngày công</title>
+        <link rel="icon" type="image/png" href="iconlogo.png">
+    <style>
+        /* ...existing code... */
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: linear-gradient(135deg, #e3f0ff 0%, #f7f7f7 100%);
+            margin: 0; 
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 420px; 
+            margin: 60px auto 0 auto; 
+            background: #ffffffee; /* sáng hơn, trong suốt nhẹ */
+            padding: 36px 32px 28px 32px; 
+            border-radius: 16px; 
+            box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 { 
+            color: #1976d2; 
+            margin-bottom: 28px; 
+            font-size: 1.6rem;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .form-row { 
+            margin-bottom: 22px; 
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .form-row label { 
+            display: inline-block; 
+            width: 140px; 
+            font-size: 1.05rem;
+            color: #333;
+            font-weight: 500;
+        }
+        input[type="number"], input[type="text"] { 
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            border: 1.5px solid #bcdffb; 
+            font-size: 1.08rem;
+            width: 160px;
+            background: #f6fbff;
+            transition: border 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 2px #1976d210;
+        }
+        input[type="number"]:focus, input[type="text"]:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+            background: #eaf4ff;
+        }
+        .btn { 
+            background: #1976d2; 
+            color: #fff; 
+            border: none; 
+            padding: 8px 22px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 1.05rem;
+            font-weight: 500;
+            margin-top: 10px;
+            box-shadow: 0 2px 8px #1976d210;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover { background: #1565c0; box-shadow: 0 4px 16px #1976d220; }
+        .employee-select-row {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+        .employee-select-row label {
+            font-size: 1.08rem;
+            font-weight: 500;
+            color: #1976d2;
+            width: 140px;
+        }
+        select#employeeSelect {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1.5px solid #bcdffb;
+            font-size: 1.08rem;
+            width: 160px;
+            background: #f6fbff;
+            transition: border 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 2px #1976d210;
+        }
+        select#employeeSelect:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+            background: #eaf4ff;
+        }
+        .form-row-store {
+            margin-bottom: 22px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .form-row-store label {
+            display: inline-block;
+            width: 140px;
+            font-size: 1.05rem;
+            color: #333;
+            font-weight: 500;
+        }
+        input#storeNameInput {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1.5px solid #bcdffb;
+            font-size: 1.08rem;
+            width: 160px;
+            background: #f6fbff;
+            transition: border 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 2px #1976d210;
+        }
+        input#storeNameInput:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+            background: #eaf4ff;
+        }
+        /* Footer styles */
+        footer {
+            background: #1976d2;
+            color: #fff;
+            text-align: center;
+            padding: 24px 10px 18px 10px;
+            font-size: 16px;
+            margin-top: 40px;
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+            box-shadow: 0 -2px 8px #0002;
+        }
+        footer b { color: #ffd600; }
+        footer .footer-contact {
+            margin-top: 10px;
+            font-size: 15px;
+            color: #e3f0ff;
+        }
+    </style>
+    <script src="menu.js"></script>
+    <script src="data_io.js"></script>
+
+</head>
+<body>
+    <script>renderMenu('setup');</script>
+    <div class="container">
+        <h2>Thiết lập ngày công chuẩn/tháng</h2>
+        <!-- Đổi trường nhập tên cửa hàng thành select -->
+        <div class="form-row-store">
+            <label for="storeNameInput">Tên cửa hàng:</label>
+            <select id="storeNameInput" onchange="onStoreNameChange()" style="width: 160px; padding: 8px 12px; border-radius: 6px; border: 1.5px solid #bcdffb; font-size: 1.08rem; background: #f6fbff;">
+                <!-- Options sẽ được render động -->
+            </select>
+        </div>
+        <div class="employee-select-row">
+            <label for="employeeSelect">Chọn nhân viên:</label>
+            <select id="employeeSelect" onchange="onEmployeeChange()">
+                <option value="">-- Chọn nhân viên --</option>
+            </select>
+        </div>
+        <div id="noteBaseSalary" style="width:100%;color:#888;font-size:13px;margin-bottom:10px;">
+            * Chỉ áp dụng cho nhân viên có hình thức lương cơ bản (lương tháng). Nhân viên lương theo ca không sử dụng các thiết lập này.
+        </div>
+        <div class="form-row">
+            <label>Ngày công chuẩn:</label>
+            <input id="workDaysStd" type="number" value="26" min="1" oninput="autoSaveStdDaysAndSalaryPerDay()">
+        </div>
+        <div class="form-row">
+            <label>Tiền 1 ngày công:</label>
+            <input id="salaryPerDay" type="text" value="0" oninput="formatCurrencyInput(this);autoSaveStdDaysAndSalaryPerDay()">
+        </div>
+        <!-- <div class="form-row">
+            <button class="btn" onclick="saveStdDaysAndSalaryPerDay()">Lưu</button>
+        </div> -->
+        <div id="workdays-setup-section">
+            <!-- ...các input thiết lập ngày công... -->
+        </div>
+    </div>
+    <script>
+        // Lấy danh sách nhân viên từ localStorage, chỉ lấy nhân viên chưa bị ẩn
+        function getEmployees() {
+            try {
+                return JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
+            } catch { return []; }
+        }
+
+        // Hiển thị danh sách nhân viên vào select
+        function renderEmployeeSelect() {
+            const employees = getEmployees();
+            const select = document.getElementById('employeeSelect');
+            select.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
+            employees.forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp.id || emp.maNV || emp.name || emp.tenNV || '';
+                opt.textContent = (emp.name || emp.tenNV || 'Không tên');
+                select.appendChild(opt);
+            });
+        }
+
+        // Hiển thị danh sách cửa hàng vào select (cập nhật động)
+        function renderStoreNameOptions() {
+            const select = document.getElementById('storeNameInput');
+            let storeList = [];
+            try {
+                storeList = JSON.parse(localStorage.getItem('storeList') || '[]');
+            } catch {}
+            // Luôn có các cửa hàng mặc định
+            const defaultStores = [
+                { name: 'LepShop' },
+                { name: "H'Farm" },
+                { name: 'Hệ Thống' }
+            ];
+            // Gộp các cửa hàng mới và mặc định, không trùng tên
+            const allStores = [];
+            const nameSet = new Set();
+            defaultStores.forEach(store => {
+                allStores.push(store);
+                nameSet.add(store.name);
+            });
+            storeList.forEach(store => {
+                if (!nameSet.has(store.name)) {
+                    allStores.push(store);
+                    nameSet.add(store.name);
+                }
+            });
+            select.innerHTML = '';
+            allStores.forEach(store => {
+                const opt = document.createElement('option');
+                opt.value = store.name;
+                opt.textContent = store.name;
+                select.appendChild(opt);
+            });
+        }
+
+        // Khi chọn nhân viên
+        function onEmployeeChange() {
+            const empId = document.getElementById('employeeSelect').value;
+            const employees = getEmployees();
+            const emp = employees.find(e => (e.id || e.maNV || e.name || e.tenNV) == empId);
+            let isBase = emp && (emp.salary_type === 'base' || !emp.salary_type);
+            document.getElementById('workDaysStd').disabled = !isBase || !empId;
+            document.getElementById('salaryPerDay').disabled = !isBase || !empId;
+            // Ghi chú luôn hiển thị
+            if (!empId) {
+                document.getElementById('workDaysStd').value = '';
+                document.getElementById('salaryPerDay').value = '';
+                return;
+            }
+            if (!isBase) {
+                document.getElementById('workDaysStd').value = '';
+                document.getElementById('salaryPerDay').value = '';
+                return;
+            }
+            loadStdDaysAndSalaryPerDayForEmp(empId);
+        }
+
+        // Load thiết lập cho nhân viên
+        function loadStdDaysAndSalaryPerDayForEmp(empId) {
+            let workDaysStd = parseInt(localStorage.getItem('workDaysStd_' + empId) || '26');
+            let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay_' + empId) || '0');
+            document.getElementById('workDaysStd').value = workDaysStd;
+            document.getElementById('salaryPerDay').value = salaryPerDay ? Number(salaryPerDay).toLocaleString('vi-VN') : '0';
+        }
+
+        // Lưu tự động cho từng nhân viên
+        function autoSaveStdDaysAndSalaryPerDay() {
+            const empId = document.getElementById('employeeSelect').value;
+            if (!empId) return;
+            let workDaysStdVal = parseInt(document.getElementById('workDaysStd').value);
+            let perDay = parseCurrency(document.getElementById('salaryPerDay').value);
+            localStorage.setItem('workDaysStd_' + empId, workDaysStdVal);
+            localStorage.setItem('salaryPerDay_' + empId, perDay);
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        }
+
+        function formatVND(val) {
+            if (isNaN(val)) return '';
+            return Number(val).toLocaleString('vi-VN') + ' ₫';
+        }
+        function parseCurrency(val) {
+            return Number((val+'').replace(/[^\d]/g, '')) || 0;
+        }
+        function formatCurrencyInput(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            if (!value) value = '0';
+            input.value = Number(value).toLocaleString('vi-VN');
+        }
+        function exportAllData() {
+            const data = typeof getExportData === 'function' ? getExportData() : {};
+            // Thêm tên cửa hàng vào dữ liệu xuất
+            data.storeName = localStorage.getItem('storeName') || '';
+            // Lấy tên cửa hàng từ localStorage
+            const storeName = (localStorage.getItem('storeName') || 'LepShop').trim();
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const fileName = `${storeName.replace(/[^a-zA-Z0-9]/g, '')}-${pad(now.getDate())}-${pad(now.getMonth()+1)}-${now.getFullYear()}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.json`;
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Hiển thị tên cửa hàng từ localStorage, nếu không có thì chọn mặc định
+        function renderStoreName() {
+            renderStoreNameOptions();
+            let storeName = localStorage.getItem('storeName');
+            const select = document.getElementById('storeNameInput');
+            let found = false;
+            for (let i = 0; i < select.options.length; ++i) {
+                if (select.options[i].value === storeName) {
+                    found = true;
+                    select.selectedIndex = i;
+                    break;
+                }
+            }
+            if (!found) {
+                select.selectedIndex = 0;
+                localStorage.setItem('storeName', select.value);
+            }
+        }
+
+        // Khi thay đổi tên cửa hàng
+        function onStoreNameChange() {
+            const name = document.getElementById('storeNameInput').value;
+            localStorage.setItem('storeName', name);
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        }
+
+        // Khi có thay đổi storeList ở tab khác, tự động cập nhật dropdown
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'storeList') {
+                renderStoreName();
+            }
+        });
+
+        // Khởi tạo giao diện
+        renderEmployeeSelect();
+        renderStoreName();
+        document.getElementById('workDaysStd').disabled = true;
+        document.getElementById('salaryPerDay').disabled = true;
+        // Ghi chú luôn hiển thị
+        // Thêm hàm importAllData để nhập dữ liệu ở bất kỳ trang nào
+        function importAllData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.employees && data.attendanceByMonth) {
+                        // Merge employees
+                        let oldEmployees = JSON.parse(localStorage.getItem('employees') || '[]');
+                        let newEmployees = data.employees || [];
+                        let empMap = {};
+                        oldEmployees.forEach(e => empMap[e.id] = e);
+                        newEmployees.forEach(e => empMap[e.id] = e);
+                        let mergedEmployees = Object.values(empMap);
+
+                        // Merge attendanceByMonth
+                        let oldAtt = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+                        let newAtt = data.attendanceByMonth || {};
+                        for (let month in newAtt) {
+                            if (!oldAtt[month]) oldAtt[month] = {};
+                            for (let empId in newAtt[month]) {
+                                if (!oldAtt[month][empId]) oldAtt[month][empId] = {};
+                                for (let day in newAtt[month][empId]) {
+                                    oldAtt[month][empId][day] = newAtt[month][empId][day];
+                                }
+                            }
+                        }
+
+                        // Merge shifts
+                        let oldShifts = JSON.parse(localStorage.getItem('shifts') || '[]');
+                        let newShifts = data.shifts || [];
+                        let shiftMap = {};
+                        oldShifts.forEach(s => shiftMap[s.id] = s);
+                        newShifts.forEach(s => shiftMap[s.id] = s);
+                        let mergedShifts = Object.values(shiftMap);
+
+                        // Merge shiftsByEmp
+                        let oldShiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+                        let newShiftsByEmp = data.shiftsByEmp || {};
+                        for (let empId in newShiftsByEmp) {
+                            if (!oldShiftsByEmp[empId]) oldShiftsByEmp[empId] = [];
+                            let oldArr = oldShiftsByEmp[empId];
+                            let newArr = newShiftsByEmp[empId];
+                            for (let i = 0; i < newArr.length; ++i) {
+                                let exists = oldArr.some(s =>
+                                    s.name === newArr[i].name &&
+                                    s.start === newArr[i].start &&
+                                    s.end === newArr[i].end &&
+                                    s.salary === newArr[i].salary
+                                );
+                                if (!exists) oldArr.push(newArr[i]);
+                            }
+                        }
+
+                        // Merge workDaysStd & salaryPerDay (ưu tiên giữ giá trị lớn nhất)
+                        let workDaysStd = Math.max(
+                            parseInt(localStorage.getItem('workDaysStd') || '26'),
+                            parseInt(data.workDaysStd || '26')
+                        );
+                        let salaryPerDay = Math.max(
+                            parseInt(localStorage.getItem('salaryPerDay') || '0'),
+                            parseInt(data.salaryPerDay || '0')
+                        );
+
+                        // Save merged data
+                        localStorage.setItem('employees', JSON.stringify(mergedEmployees));
+                        localStorage.setItem('attendanceByMonth', JSON.stringify(oldAtt));
+                        localStorage.setItem('shifts', JSON.stringify(mergedShifts));
+                        localStorage.setItem('shiftsByEmp', JSON.stringify(oldShiftsByEmp));
+                        localStorage.setItem('workDaysStd', workDaysStd.toString());
+                        localStorage.setItem('salaryPerDay', salaryPerDay.toString());
+                        // Thêm các dòng sau để đồng bộ lịch làm việc
+                        if (data.workSchedules) localStorage.setItem('workSchedules', JSON.stringify(data.workSchedules));
+                        if (data.scheduleShiftsByMonth) localStorage.setItem('scheduleShiftsByMonth', JSON.stringify(data.scheduleShiftsByMonth));
+                        if (data.workScheduleWeekTemplate) localStorage.setItem('workScheduleWeekTemplate', JSON.stringify(data.workScheduleWeekTemplate));
+                        if (data.workScheduleWeekNames) localStorage.setItem('workScheduleWeekNames', JSON.stringify(data.workScheduleWeekNames));
+                        // Merge notes nếu có
+                        if (data.notes) {
+                            Object.keys(localStorage).forEach(k => {
+                                if (k.startsWith('note_')) localStorage.removeItem(k);
+                            });
+                            for (let k in data.notes) {
+                                localStorage.setItem(k, data.notes[k]);
+                            }
+                        }
+                        // Đồng bộ tên cửa hàng nếu có
+                        if (data.storeName !== undefined) {
+                            localStorage.setItem('storeName', data.storeName);
+                        }
+
+                        alert('Nhập dữ liệu thành công! Trang sẽ được tải lại.');
+                        if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+                        location.reload();
+                    } else {
+                        alert('File không đúng định dạng!');
+                    }
+                } catch (err) {
+                    alert('Lỗi khi đọc file dữ liệu!');
+                }
+            };
+            reader.readAsText(file);
+        }
+        // Trong hàm importAllData hoặc nơi xử lý nhập dữ liệu:
+        if (data.payrollInputs) {
+            let oldPayrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+            let newPayrollInputs = data.payrollInputs;
+            let mergedPayrollInputs = { ...oldPayrollInputs };
+            Object.keys(newPayrollInputs).forEach(empId => {
+                if (!mergedPayrollInputs[empId]) mergedPayrollInputs[empId] = {};
+                Object.keys(newPayrollInputs[empId]).forEach(month => {
+                    mergedPayrollInputs[empId][month] = {
+                        ...mergedPayrollInputs[empId][month],
+                        ...newPayrollInputs[empId][month]
+                    };
+                });
+            });
+            localStorage.setItem('payrollInputs', JSON.stringify(mergedPayrollInputs));
+        }
+        // Phát tín hiệu đồng bộ cho các tab khác
+        if (window.localStorage) {
+            localStorage.setItem('sync_data_trigger', Date.now().toString());
+        }
+    </script>
+    <script src="footer.js"></script>
+    <script>renderFooter();</script>
+</body>
+
+    </script>
+    <script src="footer.js"></script>
+    <script>renderFooter();</script>
+</body>
+</html>

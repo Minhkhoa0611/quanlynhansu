@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html style="zoom:90%;">
+<head><script type="text/javascript" src="/___vscode_livepreview_injected_script"></script><script type="text/javascript" src="/___vscode_livepreview_injected_script"></script>
+    <meta charset="utf-8">
+    <title>TimePro HRM-Danh sách nhân viên</title>
+        <link rel="icon" type="image/png" href="iconlogo.png">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(120deg, #e3f0ff 0%, #f7f7f7 100%);
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px; /* tăng từ 900px lên 1200px */
+            margin: 40px auto;
+            background: #fff;
+            padding: 32px 28px 28px 28px;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px #0002;
+            position: relative;
+        }
+        h2 {
+            color: #1976d2;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            font-size: 2.8rem; /* tăng từ 2rem lên 2.8rem */
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            margin-top: 18px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f9fbfd;
+            box-shadow: 0 2px 8px #0001;
+            table-layout: fixed; /* đảm bảo các cột có thể set width */
+            border-collapse: collapse; /* Thêm dòng này */
+        }
+        table, th, td {
+            border: 1px solid #b3d1f7; /* Thay đổi từ border: none; */
+        }
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            /* ...existing code... */
+        }
+        th:nth-child(1), td:nth-child(1) {
+            width: 18%; /* Tên */
+        }
+        th:nth-child(2), td:nth-child(2) {
+            width: 15%; /* ID */
+            min-width: 120px;
+            max-width: 200px;
+            word-break: break-all;
+        }
+        th:nth-child(3), td:nth-child(3) {
+            width: 13%; /* Chức vụ */
+        }
+        th:nth-child(4), td:nth-child(4) {
+            width: 13%; /* Cửa hàng */
+        }
+        th:nth-child(5), td:nth-child(5) {
+            width: 13%; /* Hình thức trả lương */
+        }
+        th:nth-child(6), td:nth-child(6) {
+            width: 13%; /* Lương cơ bản */
+        }
+        th:nth-child(7), td:nth-child(7) {
+            width: 7%; /* Ẩn/Hiện */
+        }
+        th.action-col, td.action-col {
+            width: 8%; /* thu nhỏ lại */
+            min-width: 80px;
+            max-width: 120px;
+            text-align: left;
+        }
+        input[type="number"], input[type="text"], .emp-input {
+            padding: 7px 10px;
+            border-radius: 6px;
+            border: 1.5px solid #b3d1f7;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.2s;
+            background: #f7fbff;
+        }
+        input[type="number"]:focus, input[type="text"]:focus, .emp-input:focus {
+            border: 1.5px solid #1976d2;
+            background: #e3f0ff;
+        }
+        select.emp-input {
+            height: 34px;
+            /* Đảm bảo chiều cao đồng bộ với input */
+        }
+        .form-row {
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .form-row label {
+            display: inline-block;
+            width: 110px;
+            color: #1976d2;
+            font-weight: 500;
+        }
+        .btn {
+            background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
+            color: #fff;
+            border: none;
+            padding: 8px 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px #1976d220;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+        }
+        .btn:hover {
+            background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+            box-shadow: 0 4px 16px #1976d220;
+            transform: translateY(-1px) scale(1.03);
+        }
+        .btn[style*="background:#e53935"] {
+            background: linear-gradient(90deg, #e53935 60%, #ff5252 100%) !important;
+        }
+        .btn[style*="background:#e53935"]:hover {
+            background: linear-gradient(90deg, #b71c1c 60%, #e53935 100%) !important;
+        }
+        .btn[style*="background:#43a047"] {
+            background: linear-gradient(90deg, #43a047 60%, #66bb6a 100%) !important;
+        }
+        .btn[style*="background:#43a047"]:hover {
+            background: linear-gradient(90deg, #2e7d32 60%, #43a047 100%) !important;
+        }
+        .btn-green {
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%) !important;
+            color: #222 !important;
+            box-shadow: 0 2px 8px #43e97b40, 0 1.5px 0 #fff3 inset;
+            border: none;
+        }
+        .btn-green:hover {
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%) !important;
+            color: #222 !important;
+            box-shadow: 0 4px 16px #43e97b60, 0 1.5px 0 #fff3 inset;
+        }
+        .btn-red {
+            background: linear-gradient(90deg, #ff5858 0%, #f09819 100%) !important;
+            color: #222 !important;
+            box-shadow: 0 2px 8px #ff585840, 0 1.5px 0 #fff3 inset;
+            border: none;
+        }
+        .btn-red:hover {
+            background: linear-gradient(90deg, #e52d27 0%, #b31217 100%) !important;
+            color: #222 !important;
+            box-shadow: 0 4px 16px #ff585860, 0 1.5px 0 #fff3 inset;
+        }
+        #addEmpForm {
+            background: #f4f8fc;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #1976d210;
+            padding: 18px 18px 10px 18px;
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        .emp-hide-checkbox {
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+        .emp-eye-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            outline: none;
+        }
+        .emp-eye-icon {
+            width: 22px;
+            height: 22px;
+            vertical-align: middle;
+            fill: #1976d2;
+            opacity: 0.85;
+            transition: opacity 0.15s;
+        }
+        .emp-eye-btn:hover .emp-eye-icon {
+            opacity: 1;
+            fill: #e53935;
+        }
+        .copy-id-btn svg {
+            transition: fill 0.15s, transform 0.15s;
+        }
+        .copy-id-btn:hover svg,
+        .copy-id-btn.copied svg {
+            fill: #43a047;
+            transform: scale(1.18) rotate(-10deg);
+        }
+        .copy-id-btn:active svg {
+            fill: #2e7d32;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 10px; }
+            .form-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+            .form-row label { width: 100%; }
+            table, th, td { font-size: 14px; }
+        }
+        .emp-store-glossy {
+            background: linear-gradient(120deg, #e3f0ff 60%, #b3d1f7 100%);
+            box-shadow: 0 2px 8px #1976d220, 0 1.5px 0 #fff inset;
+            border: 1.5px solid #1976d2;
+            color: #1976d2;
+            font-weight: 600;
+            transition: box-shadow 0.2s, border 0.2s;
+        }
+        .emp-store-glossy:focus {
+            box-shadow: 0 4px 16px #1976d240, 0 1.5px 0 #fff inset;
+            border: 2px solid #1565c0;
+            background: linear-gradient(120deg, #e3f0ff 40%, #90caf9 100%);
+        }
+    </style>
+    <script src="menu.js"></script>
+    <script src="data_io.js"></script>
+    <!-- Thư viện tạo QR code -->
+    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+    <!-- Thư viện tạo Barcode -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+    <script>renderMenu('emp');</script>
+    <div class="container">
+        <h2>TimePro HRM - Danh Sách Nhân Viên</h2>
+
+        <!-- Snackbar hoàn tác xóa -->
+        <div id="undoDeleteSnackbar" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:16px 28px;border-radius:8px;box-shadow:0 4px 24px #0005;z-index:3000;font-size:1.08rem;min-width:220px;text-align:center;">
+            <span id="undoDeleteMsg"></span>
+            <button id="undoDeleteBtn" style="margin-left:18px;background:#43a047;color:#fff;border:none;border-radius:6px;padding:6px 18px;font-size:1rem;font-weight:600;cursor:pointer;">Hoàn tác</button>
+        </div>
+        <form id="addEmpForm">
+            <div class="form-row">
+                <label>Tên:</label>
+                <input id="empName" required class="emp-input" style="flex:1;">
+                <label>Chức vụ:</label>
+                <select id="empPos" class="emp-input" style="flex:1;">
+                    <option value="">--Chọn chức vụ--</option>
+                    <option value="Nhân viên">Nhân viên</option>
+                    <option value="Tổ trưởng">Tổ trưởng</option>
+                    <option value="Quản lý">Quản lý</option>
+                    <option value="Phó cửa hàng trưởng">Phó cửa hàng trưởng</option>
+                    <option value="Cửa hàng trưởng">Cửa hàng trưởng</option>
+                    <option value="Giám sát">Giám sát</option>
+                    <option value="Giám đốc">Giám đốc</option>
+                </select>
+                <label>Cửa hàng:</label>
+                <select id="empStore" class="emp-input emp-store-glossy" required style="flex:1;">
+                    <!-- Options sẽ được render động -->
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Hình thức trả lương:</label>
+                <select id="empSalaryType" required onchange="toggleSalaryInput()" class="emp-input" style="flex:1;">
+                    <option value="base">Lương cơ bản</option>
+                    <option value="shift">Lương theo ca</option>
+                </select>
+                <label id="empSalaryLabel" style="margin-left:18px;">Lương cơ bản:</label>
+                <input id="empSalary" type="text" required oninput="formatCurrencyInput(this)" style="flex:1;">
+            </div>
+            <div class="form-row" style="justify-content:center; gap:18px;">
+                <button class="btn btn-green" type="submit" id="empSubmitBtn" style="min-width:100px;">Tạo</button>
+                <button class="btn btn-red" type="button" id="empCancelBtn" style="min-width:100px;">Hủy bỏ</button>
+            </div>
+        </form>
+        <!-- Nút chọn/xóa nhiều nhân viên -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+
+        <div>
+            <button class="btn btn-red" type="button" id="toggleSelectBtn" style="min-width:140px;">Select</button>
+            <button class="btn btn-red" type="button" id="deleteSelectedBtn" style="min-width:140px;display:none;">Delete</button>
+        </div>
+
+        <div style="text-align:right; margin-top:10px;">
+            <button class="btn" style="background:#e53935" onclick="deleteAllEmployees()">Delete All</button>
+        </div>
+
+        </div>
+        <table id="empTable">
+            <thead>
+                <tr>
+                    <th id="selectColHeader" style="display:none; width:32px; text-align:center;">
+                        <input type="checkbox" id="selectAllEmp" style="transform:scale(1);margin:0;">
+                    </th>
+                    <th>Tên</th>
+                    <th>ID</th>
+                    <th>Chức vụ</th>
+                    <th>Cửa hàng</th>
+                    <th>Hình thức trả lương</th>
+                    <th>Lương cơ bản</th>
+                    <th>Ẩn/Hiện</th>
+                    <th class="action-col">Hành động</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <!-- Modal QR -->
+        <div id="qrEmpModal" style="display:none;position:fixed;z-index:2000;left:0;top:0;width:100vw;height:100vh;background:#0005;">
+            <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:350px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;text-align:center;">
+                <h3 style="margin-top:0;color:#1976d2;font-size:20px;">Mã QR nhân viên</h3>
+                <div id="qrEmpName" style="font-weight:500;margin-bottom:8px;"></div>
+                <canvas id="qrEmpCanvas" style="margin:0 auto;display:block;"></canvas>
+                <div style="margin-top:14px;text-align:right;">
+                    <button class="btn" style="background:#e53935" onclick="closeEmpQRModal()">Đóng</button>
+                </div>
+            </div>
+        </div>
+        <!-- Modal Barcode -->
+        <div id="barcodeEmpModal" style="display:none;position:fixed;z-index:2000;left:0;top:0;width:100vw;height:100vh;background:#0005;">
+            <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:350px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;text-align:center;">
+                <h3 style="margin-top:0;color:#1976d2;font-size:20px;">Mã vạch nhân viên</h3>
+                <div id="barcodeEmpName" style="font-weight:500;margin-bottom:8px;"></div>
+                <svg id="barcodeEmpSvg" style="margin:0 auto;display:block;"></svg>
+                <div style="margin-top:14px;text-align:right;">
+                    <button class="btn" style="background:#e53935" onclick="closeEmpBarcodeModal()">Đóng</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Chi tiết nhân viên -->
+        <div id="empDetailModal" style="display:none;position:fixed;z-index:2100;left:0;top:0;width:100vw;height:100vh;background:#0005;">
+            <div id="empDetailContent" style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:480px;margin:80px auto;position:relative;box-shadow:0 4px 24px #0003;">
+                <!-- Nội dung sẽ render động -->
+            </div>
+        </div>
+    </div>
+    <script>
+        // Lấy dữ liệu nhân viên theo chuẩn trang minhkhoa0611.github.io/quanlynhansu (key: nhanvien)
+        let employees = [];
+        if (localStorage.getItem('employees')) {
+            employees = JSON.parse(localStorage.getItem('employees'));
+        } else if (localStorage.getItem('nhanvien')) {
+            employees = JSON.parse(localStorage.getItem('nhanvien'));
+            localStorage.setItem('employees', JSON.stringify(employees));
+        } else if (localStorage.getItem('employees_backup')) {
+            employees = JSON.parse(localStorage.getItem('employees_backup'));
+            localStorage.setItem('employees', JSON.stringify(employees));
+            alert('Dữ liệu nhân viên đã được phục hồi từ backup!');
+        } else {
+            employees = [];
+        }
+        // Sửa tên cửa hàng H'farm thành H'Farm cho tất cả nhân viên
+        employees.forEach(emp => {
+            if (emp.store === "H'farm") emp.store = "H'Farm";
+        });
+        // Luôn đồng bộ sang key nhanvien để tương thích
+        localStorage.setItem('nhanvien', JSON.stringify(employees));
+        let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+        let editEmpId = null;
+
+        function renderStoreOptions(selectedValue = '') {
+            // Chỉ cho phép chọn 2 cửa hàng: LepShop và H'Farm
+            const storeList = ["LepShop", "H'Farm"];
+            const empStore = document.getElementById('empStore');
+            empStore.innerHTML = '<option value="">--Chọn cửa hàng--</option>';
+            storeList.forEach(store => {
+                const opt = document.createElement('option');
+                opt.value = store;
+                opt.textContent = store;
+                if (selectedValue === store) opt.selected = true;
+                empStore.appendChild(opt);
+            });
+            // Nếu có selectedValue mà không nằm trong 2 cửa hàng trên thì thêm vào cuối
+            if (selectedValue && !storeList.includes(selectedValue)) {
+                const opt = document.createElement('option');
+                opt.value = selectedValue;
+                opt.textContent = selectedValue;
+                opt.selected = true;
+                empStore.appendChild(opt);
+            }
+        }
+
+        // --- Tự động cập nhật trường 'store' cho nhân viên theo ID ---
+        function autoUpdateEmployeeStores() {
+            // ID cho H'Farm
+            const hfarmIds = [
+                "1748743379562",
+                "1748743529323"
+            ];
+            employees.forEach(emp => {
+                // Nếu nhân viên chưa có trường store hoặc store rỗng/null thì tự động gán
+                if (!emp.store || emp.store === '') {
+                    if (hfarmIds.includes(emp.id)) {
+                        emp.store = "H'Farm";
+                    } else {
+                        emp.store = "LepShop";
+                    }
+                }
+                // Nếu đã có store thì giữ nguyên để người dùng có thể chỉnh sửa
+            });
+            saveEmployees();
+        }
+        // Gọi hàm này khi trang load để đảm bảo dữ liệu đúng
+        autoUpdateEmployeeStores();
+
+        // Bỏ hàm moveEmployee và các nút lên/xuống
+
+        // Kéo thả để thay đổi thứ tự nhân viên
+        function enableEmpDragDrop() {
+            const tbody = document.querySelector('#empTable tbody');
+            let dragIdx = null;
+
+            tbody.querySelectorAll('tr').forEach((tr, idx) => {
+                tr.draggable = true;
+                tr.ondragstart = e => {
+                    dragIdx = idx;
+                    tr.style.opacity = '0.5';
+                };
+                tr.ondragend = e => {
+                    tr.style.opacity = '';
+                };
+                tr.ondragover = e => {
+                    e.preventDefault();
+                    tr.style.background = '#bbdefb';
+                };
+                tr.ondragleave = e => {
+                    tr.style.background = '';
+                };
+                tr.ondrop = e => {
+                    e.preventDefault();
+                    tr.style.background = '';
+                    if (dragIdx === null || dragIdx === idx) return;
+                    // Đổi vị trí trong mảng
+                    const moved = employees.splice(dragIdx, 1)[0];
+                    employees.splice(idx, 0, moved);
+                    saveEmployees();
+                    renderEmployees();
+                };
+            });
+        }
+
+        // Thêm biến selectMode để tránh lỗi ReferenceError
+        let selectMode = false;
+
+        // Toggle select mode
+        document.getElementById('toggleSelectBtn').onclick = function() {
+            selectMode = !selectMode;
+            document.getElementById('selectColHeader').style.display = selectMode ? '' : 'none';
+            document.getElementById('deleteSelectedBtn').style.display = selectMode ? '' : 'none';
+            renderEmployees();
+            this.textContent = selectMode ? 'Bỏ chọn' : 'Select';
+        };
+
+        function renderEmployees() {
+            const tbody = document.querySelector('#empTable tbody');
+            tbody.innerHTML = '';
+            employees.forEach((emp, idx) => {
+                tbody.innerHTML += `<tr style="${emp.hidden ? 'opacity:0.5;background:#f8bbd0;' : ''}">
+                    <td style="text-align:center;${selectMode ? '' : 'display:none;'};width:32px;">
+                        <input type="checkbox" class="emp-checkbox" value="${emp.id}" style="transform:scale(1);margin:0;">
+                    </td>
+                    <td>${emp.name}</td>
+                    <td>
+                        <span style="display:inline-flex;align-items:center;gap:6px;position:relative;">
+                            <span class="emp-id-text" style="user-select:all;">${emp.id}</span>
+                            <button class="copy-id-btn" title="Copy ID" onclick="copyEmpIdToClipboard('${emp.id}', this)" style="background:none;border:none;cursor:pointer;padding:0;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;fill:#1976d2;">
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 18H8V7h11v16z"/>
+                                </svg>
+                            </button>
+                            <span class="copy-tooltip" style="display:none;position:absolute;top:-28px;left:0;background:#323232;color:#fff;padding:2px 10px;border-radius:5px;font-size:13px;white-space:nowrap;z-index:10;">Đã copy!</span>
+                        </span>
+                    </td>
+                    <td>${emp.position}</td>
+                    <td>${emp.store || ''}</td>
+                    <td>${emp.salary_type === 'shift' ? 'Lương theo ca' : 'Lương cơ bản'}</td>
+                    <td>${emp.salary_type === 'base' ? formatVND(emp.base_salary) : '<span style="color:#888">--</span>'}</td>
+                    <td style="text-align:center;">
+                        <button class="emp-eye-btn" title="${emp.hidden ? 'Hiện lại nhân viên này' : 'Ẩn nhân viên này'}" onclick="toggleHideEmployee('${emp.id}')">
+                            ${emp.hidden
+                                ? `<svg class="emp-eye-icon" viewBox="0 0 24 24">
+                                    <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"/>
+                                    <line x1="4" y1="4" x2="20" y2="20" stroke="#e53935" stroke-width="2"/>
+                                  </svg>`
+                                : `<svg class="emp-eye-icon" viewBox="0 0 24 24">
+                                    <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"/>
+                                  </svg>`
+                            }
+                        </button>
+                    </td>
+                    <td class="action-col">
+                        <button class="btn" onclick="showEmpDetailModal('${emp.id}')">Chi tiết</button>
+                    </td>
+                </tr>`;
+            });
+            enableEmpDragDrop();
+            // Gán lại sự kiện cho select all checkbox
+            const selectAll = document.getElementById('selectAllEmp');
+            if (selectAll) {
+                selectAll.checked = false;
+                selectAll.onclick = function() {
+                    document.querySelectorAll('.emp-checkbox').forEach(cb => cb.checked = selectAll.checked);
+                };
+            }
+        }
+
+        // Hàm lấy danh sách ngân hàng từ API (momo hoặc vban.vn)
+        async function fetchBankList() {
+            // Sử dụng API vban.vn miễn phí, trả về danh sách ngân hàng Việt Nam
+            try {
+                const res = await fetch('https://api.vietqr.io/v2/banks');
+                const data = await res.json();
+                if (data && data.data) {
+                    // Trả về mảng [{code, name, shortName, ...}]
+                    return data.data;
+                }
+            } catch (e) {}
+            return [];
+        }
+
+        // Modal chi tiết nhân viên
+        function showEmpDetailModal(empId) {
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            const modal = document.getElementById('empDetailModal');
+            const content = document.getElementById('empDetailContent');
+            // Hiển thị tên ngân hàng kèm tên viết tắt nếu có
+            let bankDisplay = '';
+            if (emp.bank_name) {
+                bankDisplay = emp.bank_name;
+                if (emp.bank_short_name) {
+                    bankDisplay += ` (${emp.bank_short_name})`;
+                }
+            }
+            // QR chuyển khoản (nếu đủ thông tin)
+            let qrBankHtml = '';
+            if (emp.bank_name && emp.bank_account && emp.bank_account_holder) {
+                qrBankHtml = `
+                    <div style="margin:22px 0 0 0;text-align:center;">
+                        <div id="bankQrLabel" style="font-weight:500;margin-bottom:8px;color:#1976d2;font-size:1.08rem;">QR chuyển khoản ngân hàng</div>
+                        <img id="bankQrImg" style="margin:0 auto;display:block;max-width:240px;max-height:240px;" alt="QR chuyển khoản VietQR"/>
+                        <div style="font-size:14px;color:#888;margin-top:6px;">Quét bằng app ngân hàng để chuyển khoản</div>
+                    </div>
+                `;
+            }
+            content.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div style="font-size:1.2rem;font-weight:600;color:#1976d2;">Chi tiết nhân viên</div>
+                    <button onclick="closeEmpDetailModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#888;">&times;</button>
+                </div>
+                <div style="margin:10px 0 18px 0;">
+                    <div><b>Tên:</b> ${emp.name}</div>
+                    <div><b>ID:</b> ${emp.id}</div>
+                    <div><b>Chức vụ:</b> ${emp.position || ''}</div>
+                    <div><b>Cửa hàng:</b> ${emp.store || ''}</div>
+                    <div><b>Hình thức trả lương:</b> ${emp.salary_type === 'shift' ? 'Lương theo ca' : 'Lương cơ bản'}</div>
+                    <div><b>Lương cơ bản:</b> ${emp.salary_type === 'base' ? formatVND(emp.base_salary) : '<span style="color:#888">--</span>'}</div>
+                    <div><b>Ngân hàng:</b> ${bankDisplay}</div>
+                    <div><b>Số tài khoản:</b> ${emp.bank_account || ''}</div>
+                    <div><b>Tên chủ tài khoản:</b> ${emp.bank_account_holder || ''}</div>
+                </div>
+                ${qrBankHtml}
+                <div id="empDetailActionBtns" style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn" onclick="showEditEmpInModal('${emp.id}')">Sửa</button>
+                    <button class="btn" style="background:#e53935" onclick="deleteEmployeeFromModal('${emp.id}')">Xóa</button>
+                    <button class="btn" style="background:#43a047" onclick="openQRModalAndHideDetail('${emp.id}')">QR</button>
+                    <button class="btn" style="background:#1976d2" onclick="openBarcodeModalAndHideDetail('${emp.id}')">Barcode</button>
+                </div>
+            `;
+            modal.style.display = '';
+            // Tạo QR chuyển khoản VietQR nếu đủ thông tin
+            if (emp.bank_name && emp.bank_account && emp.bank_account_holder) {
+                // Lấy bankId từ API VietQR (dùng shortName để tìm)
+                fetch('https://api.vietqr.io/v2/banks')
+                    .then(res => res.json())
+                    .then(data => {
+                        let bankId = '';
+                        if (data && data.data && Array.isArray(data.data)) {
+                            // Ưu tiên tìm theo shortName, nếu không có thì thử theo name
+                            let found = data.data.find(b => b.shortName === emp.bank_name);
+                            if (!found) found = data.data.find(b => b.name === emp.bank_name);
+                            if (found) bankId = found.bin || found.code || found.id;
+                        }
+                        if (bankId && emp.bank_account) {
+                            fetch('https://api.vietqr.io/v2/generate', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    accountNo: emp.bank_account,
+                                    accountName: emp.bank_account_holder || '',
+                                    acqId: bankId,
+                                    amount: 0,
+                                    addInfo: '',
+                                    template: 'compact'
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data && data.data && data.data.qrDataURL) {
+                                    const img = document.getElementById('bankQrImg');
+                                    if (img) img.src = data.data.qrDataURL;
+                                }
+                            });
+                        } else {
+                            // fallback: không có mã ngân hàng, không hiển thị QR
+                            const img = document.getElementById('bankQrImg');
+                            if (img) img.style.display = 'none';
+                        }
+                    });
+            }
+        }
+        window.showEmpDetailModal = showEmpDetailModal;
+
+        // Đóng popup chi tiết khi mở QR/Barcode
+        function openQRModalAndHideDetail(empId) {
+            closeEmpDetailModal();
+            setTimeout(() => showEmpQR(empId), 150);
+        }
+        function openBarcodeModalAndHideDetail(empId) {
+            closeEmpDetailModal();
+            setTimeout(() => showEmpBarcode(empId), 150);
+        }
+        window.openQRModalAndHideDetail = openQRModalAndHideDetail;
+        window.openBarcodeModalAndHideDetail = openBarcodeModalAndHideDetail;
+
+        function closeEmpDetailModal() {
+            document.getElementById('empDetailModal').style.display = 'none';
+        }
+        window.closeEmpDetailModal = closeEmpDetailModal;
+
+        // Sửa nhân viên trong popup
+        function showEditEmpInModal(empId) {
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            const content = document.getElementById('empDetailContent');
+            content.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div style="font-size:1.2rem;font-weight:600;color:#1976d2;">Sửa nhân viên</div>
+                    <button onclick="closeEmpDetailModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#888;">&times;</button>
+                </div>
+                <form id="editEmpModalForm" style="margin-top:12px;">
+                    <div style="margin-bottom:10px;">
+                        <label>Tên:</label>
+                        <input id="editEmpName" class="emp-input" required value="${emp.name}">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Chức vụ:</label>
+                        <select id="editEmpPos" class="emp-input">
+                            <option value="">--Chọn chức vụ--</option>
+                            <option value="Nhân viên" ${emp.position === 'Nhân viên' ? 'selected' : ''}>Nhân viên</option>
+                            <option value="Tổ trưởng" ${emp.position === 'Tổ trưởng' ? 'selected' : ''}>Tổ trưởng</option>
+                            <option value="Quản lý" ${emp.position === 'Quản lý' ? 'selected' : ''}>Quản lý</option>
+                            <option value="Phó cửa hàng trưởng" ${emp.position === 'Phó cửa hàng trưởng' ? 'selected' : ''}>Phó cửa hàng trưởng</option>
+                            <option value="Cửa hàng trưởng" ${emp.position === 'Cửa hàng trưởng' ? 'selected' : ''}>Cửa hàng trưởng</option>
+                            <option value="Giám sát" ${emp.position === 'Giám sát' ? 'selected' : ''}>Giám sát</option>
+                            <option value="Giám đốc" ${emp.position === 'Giám đốc' ? 'selected' : ''}>Giám đốc</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Cửa hàng:</label>
+                        <select id="editEmpStore" class="emp-input" required>
+                            <option value="LepShop" ${emp.store === 'LepShop' ? 'selected' : ''}>LepShop</option>
+                            <option value="H'Farm" ${emp.store === "H'Farm" ? 'selected' : ''}>H'Farm</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Hình thức trả lương:</label>
+                        <select id="editEmpSalaryType" class="emp-input" required onchange="toggleEditSalaryInput()">
+                            <option value="base" ${emp.salary_type === 'base' ? 'selected' : ''}>Lương cơ bản</option>
+                            <option value="shift" ${emp.salary_type === 'shift' ? 'selected' : ''}>Lương theo ca</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Lương cơ bản:</label>
+                        <input id="editEmpSalary" type="text" class="emp-input" ${emp.salary_type === 'base' ? '' : 'disabled'} value="${emp.salary_type === 'base' ? formatVND(emp.base_salary) : ''}" oninput="formatCurrencyInput(this)">
+                    </div>
+                    <div style="margin-bottom:10px;display:flex;align-items:center;">
+                        <label style="flex-shrink:0;">Ngân hàng:</label>
+                        <div style="flex:1;min-width:0;">
+                            <select id="editEmpBankName" class="emp-input" style="width:100%;max-width:100%;"></select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Số tài khoản:</label>
+                        <input id="editEmpBankAccount" class="emp-input" value="${emp.bank_account || ''}">
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <label>Tên chủ TK:</label>
+                        <input id="editEmpBankAccountHolder" class="emp-input" value="${emp.bank_account_holder || ''}">
+                    </div>
+                    <div style="text-align:right;">
+                        <button type="button" class="btn" onclick="closeEmpDetailModal()">Hủy</button>
+                        <button type="submit" class="btn" style="background:#43a047">Lưu</button>
+                    </div>
+                </form>
+            `;
+            document.getElementById('editEmpModalForm').onsubmit = function(e) {
+                e.preventDefault();
+                updateEmpFromModal(empId);
+            };
+            loadBankListToSelect(emp.bank_name || '', emp.bank_short_name || '');
+        }
+
+        // Hàm load danh sách ngân hàng vào select, lưu cả tên viết tắt
+        async function loadBankListToSelect(selectedBankName, selectedShortName) {
+            const select = document.getElementById('editEmpBankName');
+            if (!select) return;
+            select.innerHTML = '<option value="">--Chọn ngân hàng--</option>';
+            const banks = await fetchBankList();
+            banks.forEach(bank => {
+                const opt = document.createElement('option');
+                opt.value = bank.name;
+                opt.textContent = bank.name + (bank.shortName ? ` (${bank.shortName})` : '');
+                opt.setAttribute('data-short', bank.shortName || '');
+                if (
+                    (selectedBankName && selectedBankName === bank.name) ||
+                    (selectedShortName && selectedShortName === bank.shortName)
+                ) opt.selected = true;
+                select.appendChild(opt);
+            });
+            // Nếu selectedBankName không nằm trong danh sách thì thêm vào cuối
+            if (
+                selectedBankName &&
+                !banks.some(b => b.name === selectedBankName)
+            ) {
+                const opt = document.createElement('option');
+                opt.value = selectedBankName;
+                opt.textContent = selectedBankName + (selectedShortName ? ` (${selectedShortName})` : '');
+                opt.setAttribute('data-short', selectedShortName || '');
+                opt.selected = true;
+                select.appendChild(opt);
+            }
+            // Khi chọn ngân hàng, tự động lưu shortName vào biến tạm
+            select.onchange = function() {
+                const sel = select.options[select.selectedIndex];
+                select.setAttribute('data-selected-short', sel.getAttribute('data-short') || '');
+            };
+            // Gán shortName ban đầu nếu có
+            if (selectedShortName) select.setAttribute('data-selected-short', selectedShortName);
+        }
+
+        function toggleEditSalaryInput() {
+            const type = document.getElementById('editEmpSalaryType').value;
+            const salaryInput = document.getElementById('editEmpSalary');
+            if (type === 'base') {
+                salaryInput.disabled = false;
+                salaryInput.required = true;
+                salaryInput.style.background = '';
+            } else {
+                salaryInput.disabled = true;
+                salaryInput.required = false;
+                salaryInput.value = '';
+                salaryInput.style.background = '#eee';
+            }
+        }
+        window.toggleEditSalaryInput = toggleEditSalaryInput;
+
+        function updateEmpFromModal(empId) {
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            emp.name = document.getElementById('editEmpName').value;
+            emp.position = document.getElementById('editEmpPos').value;
+            emp.store = document.getElementById('editEmpStore').value;
+            emp.salary_type = document.getElementById('editEmpSalaryType').value;
+            emp.base_salary = emp.salary_type === 'base' ? parseCurrency(document.getElementById('editEmpSalary').value) : 0;
+            // Thông tin ngân hàng
+            const bankSelect = document.getElementById('editEmpBankName');
+            emp.bank_name = bankSelect.value;
+            emp.bank_short_name = bankSelect.options[bankSelect.selectedIndex].getAttribute('data-short') || '';
+            emp.bank_account = document.getElementById('editEmpBankAccount').value;
+            emp.bank_account_holder = document.getElementById('editEmpBankAccountHolder').value;
+            saveEmployees();
+            renderEmployees();
+            closeEmpDetailModal();
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        }
+
+        // Xóa nhân viên từ popup
+        function deleteEmployeeFromModal(empId) {
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            if (!confirm(`Bạn có chắc chắn muốn xóa nhân viên "${emp.name}"?`)) return;
+            closeEmpDetailModal();
+            // Xóa và cập nhật bảng ngay, hiển thị snackbar hoàn tác
+            setTimeout(() => {
+                deleteEmployee(empId);
+                renderEmployees(); // Đảm bảo cập nhật bảng ngay lập tức
+            }, 100);
+        }
+        window.deleteEmployeeFromModal = deleteEmployeeFromModal;
+
+        // Ẩn hoặc hiện nhân viên (toggle)
+        function toggleHideEmployee(empId) {
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            emp.hidden = !emp.hidden;
+            saveEmployees();
+            renderEmployees();
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        }
+        window.toggleHideEmployee = toggleHideEmployee;
+
+        function editEmployee(empId) {
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            empName.value = emp.name;
+            empPos.value = emp.position;
+            renderStoreOptions(emp.store || '');
+            empSalaryType.value = emp.salary_type || 'base';
+            toggleSalaryInput();
+            empSalary.value = emp.salary_type === 'base' ? formatVND(emp.base_salary) : '';
+            editEmpId = empId;
+            document.getElementById('empSubmitBtn').textContent = 'Cập nhật';
+        }
+
+        // Biến lưu tạm nhân viên vừa xóa và dữ liệu liên quan
+        let lastDeletedEmp = null;
+        let undoDeleteTimer = null;
+
+        // Thêm biến lưu backup khi xóa tất cả
+        let lastDeletedAllEmp = null;
+
+        // Thêm biến lưu backup khi xóa nhiều nhân viên
+        let lastDeletedMultiEmp = null;
+
+        function deleteEmployee(empId) {
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            // Xóa xác nhận thừa ở đây
+            // if (typeof deleteEmployeeFromModal !== "undefined" && event === undefined) {
+            //     if (!confirm(`Bạn có chắc chắn muốn xóa nhân viên "${emp.name}"?`)) return;
+            // }
+            // Lưu lại dữ liệu nhân viên và các dữ liệu liên quan để hoàn tác
+            let backup = {
+                emp: JSON.parse(JSON.stringify(emp)),
+                attendance: {},
+                shiftsByEmp: null,
+                shiftsByEmpByMonth: {},
+                payrollInputs: null,
+                notes: [],
+                workDaysStd: null,
+                salaryPerDay: null
+            };
+            // Attendance
+            Object.keys(attendanceByMonth).forEach(month => {
+                if (attendanceByMonth[month][empId]) {
+                    backup.attendance[month] = JSON.parse(JSON.stringify(attendanceByMonth[month][empId]));
+                }
+            });
+            // shiftsByEmp
+            let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+            if (shiftsByEmp[empId]) backup.shiftsByEmp = JSON.parse(JSON.stringify(shiftsByEmp[empId]));
+            // shiftsByEmpByMonth
+            let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            Object.keys(shiftsByEmpByMonth).forEach(month => {
+                if (shiftsByEmpByMonth[month][empId]) {
+                    if (!backup.shiftsByEmpByMonth[month]) backup.shiftsByEmpByMonth[month] = {};
+                    backup.shiftsByEmpByMonth[month] = JSON.parse(JSON.stringify(shiftsByEmpByMonth[month][empId]));
+                }
+            });
+            // payrollInputs
+            // Xóa nhân viên và dữ liệu liên quan như cũ
+            employees = employees.filter(e => e.id !== empId);
+            localStorage.setItem('employees', JSON.stringify(employees));
+            Object.keys(attendanceByMonth).forEach(month => {
+                if (attendanceByMonth[month][empId]) delete attendanceByMonth[month][empId];
+            });
+            localStorage.setItem('attendanceByMonth', JSON.stringify(attendanceByMonth));
+            if (shiftsByEmp[empId]) {
+                delete shiftsByEmp[empId];
+                if (Object.keys(shiftsByEmp).length === 0) {
+                    localStorage.removeItem('shiftsByEmp');
+                } else {
+                    localStorage.setItem('shiftsByEmp', JSON.stringify(shiftsByEmp));
+                }
+                if (shiftsByEmpByMonth[month][empId]) {
+                    delete shiftsByEmpByMonth[month][empId];
+                    changed = true;
+                }
+                if (Object.keys(shiftsByEmpByMonth[month]).length === 0) {
+                    delete shiftsByEmpByMonth[month];
+                    changed = true;
+                }
+            };
+            if (changed) {
+                if (Object.keys(shiftsByEmpByMonth).length === 0) {
+                    localStorage.removeItem('shiftsByEmpByMonth');
+                } else {
+                    localStorage.setItem('shiftsByEmpByMonth', JSON.stringify(shiftsByEmpByMonth));
+                }
+            }
+            if (payrollInputs[empId]) {
+                delete payrollInputs[empId];
+                if (Object.keys(payrollInputs).length === 0) {
+                    localStorage.removeItem('payrollInputs');
+                } else {
+                    localStorage.setItem('payrollInputs', JSON.stringify(payrollInputs));
+                }
+            }
+            Object.keys(localStorage).forEach(k => {
+                if (k.startsWith('note_' + empId)) localStorage.removeItem(k);
+            });
+            localStorage.removeItem('workDaysStd_' + empId);
+            localStorage.removeItem('salaryPerDay_' + empId);
+            renderEmployees();
+            if (employees.length === 0) {
+                localStorage.removeItem('shifts');
+            }
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+
+            // Hiển thị snackbar hoàn tác
+            lastDeletedEmp = backup;
+            showUndoDeleteSnackbar(emp.name);
+        }
+
+        function showUndoDeleteSnackbar(empName, isAll = false) {
+            clearTimeout(undoDeleteTimer);
+            const snackbar = document.getElementById('undoDeleteSnackbar');
+            document.getElementById('undoDeleteMsg').textContent = isAll
+                ? `Đã xóa tất cả nhân viên.`
+                : `Đã xóa nhân viên "${empName}".`;
+            snackbar.style.display = '';
+            undoDeleteTimer = setTimeout(() => {
+                snackbar.style.display = 'none';
+                lastDeletedEmp = null;
+                lastDeletedAllEmp = null;
+            }, 10000);
+        }
+
+        document.getElementById('undoDeleteBtn').onclick = function() {
+            // Nếu vừa xóa tất cả
+            if (lastDeletedAllEmp) {
+                // Phục hồi lại toàn bộ dữ liệu
+                localStorage.setItem('employees', JSON.stringify(lastDeletedAllEmp.employees));
+                localStorage.setItem('nhanvien', JSON.stringify(lastDeletedAllEmp.employees));
+                localStorage.setItem('employees_backup', JSON.stringify(lastDeletedAllEmp.employees));
+                if (lastDeletedAllEmp.attendanceByMonth !== null)
+                    localStorage.setItem('attendanceByMonth', lastDeletedAllEmp.attendanceByMonth);
+                if (lastDeletedAllEmp.shifts !== null)
+                    localStorage.setItem('shifts', lastDeletedAllEmp.shifts);
+                if (lastDeletedAllEmp.shiftsByEmp !== null)
+                    localStorage.setItem('shiftsByEmp', lastDeletedAllEmp.shiftsByEmp);
+                if (lastDeletedAllEmp.shiftsByEmpByMonth !== null)
+                    localStorage.setItem('shiftsByEmpByMonth', lastDeletedAllEmp.shiftsByEmpByMonth);
+                if (lastDeletedAllEmp.payrollInputs !== null)
+                    localStorage.setItem('payrollInputs', lastDeletedAllEmp.payrollInputs);
+                if (lastDeletedAllEmp.workDaysStd !== null)
+                    localStorage.setItem('workDaysStd', lastDeletedAllEmp.workDaysStd);
+                if (lastDeletedAllEmp.salaryPerDay !== null)
+                    localStorage.setItem('salaryPerDay', lastDeletedAllEmp.salaryPerDay);
+
+                // Phục hồi notes, workDaysStd_, salaryPerDay_
+                Object.keys(lastDeletedAllEmp.notes).forEach(k => {
+                    localStorage.setItem(k, lastDeletedAllEmp.notes[k]);
+                });
+                Object.keys(lastDeletedAllEmp.workDaysStdByEmp).forEach(k => {
+                    localStorage.setItem(k, lastDeletedAllEmp.workDaysStdByEmp[k]);
+                });
+                Object.keys(lastDeletedAllEmp.salaryPerDayByEmp).forEach(k => {
+                    localStorage.setItem(k, lastDeletedAllEmp.salaryPerDayByEmp[k]);
+                });
+
+                employees = JSON.parse(localStorage.getItem('employees') || '[]');
+                renderEmployees();
+                document.getElementById('undoDeleteSnackbar').style.display = 'none';
+                lastDeletedAllEmp = null;
+                if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+                return;
+            }
+            // Nếu vừa xóa 1 nhân viên
+            if (!lastDeletedEmp) return;
+            // Phục hồi nhân viên
+            employees.push(lastDeletedEmp.emp);
+            localStorage.setItem('employees', JSON.stringify(employees));
+            // Phục hồi attendance
+            let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            Object.keys(lastDeletedEmp.attendance).forEach(month => {
+                if (!attendanceByMonth[month]) attendanceByMonth[month] = {};
+                attendanceByMonth[month][lastDeletedEmp.emp.id] = lastDeletedEmp.attendance[month];
+            });
+            localStorage.setItem('attendanceByMonth', JSON.stringify(attendanceByMonth));
+            // Phục hồi shiftsByEmp
+            if (lastDeletedEmp.shiftsByEmp) {
+                let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+                shiftsByEmp[lastDeletedEmp.emp.id] = lastDeletedEmp.shiftsByEmp;
+                localStorage.setItem('shiftsByEmp', JSON.stringify(shiftsByEmp));
+            }
+            // Phục hồi shiftsByEmpByMonth
+            if (lastDeletedEmp.shiftsByEmpByMonth) {
+                let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+                Object.keys(lastDeletedEmp.shiftsByEmpByMonth).forEach(month => {
+                    if (!shiftsByEmpByMonth[month]) shiftsByEmpByMonth[month] = {};
+                    shiftsByEmpByMonth[month][lastDeletedEmp.emp.id] = lastDeletedEmp.shiftsByEmpByMonth[month];
+                });
+                localStorage.setItem('shiftsByEmpByMonth', JSON.stringify(shiftsByEmpByMonth));
+            }
+            // Phục hồi payrollInputs
+            if (lastDeletedEmp.payrollInputs) {
+                let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+                payrollInputs[lastDeletedEmp.emp.id] = lastDeletedEmp.payrollInputs;
+                localStorage.setItem('payrollInputs', JSON.stringify(payrollInputs));
+            }
+            // Phục hồi notes
+            if (lastDeletedEmp.notes && lastDeletedEmp.notes.length > 0) {
+                lastDeletedEmp.notes.forEach(n => {
+                    localStorage.setItem(n.key, n.value);
+                });
+            }
+            // Phục hồi workDaysStd & salaryPerDay riêng
+            if (lastDeletedEmp.workDaysStd) localStorage.setItem('workDaysStd_' + lastDeletedEmp.emp.id, lastDeletedEmp.workDaysStd);
+            if (lastDeletedEmp.salaryPerDay) localStorage.setItem('salaryPerDay_' + lastDeletedEmp.emp.id, lastDeletedEmp.salaryPerDay);
+
+            renderEmployees();
+            document.getElementById('undoDeleteSnackbar').style.display = 'none';
+            lastDeletedEmp = null;
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        };
+
+        document.getElementById('addEmpForm').onsubmit = function(e) {
+            e.preventDefault();
+            const salaryType = empSalaryType.value;
+            const salary = salaryType === 'base' ? parseCurrency(empSalary.value) : 0;
+            const store = empStore.value;
+            if (editEmpId) {
+                // Cập nhật
+                const emp = employees.find(e => e.id === editEmpId);
+                emp.name = empName.value;
+                emp.position = empPos.value;
+                emp.store = store;
+                emp.salary_type = salaryType;
+                emp.base_salary = salary;
+                // Khi cập nhật không thay đổi trạng thái ẩn/hiện
+                editEmpId = null;
+                document.getElementById('empSubmitBtn').textContent = 'Tạo';
+            } else {
+                // Thêm mới
+                const emp = {
+                    id: Date.now().toString(),
+                    name: empName.value,
+                    position: empPos.value,
+                    store: store,
+                    salary_type: salaryType,
+                    base_salary: salary,
+                    hidden: false // Mặc định là hiện
+                };
+                employees.push(emp);
+            }
+            saveEmployees();
+            renderEmployees();
+            this.reset();
+            renderStoreOptions();
+            empSalaryType.value = 'base';
+            toggleSalaryInput();
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        };
+
+        // Thêm sự kiện cho nút Hủy bỏ để reset form và trạng thái chỉnh sửa
+        document.getElementById('empCancelBtn').onclick = function() {
+            document.getElementById('addEmpForm').reset();
+            renderStoreOptions();
+            document.getElementById('empSalaryType').value = 'base';
+            toggleSalaryInput();
+            editEmpId = null;
+            document.getElementById('empSubmitBtn').textContent = 'Tạo';
+        };
+
+        function saveEmployees() {
+            localStorage.setItem('employees', JSON.stringify(employees));
+            localStorage.setItem('nhanvien', JSON.stringify(employees)); // đồng bộ với trang kia
+            // Lưu backup mỗi lần cập nhật
+            localStorage.setItem('employees_backup', JSON.stringify(employees));
+        }
+
+        function formatVND(val) {
+            if (isNaN(val)) return '';
+            return Number(val).toLocaleString('vi-VN') + ' ₫';
+        }
+        function parseCurrency(val) {
+            return Number((val+'').replace(/[^\d]/g, '')) || 0;
+        }
+        function formatCurrencyInput(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            if (!value) value = '0';
+            input.value = Number(value).toLocaleString('vi-VN');
+        }
+
+        function exportAllData() {
+            const data = typeof getExportData === 'function' ? getExportData() : {};
+            // Lấy tên cửa hàng từ localStorage
+            const storeName = (localStorage.getItem('storeName') || 'LepShop').trim();
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const fileName = `${storeName.replace(/[^a-zA-Z0-9]/g, '')}-${pad(now.getDate())}-${pad(now.getMonth()+1)}-${now.getFullYear()}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.json`;
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importAllData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.employees && data.attendanceByMonth) {
+                        // Merge employees
+                        let oldEmployees = JSON.parse(localStorage.getItem('employees') || '[]');
+                        let newEmployees = data.employees || [];
+                        let empMap = {};
+                        oldEmployees.forEach(e => empMap[e.id] = e);
+                        newEmployees.forEach(e => empMap[e.id] = e);
+                        let mergedEmployees = Object.values(empMap);
+
+                        // Merge attendanceByMonth
+                        let oldAtt = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+                        let newAtt = data.attendanceByMonth || {};
+                        for (let month in newAtt) {
+                            if (!oldAtt[month]) oldAtt[month] = {};
+                            for (let empId in newAtt[month]) {
+                                if (!oldAtt[month][empId]) oldAtt[month][empId] = {};
+                                for (let day in newAtt[month][empId]) {
+                                    oldAtt[month][empId][day] = newAtt[month][empId][day];
+                                }
+                            }
+                        }
+
+                        // Merge shifts
+                        let oldShifts = JSON.parse(localStorage.getItem('shifts') || '[]');
+                        let newShifts = data.shifts || [];
+                        let shiftMap = {};
+                        oldShifts.forEach(s => shiftMap[s.id] = s);
+                        newShifts.forEach(s => shiftMap[s.id] = s);
+                        let mergedShifts = Object.values(shiftMap);
+
+                        // Merge shiftsByEmp
+                        let oldShiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+                        let newShiftsByEmp = data.shiftsByEmp || {};
+                        for (let empId in newShiftsByEmp) {
+                            if (!oldShiftsByEmp[empId]) oldShiftsByEmp[empId] = [];
+                            let oldArr = oldShiftsByEmp[empId];
+                            let newArr = newShiftsByEmp[empId];
+                            for (let i = 0; i < newArr.length; ++i) {
+                                let exists = oldArr.some(s =>
+                                    s.name === newArr[i].name &&
+                                    s.start === newArr[i].start &&
+                                    s.end === newArr[i].end &&
+                                    s.salary === newArr[i].salary
+                                );
+                                if (!exists) oldArr.push(newArr[i]);
+                            }
+                        }
+
+                        // Merge shiftsByEmpByMonth
+                        let oldShiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+                        let newShiftsByEmpByMonth = data.shiftsByEmpByMonth || {};
+                        for (let month in newShiftsByEmpByMonth) {
+                            if (!oldShiftsByEmpByMonth[month]) oldShiftsByEmpByMonth[month] = {};
+                            for (let empId in newShiftsByEmpByMonth[month]) {
+                                oldShiftsByEmpByMonth[month][empId] = newShiftsByEmpByMonth[month][empId];
+                            }
+                        }
+
+                        // Merge workDaysStd & salaryPerDay (ưu tiên giữ giá trị lớn nhất)
+                        let workDaysStd = Math.max(
+                            parseInt(localStorage.getItem('workDaysStd') || '26'),
+                            parseInt(data.workDaysStd || '26')
+                        );
+                        let salaryPerDay = Math.max(
+                            parseInt(localStorage.getItem('salaryPerDay') || '0'),
+                            parseInt(data.salaryPerDay || '0')
+                        );
+
+                        // Áp dụng lại workDaysStdByEmp và salaryPerDayByEmp nếu có
+                        if (data.workDaysStdByEmp) {
+                            Object.keys(data.workDaysStdByEmp).forEach(empId => {
+                                localStorage.setItem('workDaysStd_' + empId, data.workDaysStdByEmp[empId]);
+                            });
+                        }
+                        if (data.salaryPerDayByEmp) {
+                            Object.keys(data.salaryPerDayByEmp).forEach(empId => {
+                                localStorage.setItem('salaryPerDay_' + empId, data.salaryPerDayByEmp[empId]);
+                            });
+                        }
+
+                        // Save merged data
+                        localStorage.setItem('employees', JSON.stringify(mergedEmployees));
+                        localStorage.setItem('attendanceByMonth', JSON.stringify(oldAtt));
+                        localStorage.setItem('shifts', JSON.stringify(mergedShifts));
+                        localStorage.setItem('shiftsByEmp', JSON.stringify(oldShiftsByEmp));
+                        localStorage.setItem('shiftsByEmpByMonth', JSON.stringify(oldShiftsByEmpByMonth));
+                        localStorage.setItem('workDaysStd', workDaysStd.toString());
+                        localStorage.setItem('salaryPerDay', salaryPerDay.toString());
+                        // Thêm các dòng sau để đồng bộ lịch làm việc
+                        if (data.workSchedules) localStorage.setItem('workSchedules', JSON.stringify(data.workSchedules));
+                        if (data.scheduleShiftsByMonth) localStorage.setItem('scheduleShiftsByMonth', JSON.stringify(data.scheduleShiftsByMonth));
+                        if (data.workScheduleWeekTemplate) localStorage.setItem('workScheduleWeekTemplate', JSON.stringify(data.workScheduleWeekTemplate));
+                        if (data.workScheduleWeekNames) localStorage.setItem('workScheduleWeekNames', JSON.stringify(data.workScheduleWeekNames));
+                        // Merge notes nếu có
+                        if (data.notes) {
+                            Object.keys(localStorage).forEach(k => {
+                                if (k.startsWith('note_')) localStorage.removeItem(k);
+                            });
+                            for (let k in data.notes) {
+                                localStorage.setItem(k, data.notes[k]);
+                            }
+                        }
+
+                        // Merge payrollInputs nếu có (đảm bảo các trường TC/LT, Doanh Thu, Phụ cấp, Thưởng lễ, Tiền ứng, Phạt được nhập lại)
+                        if (data.payrollInputs) {
+                            let oldPayrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+                            let newPayrollInputs = data.payrollInputs;
+                            let mergedPayrollInputs = { ...oldPayrollInputs };
+                            Object.keys(newPayrollInputs).forEach(empId => {
+                                if (!mergedPayrollInputs[empId]) mergedPayrollInputs[empId] = {};
+                                Object.keys(newPayrollInputs[empId]).forEach(month => {
+                                    mergedPayrollInputs[empId][month] = {
+                                        ...mergedPayrollInputs[empId][month],
+                                        ...newPayrollInputs[empId][month]
+                                    };
+                                });
+                            });
+                            localStorage.setItem('payrollInputs', JSON.stringify(mergedPayrollInputs));
+                        }
+
+                        alert('Nhập dữ liệu thành công! Trang sẽ được tải lại.');
+                        if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+                        location.reload();
+                    } else {
+                        alert('File không đúng định dạng!');
+                    }
+                } catch (err) {
+                    alert('Lỗi khi đọc file dữ liệu!');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function toggleSalaryInput() {
+            const type = empSalaryType.value;
+            if (type === 'base') {
+                empSalary.disabled = false;
+                empSalary.required = true;
+                document.getElementById('empSalaryLabel').style.color = '';
+                empSalary.style.background = '';
+                // Không set mặc định 800000 khi chuyển sang lương cơ bản
+                // empSalary.value = empSalary.value || ''; // Không gán giá trị mặc định
+            } else {
+                empSalary.disabled = true;
+                empSalary.required = false;
+                empSalary.value = '';
+                document.getElementById('empSalaryLabel').style.color = '#aaa';
+                empSalary.style.background = '#eee';
+            }
+        }
+
+        window.toggleSalaryInput = toggleSalaryInput;
+        toggleSalaryInput();
+
+        renderStoreOptions();
+        renderEmployees();
+        
+        // Đồng bộ dữ liệu nhân viên giữa các tab/trang
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'employees') {
+                employees = JSON.parse(localStorage.getItem('employees') || '[]');
+                renderEmployees();
+            }
+        });
+
+        function showEmpQR(empId) {
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            document.getElementById('qrEmpName').textContent = emp.name + (emp.position ? ' - ' + emp.position : '');
+            // Tạo QR code với emp.id
+            const qr = new QRious({
+                element: document.getElementById('qrEmpCanvas'),
+                value: emp.id,
+                size: 220,
+                level: 'H'
+            });
+            document.getElementById('qrEmpModal').style.display = '';
+        }
+        function closeEmpQRModal() {
+            document.getElementById('qrEmpModal').style.display = 'none';
+        }
+
+        // Barcode functions
+        function showEmpBarcode(empId) {
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            document.getElementById('barcodeEmpName').textContent = emp.name + (emp.position ? ' - ' + emp.position : '');
+            // Tạo barcode với emp.id
+            JsBarcode("#barcodeEmpSvg", emp.id, {
+                format: "CODE128",
+                lineColor: "#1976d2",
+                width: 2,
+                height: 80,
+                displayValue: true,
+                fontSize: 18,
+                margin: 10
+            });
+            document.getElementById('barcodeEmpModal').style.display = '';
+        }
+        function closeEmpBarcodeModal() {
+            document.getElementById('barcodeEmpModal').style.display = 'none';
+        }
+
+        // Đóng modal barcode khi bấm ra ngoài
+        document.addEventListener('mousedown', function(e) {
+            const barcodeModal = document.getElementById('barcodeEmpModal');
+            if (barcodeModal && barcodeModal.style.display !== 'none' && !barcodeModal.querySelector('div').contains(e.target)) {
+                closeEmpBarcodeModal();
+            }
+        });
+
+        // Đảm bảo các hàm QR/barcode có thể gọi từ HTML
+        window.showEmpQR = showEmpQR;
+        window.closeEmpQRModal = closeEmpQRModal;
+        window.showEmpBarcode = showEmpBarcode;
+        window.closeEmpBarcodeModal = closeEmpBarcodeModal;
+
+        function copyEmpIdToClipboard(empId, btn) {
+            navigator.clipboard.writeText(empId).then(() => {
+                // Hiện tooltip "Đã copy!" tạm thời
+                const wrapper = btn.parentElement;
+                const tooltip = wrapper.querySelector('.copy-tooltip');
+                btn.classList.add('copied');
+                if (tooltip) {
+                    tooltip.style.display = 'inline-block';
+                    setTimeout(() => {
+                        tooltip.style.display = 'none';
+                        btn.classList.remove('copied');
+                    }, 1200);
+                } else {
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                    }, 1200);
+                }
+                btn.blur();
+            });
+        }
+        window.copyEmpIdToClipboard = copyEmpIdToClipboard;
+
+        // Xóa tất cả nhân viên và dữ liệu liên quan
+        function deleteAllEmployees() {
+            if (!employees.length) {
+                alert('Không có nhân viên nào để xóa!');
+                return;
+            }
+            if (!confirm('Bạn có chắc chắn muốn xóa TẤT CẢ nhân viên và toàn bộ dữ liệu liên quan? Hành động này không thể hoàn tác!')) return;
+
+            // Lưu lại toàn bộ dữ liệu để hoàn tác
+            lastDeletedAllEmp = {
+                employees: JSON.parse(JSON.stringify(employees)),
+                attendanceByMonth: localStorage.getItem('attendanceByMonth'),
+                shifts: localStorage.getItem('shifts'),
+                shiftsByEmp: localStorage.getItem('shiftsByEmp'),
+                shiftsByEmpByMonth: localStorage.getItem('shiftsByEmpByMonth'),
+                payrollInputs: localStorage.getItem('payrollInputs'),
+                notes: {},
+                workDaysStd: localStorage.getItem('workDaysStd'),
+                salaryPerDay: localStorage.getItem('salaryPerDay'),
+                workDaysStdByEmp: {},
+                salaryPerDayByEmp: {}
+            };
+            // Lưu tất cả notes, workDaysStd_, salaryPerDay_
+            Object.keys(localStorage).forEach(k => {
+                if (k.startsWith('note_')) lastDeletedAllEmp.notes[k] = localStorage.getItem(k);
+                if (k.startsWith('workDaysStd_')) lastDeletedAllEmp.workDaysStdByEmp[k] = localStorage.getItem(k);
+                if (k.startsWith('salaryPerDay_')) lastDeletedAllEmp.salaryPerDayByEmp[k] = localStorage.getItem(k);
+            });
+
+            // Xóa dữ liệu nhân viên
+            employees = [];
+            localStorage.setItem('employees', '[]');
+            localStorage.setItem('nhanvien', '[]');
+            localStorage.setItem('employees_backup', '[]');
+
+            // Xóa dữ liệu liên quan đến nhân viên
+            localStorage.removeItem('attendanceByMonth');
+            localStorage.removeItem('shifts');
+            localStorage.removeItem('shiftsByEmp');
+            localStorage.removeItem('shiftsByEmpByMonth');
+            localStorage.removeItem('payrollInputs');
+
+            // Xóa notes, workDaysStd, salaryPerDay từng nhân viên
+            Object.keys(localStorage).forEach(k => {
+                if (k.startsWith('note_') || k.startsWith('workDaysStd_') || k.startsWith('salaryPerDay_')) {
+                    localStorage.removeItem(k);
+                }
+            });
+
+            renderEmployees();
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+            // alert('Đã xóa tất cả nhân viên và dữ liệu liên quan!');
+            // Hiển thị snackbar hoàn tác
+            showUndoDeleteSnackbar('tất cả nhân viên', true);
+        }
+        window.deleteAllEmployees = deleteAllEmployees;
+
+        // Xóa nhiều nhân viên đã chọn
+        document.getElementById('deleteSelectedBtn').onclick = function() {
+            const checked = Array.from(document.querySelectorAll('.emp-checkbox:checked')).map(cb => cb.value);
+            if (!checked.length) {
+                alert('Vui lòng chọn ít nhất 1 nhân viên để xóa!');
+                return;
+            }
+            if (!confirm('Bạn có chắc chắn muốn xóa các nhân viên đã chọn?')) return;
+
+            // Lưu lại backup cho hoàn tác
+            let backups = [];
+            checked.forEach(empId => {
+                const emp = employees.find(e => e.id === empId);
+                if (!emp) return;
+                let backup = {
+                    emp: JSON.parse(JSON.stringify(emp)),
+                    attendance: {},
+                    shiftsByEmp: null,
+                    shiftsByEmpByMonth: {},
+                    payrollInputs: null,
+                    notes: [],
+                    workDaysStd: null,
+                    salaryPerDay: null
+                };
+                // Attendance
+                Object.keys(attendanceByMonth).forEach(month => {
+                    if (attendanceByMonth[month][empId]) {
+                        backup.attendance[month] = JSON.parse(JSON.stringify(attendanceByMonth[month][empId]));
+                    }
+                });
+                // shiftsByEmp
+                let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+                if (shiftsByEmp[empId]) backup.shiftsByEmp = JSON.parse(JSON.stringify(shiftsByEmp[empId]));
+                // shiftsByEmpByMonth
+                let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+                Object.keys(shiftsByEmpByMonth).forEach(month => {
+                    if (shiftsByEmpByMonth[month][empId]) {
+                        if (!backup.shiftsByEmpByMonth[month]) backup.shiftsByEmpByMonth[month] = {};
+                        backup.shiftsByEmpByMonth[month] = JSON.parse(JSON.stringify(shiftsByEmpByMonth[month][empId]));
+                    }
+                });
+                // payrollInputs
+                let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+                if (payrollInputs[empId]) backup.payrollInputs = JSON.parse(JSON.stringify(payrollInputs[empId]));
+                // notes
+                Object.keys(localStorage).forEach(k => {
+                    if (k.startsWith('note_' + empId)) {
+                        backup.notes.push({ key: k, value: localStorage.getItem(k) });
+                    }
+                });
+                // workDaysStd & salaryPerDay riêng
+                if (localStorage.getItem('workDaysStd_' + empId)) backup.workDaysStd = localStorage.getItem('workDaysStd_' + empId);
+                if (localStorage.getItem('salaryPerDay_' + empId)) backup.salaryPerDay = localStorage.getItem('salaryPerDay_' + empId);
+
+                backups.push(backup);
+            });
+
+            // Xóa các nhân viên đã chọn và dữ liệu liên quan
+            employees = employees.filter(e => !checked.includes(e.id));
+            localStorage.setItem('employees', JSON.stringify(employees));
+            checked.forEach ( empId => {
+                Object.keys(attendanceByMonth).forEach(month => {
+                    if (attendanceByMonth[month][empId]) delete attendanceByMonth[month][empId];
+                });
+            });
+            localStorage.setItem('attendanceByMonth', JSON.stringify(attendanceByMonth));
+            let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+            checked.forEach(empId => {
+                if (shiftsByEmp[empId]) delete shiftsByEmp[empId];
+            });
+            localStorage.setItem('shiftsByEmp', JSON.stringify(shiftsByEmp));
+            let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            let changed = false;
+            Object.keys(shiftsByEmpByMonth).forEach(month => {
+                checked.forEach(empId => {
+                    if (shiftsByEmpByMonth[month][empId]) {
+                        delete shiftsByEmpByMonth[month][empId];
+                        changed = true;
+                    }
+                });
+                if (Object.keys(shiftsByEmpByMonth[month]).length === 0) {
+                    delete shiftsByEmpByMonth[month];
+                    changed = true;
+                }
+            });
+            if (changed) {
+                localStorage.setItem('shiftsByEmpByMonth', JSON.stringify(shiftsByEmpByMonth));
+            }
+            let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+                       checked.forEach(empId => {
+                if (payrollInputs[empId]) delete payrollInputs[empId];
+            });
+            localStorage.setItem('payrollInputs', JSON.stringify(payrollInputs));
+            checked.forEach(empId => {
+                Object.keys(localStorage).forEach(k => {
+                    if (k.startsWith('note_' + empId)) localStorage.removeItem(k);
+                });
+                localStorage.removeItem('workDaysStd_' + empId);
+                localStorage.removeItem('salaryPerDay_' + empId);
+            });
+            renderEmployees();
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+
+            // Hiển thị snackbar hoàn tác
+            lastDeletedMultiEmp = backups;
+            showUndoDeleteSnackbar('các nhân viên đã chọn');
+        };
+
+        // Undo cho xóa nhiều nhân viên
+        const oldUndoDeleteBtn = document.getElementById('undoDeleteBtn').onclick;
+        document.getElementById('undoDeleteBtn').onclick = function() {
+            if (lastDeletedMultiEmp) {
+                lastDeletedMultiEmp.forEach(backup => {
+                    employees.push(backup.emp);
+                    // Phục hồi attendance
+                    let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+                    Object.keys(backup.attendance).forEach(month => {
+                        if (!attendanceByMonth[month]) attendanceByMonth[month] = {};
+                        attendanceByMonth[month][backup.emp.id] = backup.attendance[month];
+                    });
+                    localStorage.setItem('attendanceByMonth', JSON.stringify(attendanceByMonth));
+                    // Phục hồi shiftsByEmp
+                    if (backup.shiftsByEmp) {
+                        let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+                        shiftsByEmp[backup.emp.id] = backup.shiftsByEmp;
+                        localStorage.setItem('shiftsByEmp', JSON.stringify(shiftsByEmp));
+                    }
+                    // Phục hồi shiftsByEmpByMonth
+                    if (backup.shiftsByEmpByMonth) {
+                        let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+                        Object.keys(backup.shiftsByEmpByMonth).forEach(month => {
+                            if (!shiftsByEmpByMonth[month]) shiftsByEmpByMonth[month] = {};
+                            shiftsByEmpByMonth[month][backup.emp.id] = backup.shiftsByEmpByMonth[month];
+                        });
+                        localStorage.setItem('shiftsByEmpByMonth', JSON.stringify(shiftsByEmpByMonth));
+                    }
+                    // Phục hồi payrollInputs
+                    if (backup.payrollInputs) {
+                        let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+                        payrollInputs[backup.emp.id] = backup.payrollInputs;
+                        localStorage.setItem('payrollInputs', JSON.stringify(payrollInputs));
+                    }
+                    // Phục hồi notes
+                    if (backup.notes && backup.notes.length > 0) {
+                        backup.notes.forEach(n => {
+                            localStorage.setItem(n.key, n.value);
+                        });
+                    }
+                    // Phục hồi workDaysStd & salaryPerDay riêng
+                    if (backup.workDaysStd) localStorage.setItem('workDaysStd_' + backup.emp.id, backup.workDaysStd);
+                    if (backup.salaryPerDay) localStorage.setItem('salaryPerDay_' + backup.emp.id, backup.salaryPerDay);
+                });
+                localStorage.setItem('employees', JSON.stringify(employees));
+                renderEmployees();
+                document.getElementById('undoDeleteSnackbar').style.display = 'none';
+                lastDeletedMultiEmp = null;
+                if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+                return;
+            }
+            // fallback: gọi undo mặc định (xóa 1 hoặc tất cả)
+            if (typeof oldUndoDeleteBtn === 'function') oldUndoDeleteBtn();
+        };
+
+        document.getElementById('empSubmitBtn').onclick = function() {
+            const empName = document.getElementById('empName').value.trim();
+            const empPos = document.getElementById('empPos').value.trim();
+            const empStore = document.getElementById('empStore').value;
+            const empSalaryType = document.getElementById('empSalaryType').value;
+            const empSalary = document.getElementById('empSalary').value.replace(/[^\d]/g, '');
+            if (!empName || !empPos || !empStore || !empSalaryType) {
+                alert('Vui lòng điền đầy đủ thông tin!');
+                return;
+            }
+            if (empSalaryType === 'base' && (!empSalary || isNaN(empSalary))) {
+                alert('Vui lòng nhập lương cơ bản hợp lệ!');
+                return;
+            }
+            // Tự động thêm ID nếu không có
+            if (!editEmpId) {
+                document.getElementById('empId').value = 'NV' + Date.now();
+            }
+            document.getElementById('addEmpForm').submit();
+        }
+    </script>
+    <script src="footer.js"></script>
+    <script>renderFooter();</script>
+</body>
+</html>
+</html>

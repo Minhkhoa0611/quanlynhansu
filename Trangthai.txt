@@ -1,0 +1,3 @@
+LepShop : OFF
+H'Farm : ON
+THAO VY : OFF

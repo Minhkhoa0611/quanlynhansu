@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html style="zoom:90%;">
+<head>
+    <meta charset="utf-8">
+    <title>TimePro HRM - Lịch Làm Việc</title>
+    <link rel="icon" type="image/png" href="iconlogo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #e3f0ff 0%, #f7f7f7 100%);
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #ffffffee; /* sáng hơn, trong suốt nhẹ */
+            padding: 40px 32px 32px 32px;
+            border-radius: 22px;
+            box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001;
+            border: 1.5px solid #b3d1f7;
+        }
+        h2 {
+            color: #1976d2;
+            margin-bottom: 22px;
+            letter-spacing: 1px;
+            font-size: 2.3rem;
+            text-align: center;
+            font-weight: 700;
+            text-shadow: 0 2px 8px #1976d210;
+        }
+        .form-row {
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            background: #e3f0ff44;
+            border-radius: 10px;
+            padding: 12px 18px;
+            box-shadow: 0 2px 8px #1976d210;
+        }
+        .form-row label {
+            display: inline-block;
+            width: 130px;
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 1.08rem;
+        }
+        select, input[type="month"] {
+            padding: 9px 16px;
+            border-radius: 8px;
+            border: 1.5px solid #b3d1f7;
+            font-size: 17px;
+            background: #f7fbff;
+            min-width: 170px;
+            transition: border 0.18s, box-shadow 0.18s;
+            box-shadow: 0 1px 6px #1976d210;
+        }
+        select:focus, input[type="month"]:focus {
+            border: 1.5px solid #1976d2;
+            background: #e3f0ff;
+            box-shadow: 0 2px 12px #1976d220;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 22px;
+            margin-bottom: 22px;
+        }
+        .calendar-day, .calendar-header {
+            min-height: 60px; /* giảm từ 80px */
+            background: #f7fbff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #1976d210;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 7px 4px 4px 4px; /* giảm padding */
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.18s, background 0.18s, box-shadow 0.18s, transform 0.13s;
+            position: relative;
+        }
+        .calendar-header {
+            background: #e3f0ff;
+            color: #1976d2;
+            font-weight: bold;
+            min-height: 40px;
+            cursor: default;
+            border: none;
+            box-shadow: none;
+            font-size: 1.08rem;
+            letter-spacing: 1px;
+        }
+        .calendar-day.selected {
+            border: 2.5px solid #1976d2;
+            background: #e3f0ff;
+            box-shadow: 0 4px 16px #1976d220;
+            transform: scale(1.03);
+        }
+        .calendar-day.off {
+            background: #fbe9e7;
+            color: #b71c1c;
+            border: 2px dashed #e57373;
+        }
+        .calendar-day.today {
+            border: 2.5px solid #ffb300;
+            background: #fffde7;
+            box-shadow: 0 4px 24px #ffb30033;
+        }
+        .calendar-day:hover {
+            box-shadow: 0 8px 24px #1976d230;
+            background: #bbdefb;
+            transform: translateY(-2px) scale(1.04);
+            z-index: 2;
+        }
+        .calendar-day .day-number {
+            font-size: 1.05rem; /* giảm từ 1.18rem */
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1976d2;
+            text-shadow: 0 1px 4px #1976d210;
+        }
+        .calendar-day .shift-label {
+            font-size: 0.93rem; /* giảm từ 1.02rem */
+            color: #388e3c;
+            font-weight: 600;
+            margin-top: 1px;
+            line-height: 1.3;
+            text-align: center;
+            width: 100%;
+            white-space: pre-line;
+        }
+        .calendar-day .off-label {
+            font-size: 0.93rem; /* giảm từ 1.02rem */
+            color: #b71c1c;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .calendar-day .edit-btn {
+            position: absolute;
+            top: 7px;
+            right: 10px;
+            background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            padding: 3px 10px;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 2px 8px #1976d220;
+            transition: background 0.18s, box-shadow 0.18s, transform 0.13s;
+        }
+        .calendar-day:hover .edit-btn {
+            display: block;
+        }
+        .calendar-day .edit-btn:hover {
+            background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+            box-shadow: 0 4px 16px #1976d220;
+            transform: scale(1.08);
+        }
+        .shift-popup {
+            position: fixed;
+            left: 0; top: 0; right: 0; bottom: 0;
+            background: rgba(30,40,60,0.18);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeInBg 0.25s;
+        }
+        @keyframes fadeInBg {
+            from { background: rgba(30,40,60,0.01);}
+            to { background: rgba(30,40,60,0.18);}
+        }
+        .shift-popup-content {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 12px 48px #1976d240;
+            padding: 36px 28px 22px 28px;
+            min-width: 280px;
+            text-align: center;
+            border: 2px solid #b3d1f7;
+            animation: popupIn 0.22s;
+        }
+        @keyframes popupIn {
+            from { opacity: 0; transform: scale(0.92);}
+            to { opacity: 1; transform: scale(1);}
+        }
+        .shift-popup-content h3 {
+            color: #1976d2;
+            margin-top: 0;
+            font-size: 1.22rem;
+            font-weight: 700;
+        }
+        .shift-popup-content select {
+            width: 92%;
+            margin: 14px 0 20px 0;
+            font-size: 1.05rem;
+        }
+        .shift-popup-content .btn {
+            margin: 0 12px;
+        }
+        .btn {
+            background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 26px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px #1976d220;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+        }
+        .btn:hover {
+            background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+            box-shadow: 0 4px 16px #1976d220;
+            transform: translateY(-1px) scale(1.06);
+        }
+        .btn[style*="background:#e53935"] {
+            background: #e53935 !important;
+        }
+        .btn[style*="background:#e53935"]:hover {
+            background: #b71c1c !important;
+        }
+        /* --- TUẦN --- */
+        #workScheduleWeek table {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 6px 28px #1976d220;
+            background: #f7fbff;
+            border: 1.5px solid #b3d1f7;
+        }
+        #workScheduleWeek th, #workScheduleWeek td {
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 1.01rem;
+        }
+        #workScheduleWeek th {
+            background: #e3f0ff;
+            color: #1976d2;
+            font-weight: bold;
+            border-bottom: 2px solid #b3d1f7;
+            font-size: 1.08rem;
+        }
+        #workScheduleWeek tr {
+            background: #fff;
+            transition: background 0.18s;
+        }
+        #workScheduleWeek tr:hover {
+            background: #e3f0ff33;
+        }
+        #workScheduleWeek td {
+            border-radius: 10px;
+            transition: box-shadow 0.15s, background 0.15s;
+            vertical-align: top;
+            padding: 8px 6px 6px 6px;
+            font-size: 1.01rem;
+        }
+        #workScheduleWeek td.day-cell {
+            cursor: pointer;
+            box-shadow: 0 1px 4px #1976d210;
+            background: #f7fbff;
+            position: relative;
+            min-height: 44px; /* giảm từ 70px */
+            min-width: 0;
+            border-radius: 10px;
+            padding: 5px 3px 3px 3px; /* giảm padding */
+            font-size: 0.97rem; /* giảm font */
+        }
+        #workScheduleWeek td.day-cell.selected {
+            border: 2.5px solid #1976d2;
+            background: #e3f0ff;
+        }
+        #workScheduleWeek td.day-cell.off {
+            background: #fbe9e7;
+            color: #b71c1c;
+            border: 2px dashed #e57373;
+        }
+        #workScheduleWeek td.day-cell.today {
+            border: 2.5px solid #ffb300;
+            background: #fffde7;
+            box-shadow: 0 2px 12px #ffb30033;
+        }
+        #workScheduleWeek td.day-cell:hover {
+            box-shadow: 0 6px 20px #1976d220;
+            background: #bbdefb;
+            transform: scale(1.04);
+            z-index: 2;
+        }
+        #workScheduleWeek .shift-label {
+            font-size: 0.92rem; /* giảm từ 1.01rem */
+            line-height: 1.3;
+        }
+        #workScheduleWeek .off-label {
+            font-size: 0.92rem;
+        }
+        #workScheduleWeek .day-number {
+            font-size: 1.01rem;
+        }
+        /* Responsive */
+        @media (max-width: 900px) {
+            #workScheduleWeek th, #workScheduleWeek td { font-size: 13px; padding: 4px 2px 2px 2px; }
+            #workScheduleWeek td.day-cell { min-height: 34px; font-size: 12px; }
+            #workScheduleWeek .day-number { font-size: 1rem; }
+            .container { padding: 18px 4vw 18px 4vw; }
+        }
+        @media (max-width: 600px) {
+            #workScheduleWeek th, #workScheduleWeek td { font-size: 12px; padding: 2px 1px 1px 1px; }
+            #workScheduleWeek td.day-cell { min-height: 24px; font-size: 11px; }
+            #workScheduleWeek .day-number { font-size: 0.95rem; }
+            .container { padding: 8px 2vw 8px 2vw; }
+        }
+        /* Popup content shadow and border */
+        .shift-popup-content {
+            border: 2px solid #b3d1f7;
+        }
+        /* Responsive for popup */
+        @media (max-width: 500px) {
+            .shift-popup-content {
+                padding: 18px 6vw 12px 6vw !important;
+                min-width: 0 !important;
+            }
+        }
+        #scheduleShiftSetup {
+            margin-bottom: 18px;
+        }
+        #scheduleShiftSetup .setup-title {
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: #1976d2;
+            font-size: 1.13rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+        }
+        #scheduleShiftSetup .setup-title .icon {
+            font-size: 1.25em;
+            color: #1976d2;
+        }
+        #scheduleShiftSetup table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 6px;
+            background: #f7fbff;
+            box-shadow: 0 2px 12px #1976d210;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            border: 1.5px solid #b3d1f7;
+        }
+        #scheduleShiftSetup th, #scheduleShiftSetup td {
+            text-align: center;
+            padding: 8px 6px;
+            font-size: 1rem;
+        }
+        #scheduleShiftSetup th {
+            background: #e3f0ff;
+            color: #1976d2;
+            font-weight: 700;
+            border-bottom: 2px solid #b3d1f7;
+            font-size: 1.05rem;
+        }
+        #scheduleShiftSetup tr {
+            background: #fff;
+            transition: background 0.16s;
+        }
+        #scheduleShiftSetup tr:hover td {
+            background: #e3f0ff55;
+        }
+        #scheduleShiftSetup td {
+            border-radius: 8px;
+            vertical-align: middle;
+        }
+        #scheduleShiftSetup input[type="text"], #scheduleShiftSetup input[type="time"] {
+            width: 90%;
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1.2px solid #b3d1f7;
+            background: #f7fbff;
+            font-size: 0.98rem;
+            transition: border 0.15s, box-shadow 0.15s;
+            text-align: center;
+        }
+        #scheduleShiftSetup input[type="text"]:focus, #scheduleShiftSetup input[type="time"]:focus {
+            border: 1.2px solid #1976d2;
+            background: #e3f0ff;
+            box-shadow: 0 2px 8px #1976d220;
+        }
+        #scheduleShiftSetup .btn {
+            padding: 6px 16px;
+            font-size: 0.97rem;
+            border-radius: 7px;
+            min-width: 0;
+            margin: 0 2px;
+        }
+        #scheduleShiftSetup .btn[style*="background:#e53935"] {
+            background: #e53935 !important;
+        }
+        #scheduleShiftSetup .btn[style*="background:#e53935"]:hover {
+            background: #b71c1c !important;
+        }
+        #scheduleShiftSetup .add-shift-btn {
+            display: block;
+            margin: 16px auto 0 auto;
+            background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.05rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #1976d220;
+            transition: background 0.18s, box-shadow 0.18s, transform 0.13s;
+        }
+        #scheduleShiftSetup .add-shift-btn:hover {
+            background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+            box-shadow: 0 4px 16px #1976d220;
+            transform: scale(1.04);
+        }
+    </style>
+    <script src="menu.js"></script>
+    <script src="data_io.js"></script>
+</head>
+<body>
+    <script>renderMenu('work_schedule');</script>
+    <div class="container">
+        <h2>Lịch Làm Việc Theo Tháng</h2>
+        <div class="form-row">
+            <label>Chọn cửa hàng:</label>
+            <select id="wsStoreSelect" onchange="renderEmpSelect();renderWorkSchedule()">
+                <option value="">--Tất cả--</option>
+                <option value="LepShop">LepShop</option>
+                <option value="H'farm">H'farm</option>
+            </select>
+            <label>Chọn nhân viên:</label>
+            <select id="wsEmpSelect" onchange="renderWorkSchedule()"></select>
+            <label>Chọn tháng:</label>
+            <input type="month" id="wsMonth" onchange="renderWorkSchedule()">
+        </div>
+        <!-- Thêm chức năng thêm/sửa/xóa ca riêng cho lịch làm việc -->
+        <div id="scheduleShiftSetup" style="margin-bottom:18px;"></div>
+        <div id="workScheduleCalendar"></div>
+        <div id="workScheduleWeek" style="margin-top:32px;"></div>
+        <div style="margin-top:18px;text-align:right;">
+            <button class="btn" onclick="saveWorkSchedule()">Lưu lịch làm việc</button>
+            <button class="btn" style="background:#e53935;margin-left:10px;" onclick="clearAllWorkSchedules()">Xóa dữ liệu cũ</button>
+            <button class="btn" style="background:#43a047;margin-left:10px;" onclick="applyWeekTemplateToMonth()">Áp dụng lịch tuần cho tháng</button>
+        </div>
+    </div>
+    <!-- Popup chọn ca cho từng ngày -->
+    <div id="shiftPopup" class="shift-popup" style="display:none;">
+        <div class="shift-popup-content">
+            <h3>Chọn ca làm cho ngày <span id="popupDay"></span></h3>
+            <div id="popupShiftCheckboxes" style="text-align:left;max-width:260px;margin:0 auto 10px auto;"></div>
+            <div style="margin-top:18px;">
+                <button class="btn" onclick="applyShiftPopup()">OK</button>
+                <button class="btn" style="background:#e53935" onclick="closeShiftPopup()">Hủy</button>
+            </div>
+        </div>
+    </div>
+    <!-- Popup cảnh báo xung đột lịch -->
+    <div id="conflictAlert" class="shift-popup" style="display:none;align-items:center;justify-content:center;">
+        <div class="shift-popup-content" style="min-width:320px;max-width:96vw;box-shadow:0 8px 32px #e5393520;padding:36px 32px 24px 32px;">
+            <h3 style="color:#e53935;margin-bottom:18px;font-size:1.18rem;">&#9888; Cảnh báo xung đột lịch</h3>
+            <div id="conflictMsg" style="margin:16px 0 24px 0;color:#d32f2f;font-size:1.05rem;line-height:1.6;"></div>
+            <div style="margin-top:18px;display:flex;gap:18px;justify-content:center;">
+                <button class="btn" style="min-width:120px;font-size:1rem;" onclick="applyConflictSchedule()">Vẫn áp dụng</button>
+                <button class="btn" style="background:#e53935;min-width:120px;font-size:1rem;" onclick="closeConflictAlert()">Hủy</button>
+            </div>
+        </div>
+    </div>
+    <!-- Popup chọn ca cho tất cả nhân viên -->
+    <div id="allEmpSameShiftPopup" class="shift-popup" style="display:none;align-items:center;justify-content:center;">
+        <div class="shift-popup-content" style="min-width:320px;max-width:96vw;box-shadow:0 8px 32px #1976d220;padding:36px 32px 24px 32px;">
+            <h3 style="margin-bottom:18px;font-size:1.13rem;color:#1976d2;">Chọn ca áp dụng cho tất cả nhân viên</h3>
+            <div id="allEmpShiftSelectDiv" style="margin:18px 0 18px 0;text-align:center;"></div>
+            <div style="margin-top:18px;display:flex;gap:18px;justify-content:center;">
+                <button class="btn" style="min-width:120px;font-size:1rem;" onclick="applyAllEmpSameShift()">Áp dụng</button>
+                <button class="btn" style="background:#e53935;min-width:120px;font-size:1rem;" onclick="closeAllEmpSameShiftPopup()">Hủy</button>
+            </div>
+        </div>
+    </div>
+    <!-- Popup button hover effect -->
+    <style>
+        /* Popup button hover effect */
+        .shift-popup-content .btn {
+            margin: 0 6px;
+            font-size: 1rem;
+            border-radius: 8px;
+            min-width: 110px;
+            transition: background 0.18s, box-shadow 0.18s, transform 0.13s;
+        }
+        .shift-popup-content .btn:hover {
+            background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+            box-shadow: 0 4px 16px #1976d220;
+            transform: translateY(-1px) scale(1.04);
+        }
+        .shift-popup-content .btn[style*="background:#e53935"] {
+            background: #e53935 !important;
+        }
+        .shift-popup-content .btn[style*="background:#e53935"]:hover {
+            background: #b71c1c !important;
+        }
+    </style>
+    <!-- Popup thông báo nhỏ -->
+    <div id="miniAlertPopup" class="shift-popup" style="display:none;align-items:center;justify-content:center;">
+        <div class="shift-popup-content" style="min-width:220px;max-width:90vw;padding:24px 18px 16px 18px;">
+            <div id="miniAlertMsg" style="font-size:1.07rem;color:#1976d2;text-align:center;"></div>
+            <div style="margin-top:18px;text-align:center;">
+                <button class="btn" style="min-width:90px;" onclick="closeMiniAlertPopup()">OK</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Khi lấy danh sách nhân viên, chỉ lấy nhân viên chưa bị ẩn
+        let employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
+        let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+        let workSchedules = JSON.parse(localStorage.getItem('workSchedules') || '{}');
+        let currentPopupDay = null;
+
+        function getCurrentMonth() {
+            let m = document.getElementById('wsMonth').value;
+            if (!m) {
+                const now = new Date();
+                m = now.toISOString().slice(0,7);
+                document.getElementById('wsMonth').value = m;
+            }
+            return m;
+        }
+
+        function renderEmpSelect() {
+            const sel = document.getElementById('wsEmpSelect');
+            const store = document.getElementById('wsStoreSelect').value;
+            let filtered = employees;
+            if (store) filtered = employees.filter(e => (e.store || '') === store);
+            sel.innerHTML = filtered.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+        }
+
+        function daysInMonth(month) {
+            const [y, m] = month.split('-').map(Number);
+            return new Date(y, m, 0).getDate();
+        }
+
+        // Thêm/sửa/xóa ca dùng chung cho lịch làm việc (theo tháng, không theo từng nhân viên)
+        function renderScheduleShiftSetup() {
+            const month = getCurrentMonth();
+            // Lưu ca dùng chung vào localStorage key: scheduleShiftsByMonth
+            let scheduleShiftsByMonth = JSON.parse(localStorage.getItem('scheduleShiftsByMonth') || '{}');
+            if (!scheduleShiftsByMonth[month]) scheduleShiftsByMonth[month] = [];
+            let shifts = scheduleShiftsByMonth[month];
+
+            let html = `<div class="setup-title"><span class="icon">🛠️</span>Thiết lập ca làm dùng chung cho lịch làm việc tháng này:</div>`;
+            html += `<table style="width:100%;border-collapse:collapse;background:#f9fbfd;box-shadow:0 2px 8px #0001;">
+                <thead>
+                    <tr>
+                        <th>Tên ca</th>
+                        <th>Giờ bắt đầu</th>
+                        <th>Giờ kết thúc</th>
+                        <th>Xóa</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            shifts.forEach((shift, idx) => {
+                html += `<tr>
+                    <td><input type="text" value="${shift.name||''}" style="width:110px" onchange="updateScheduleShift('${month}',${idx},'name',this.value)"></td>
+                    <td><input type="time" value="${shift.start||''}" style="width:90px" onchange="updateScheduleShift('${month}',${idx},'start',this.value)"></td>
+                    <td><input type="time" value="${shift.end||''}" style="width:90px" onchange="updateScheduleShift('${month}',${idx},'end',this.value)"></td>
+                    <td><button class="btn" style="background:#e53935" onclick="deleteScheduleShift('${month}',${idx})">Xóa</button></td>
+                </tr>`;
+            });
+            html += `</tbody></table>
+                <button class="btn add-shift-btn" style="margin-top:10px;" onclick="addScheduleShift('${month}')">+ Thêm ca</button>`;
+            document.getElementById('scheduleShiftSetup').innerHTML = html;
+        }
+
+        function addScheduleShift(month) {
+            let scheduleShiftsByMonth = JSON.parse(localStorage.getItem('scheduleShiftsByMonth') || '{}');
+            if (!scheduleShiftsByMonth[month]) scheduleShiftsByMonth[month] = [];
+            scheduleShiftsByMonth[month].push({name:'',start:'',end:''});
+            localStorage.setItem('scheduleShiftsByMonth', JSON.stringify(scheduleShiftsByMonth));
+            renderScheduleShiftSetup();
+            renderWorkSchedule();
+        }
+        function updateScheduleShift(month, idx, key, value) {
+            let scheduleShiftsByMonth = JSON.parse(localStorage.getItem('scheduleShiftsByMonth') || '{}');
+            if (!scheduleShiftsByMonth[month]) scheduleShiftsByMonth[month] = [];
+            scheduleShiftsByMonth[month][idx][key] = value;
+            localStorage.setItem('scheduleShiftsByMonth', JSON.stringify(scheduleShiftsByMonth));
+            renderScheduleShiftSetup();
+            renderWorkSchedule();
+        }
+        function deleteScheduleShift(month, idx) {
+            let scheduleShiftsByMonth = JSON.parse(localStorage.getItem('scheduleShiftsByMonth') || '{}');
+            if (!scheduleShiftsByMonth[month]) scheduleShiftsByMonth[month] = [];
+            scheduleShiftsByMonth[month].splice(idx, 1);
+            localStorage.setItem('scheduleShiftsByMonth', JSON.stringify(scheduleShiftsByMonth));
+            renderScheduleShiftSetup();
+            renderWorkSchedule();
+        }
+
+        // Lấy shifts dùng chung cho lịch làm việc (theo tháng)
+        function getScheduleShifts(empId, month) {
+            let scheduleShiftsByMonth = JSON.parse(localStorage.getItem('scheduleShiftsByMonth') || '{}');
+            return scheduleShiftsByMonth[month] || [];
+        }
+
+        // Sửa lại renderWorkSchedule để dùng ca riêng
+        function renderWorkSchedule() {
+            employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            workSchedules = JSON.parse(localStorage.getItem('workSchedules') || '{}');
+            const empId = document.getElementById('wsEmpSelect').value;
+            const month = getCurrentMonth();
+            renderScheduleShiftSetup();
+            if (!empId) {
+                document.getElementById('workScheduleCalendar').innerHTML = '<div style="color:#e53935;padding:18px;">Vui lòng chọn nhân viên.</div>';
+                return;
+            }
+            // Lấy danh sách ca riêng cho lịch làm việc
+            let shifts = getScheduleShifts(empId, month);
+            if (!Array.isArray(shifts) || shifts.length === 0) {
+                document.getElementById('workScheduleCalendar').innerHTML = '<div style="color:#e53935;padding:18px;">Chưa thiết lập ca làm cho nhân viên này/tháng này.</div>';
+                return;
+            }
+            if (!workSchedules[month]) workSchedules[month] = {};
+            if (!workSchedules[month][empId]) workSchedules[month][empId] = {};
+            let ws = workSchedules[month][empId];
+
+            const days = daysInMonth(month);
+            const [y, m] = month.split('-').map(Number);
+            const firstDay = new Date(y, m-1, 1).getDay(); // 0=CN
+            const today = new Date();
+            const isCurrentMonth = today.getFullYear() === y && (today.getMonth() + 1) === m;
+            let html = `<div class="calendar">`;
+            const weekdays = ['CN','T2','T3','T4','T5','T6','T7'];
+            for (let i = 0; i < 7; ++i) {
+                html += `<div class="calendar-header">${weekdays[i]}</div>`;
+            }
+            for (let i = 0; i < firstDay; ++i) {
+                html += `<div></div>`;
+            }
+            for (let d = 1; d <= days; ++d) {
+                let shiftArr = ws[d];
+                if (!Array.isArray(shiftArr)) shiftArr = (shiftArr === "" || shiftArr === undefined) ? [] : [shiftArr];
+                let isOff = !shiftArr || shiftArr.length === 0;
+                let shiftLabel = isOff
+                    ? '<span class="off-label">Nghỉ</span>'
+                    : `<span class="shift-label">${
+                        shiftArr.map(idx =>
+                            `${shifts[idx]?.name || ('Ca ' + (Number(idx)+1))}<br><span style='font-size:12px;color:#888'>${shifts[idx]?.start||'--'}-${shifts[idx]?.end||'--'}</span>`
+                        ).join('<hr style=\'margin:2px 0;border:none;border-top:1px dashed #b3d1f7;\' />')
+                    }</span>`;
+                let dayClass = "calendar-day";
+                if (isOff) dayClass += " off";
+                else dayClass += " selected";
+                if (isCurrentMonth && today.getDate() === d) dayClass += " today";
+                html += `<div class="${dayClass}" onclick="openShiftPopup(${d})">
+                    <span class="day-number">${d}</span>
+                    ${shiftLabel}
+                    <button class="edit-btn" onclick="openShiftPopup(${d});event.stopPropagation();">✎</button>
+                </div>`;
+            }
+            html += `</div>`;
+            document.getElementById('workScheduleCalendar').innerHTML = html;
+            renderWorkScheduleWeek(ws, shifts, days, y, m);
+        }
+
+        // Sửa lại các hàm popup để dùng ca riêng
+        function openShiftPopup(day) {
+            const empId = document.getElementById('wsEmpSelect').value;
+            const month = getCurrentMonth();
+            let shifts = getScheduleShifts(empId, month);
+            let ws = workSchedules[month]?.[empId] || {};
+            currentPopupDay = day;
+            document.getElementById('popupDay').textContent = day;
+            let checkedArr = ws[day];
+            if (!Array.isArray(checkedArr)) checkedArr = (checkedArr === "" || checkedArr === undefined) ? [] : [checkedArr];
+            let html = '';
+            shifts.forEach((s, idx) => {
+                html += `<label style="display:block;margin-bottom:6px;">
+                    <input type="checkbox" class="shift-checkbox" value="${idx}" ${checkedArr.includes(idx) ? 'checked' : ''} onchange="onShiftCheckboxChange()">
+                    ${s.name || 'Ca ' + (idx+1)} <span style="color:#888;font-size:12px;">(${s.start||'--'}-${s.end||'--'})</span>
+                </label>`;
+            });
+            html += `<label style="display:block;margin-top:8px;">
+                <input type="checkbox" id="offCheckbox" ${checkedArr.length===0?'checked':''} onchange="onOffCheckboxChange()">
+                Nghỉ (không làm ca nào)
+            </label>`;
+            document.getElementById('popupShiftCheckboxes').innerHTML = html;
+            document.getElementById('shiftPopup').style.display = '';
+        }
+
+        // Khi tích ô "Nghỉ", bỏ chọn tất cả ca
+        function onOffCheckboxChange() {
+            const off = document.getElementById('offCheckbox');
+            if (off && off.checked) {
+                document.querySelectorAll('#popupShiftCheckboxes .shift-checkbox').forEach(cb => cb.checked = false);
+            }
+        }
+
+        // Khi tích bất kỳ ca nào, nếu có ca được chọn thì bỏ chọn ô "Nghỉ"
+        function onShiftCheckboxChange() {
+            const shiftCbs = document.querySelectorAll('#popupShiftCheckboxes .shift-checkbox');
+            let anyChecked = false;
+            shiftCbs.forEach(cb => { if (cb.checked) anyChecked = true; });
+            if (anyChecked) {
+                const off = document.getElementById('offCheckbox');
+                if (off) off.checked = false;
+            }
+        }
+
+        function applyShiftPopup() {
+            const empId = document.getElementById('wsEmpSelect').value;
+            const month = getCurrentMonth();
+            let workSchedules = JSON.parse(localStorage.getItem('workSchedules') || '{}');
+            if (!workSchedules[month]) workSchedules[month] = {};
+            if (!workSchedules[month][empId]) workSchedules[month][empId] = {};
+            let ws = workSchedules[month][empId];
+
+            // Lấy các checkbox ca làm
+            let checkboxes = document.querySelectorAll('#popupShiftCheckboxes input[type="checkbox"]:not(#offCheckbox)');
+            let checked = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) checked.push(Number(cb.value));
+            });
+            // Nếu chọn nghỉ thì không lưu ca nào
+            if (document.getElementById('offCheckbox') && document.getElementById('offCheckbox').checked) {
+                ws[currentPopupDay] = [];
+            } else {
+                ws[currentPopupDay] = checked;
+            }
+            localStorage.setItem('workSchedules', JSON.stringify(workSchedules));
+            closeShiftPopup();
+            renderWorkSchedule();
+        }
+
+        function closeShiftPopup() {
+            document.getElementById('shiftPopup').style.display = 'none';
+        }
+
+        function saveWorkSchedule() {
+            const empId = document.getElementById('wsEmpSelect').value;
+            const month = getCurrentMonth();
+            let workSchedules = JSON.parse(localStorage.getItem('workSchedules') || '{}');
+            if (!workSchedules[month]) workSchedules[month] = {};
+            if (!workSchedules[month][empId]) workSchedules[month][empId] = {};
+            let ws = workSchedules[month][empId];
+            let conflicts = checkScheduleConflictAll(empId, month, ws);
+            if (conflicts.length > 0) {
+                showConflictAlert(conflicts, function() {
+                    localStorage.setItem('workSchedules', JSON.stringify(workSchedules));
+                    alert('Đã lưu lịch làm việc!');
+                    if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+                });
+                return;
+            }
+            localStorage.setItem('workSchedules', JSON.stringify(workSchedules));
+            alert('Đã lưu lịch làm việc!');
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        }
+
+        // --- Auto Schedule ---
+        // BỎ TOÀN BỘ CODE LIÊN QUAN ĐẾN AUTO SCHEDULE:
+        // - openAutoSchedulePopup
+        // - closeAutoSchedulePopup
+        // - addRepeatPatternInput
+        // - removeRepeatPatternInput
+        // - applyAutoSchedule
+        // - autoDistributeShiftsAlternate
+        // - autoDistributeShiftsNoConflict
+        // - getAssignedShiftsForDay
+        // - getOtherEmpIds
+
+        // Giữ lại các hàm khác, KHÔNG gọi hoặc tham chiếu đến các hàm auto schedule ở bất kỳ đâu.
+
+        // Tìm ca đã được phân cho nhân viên khác trong ngày d
+        function getAssignedShiftsForDay(month, d, excludeEmpId) {
+            let workSchedules = JSON.parse(localStorage.getItem('workSchedules') || '{}');
+            let assigned = new Set();
+            if (!workSchedules[month]) return assigned;
+            for (let empId in workSchedules[month]) {
+                if (empId === excludeEmpId) continue;
+                let ws = workSchedules[month][empId];
+                let arr = ws[d];
+                if (!Array.isArray(arr)) arr = (arr === "" || arr === undefined) ? [] : [arr];
+                arr.forEach(idx => assigned.add(idx));
+            }
+            return assigned;
+        }
+
+        // Lấy danh sách tất cả nhân viên còn tồn tại (trừ nhân viên đang chia)
+        function getOtherEmpIds(empId) {
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            return employees.map(e => e.id).filter(id => id !== empId);
+        }
+
+        // Chia ca tự động không để xung đột: mỗi ca mỗi ngày chỉ có 1 nhân viên
+        function autoDistributeShiftsNoConflict(empId, month, shifts, days, offDays) {
+            let workSchedules = JSON.parse(localStorage.getItem('workSchedules') || '{}');
+            if (!workSchedules[month]) workSchedules[month] = {};
+            // Lấy danh sách nhân viên còn lại
+            let otherEmpIds = getOtherEmpIds(empId);
+            // Lấy lịch của các nhân viên khác (nếu có)
+            let otherSchedules = {};
+            otherEmpIds.forEach(id => {
+                otherSchedules[id] = (workSchedules[month][id] || {});
+            });
+
+            let ws = {};
+            for (let d = 1; d <= days; ++d) {
+                if (offDays[d]) {
+                    ws[d] = [];
+                    continue;
+                }
+                // Tìm ca chưa bị nhân viên khác nhận
+                let assigned = new Set();
+                for (let id of otherEmpIds) {
+                    let arr = otherSchedules[id][d];
+                    if (!Array.isArray(arr)) arr = (arr === "" || arr === undefined) ? [] : [arr];
+                    arr.forEach(idx => assigned.add(idx));
+                }
+                // Chọn ca đầu tiên chưa bị nhận
+                let found = false;
+                for (let i = 0; i < shifts.length; ++i) {
+                    if (!assigned.has(i)) {
+                        ws[d] = [i];
+                        found = true;
+                        break;
+                    }
+                }
+                // Nếu tất cả ca đều đã bị nhận, để ngày đó nghỉ (không xung đột)
+                if (!found) {
+                    ws[d] = [];
+                }
+            }
+            return ws;
+        }
+
+        // Kiểm tra xung đột ca làm giữa các nhân viên, trả về mảng các xung đột
+        function checkScheduleConflictAll(empId, month, ws) {
+            let workSchedules = JSON.parse(localStorage.getItem('workSchedules') || '{}');
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            if (!workSchedules[month]) workSchedules[month] = {};
+            // Lấy danh sách ID nhân viên còn tồn tại
+            const validEmpIds = new Set(employees.map(e => e.id));
+            let days = Object.keys(ws);
+            let conflicts = [];
+            for (let d of days) {
+                let caArr = ws[d];
+                if (!Array.isArray(caArr)) caArr = (caArr === "" || caArr === undefined) ? [] : [caArr];
+                if (caArr.length === 0) continue;
+                for (let otherId in workSchedules[month]) {
+                    if (otherId === empId) continue;
+                    // BỎ QUA NHÂN VIÊN ĐÃ XÓA
+                    if (!validEmpIds.has(otherId)) continue;
+                    let otherWS = workSchedules[month][otherId];
+                    let otherArr = otherWS[d];
+                    if (!Array.isArray(otherArr)) otherArr = (otherArr === "" || otherArr === undefined) ? [] : [otherArr];
+                    for (let ca of caArr) {
+                        let empObj = employees.find(e=>e.id==otherId);
+                        let empName = empObj ? empObj.name : `Nhân viên đã xóa (ID: ${otherId})`;
+                        if (otherArr.includes(ca)) {
+                            conflicts.push({day: d, ca, otherId, empName});
+                        }
+                    }
+                }
+            }
+            return conflicts;
+        }
+
+        // Hiển thị cảnh báo xung đột, cho phép chọn vẫn áp dụng hoặc hủy
+        let pendingScheduleApply = null;
+        function showConflictAlert(conflicts, onApply) {
+            let msg = conflicts.map(c =>
+                `Ngày ${c.day}, ca số ${Number(c.ca)+1} đã được phân cho nhân viên "${c.empName}"`
+            ).join('<br>');
+            document.getElementById('conflictMsg').innerHTML = msg + '<br><br><b>Bạn có muốn vẫn áp dụng lịch này không?</b>';
+            document.getElementById('conflictAlert').style.display = '';
+            pendingScheduleApply = onApply;
+        }
+        function closeConflictAlert() {
+            document.getElementById('conflictAlert').style.display = 'none';
+            pendingScheduleApply = null;
+        }
+        function applyConflictSchedule() {
+            if (typeof pendingScheduleApply === 'function') pendingScheduleApply();
+            closeConflictAlert();
+        }
+
+        // Hàm mở popup chọn ca cho tất cả nhân viên
+        function openAllEmpSameShiftPopup() {
+            const month = getCurrentMonth();
+            let shifts = getScheduleShifts(null, month);
+            if (!Array.isArray(shifts) || shifts.length === 0) {
+                alert('Chưa thiết lập ca làm cho tháng này.');
+                return;
+            }
+            let html = `<select id="allEmpShiftSelect" style="min-width:120px;">` +
+                shifts.map((s, i) =>
+                    `<option value="${i}">${s.name || 'Ca ' + (i+1)} (${s.start||'--'}-${s.end||'--'})</option>`
+                ).join('') +
+                `</select>`;
+            document.getElementById('allEmpShiftSelectDiv').innerHTML = html;
+            document.getElementById('allEmpSameShiftPopup').style.display = '';
+        }
+        function closeAllEmpSameShiftPopup() {
+            document.getElementById('allEmpSameShiftPopup').style.display = 'none';
+        }
+        function applyAllEmpSameShift() {
+            const month = getCurrentMonth();
+            let shiftIdx = Number(document.getElementById('allEmpShiftSelect').value);
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            let workSchedules = JSON.parse(localStorage.getItem('workSchedules') || '{}');
+            let shifts = getScheduleShifts(null, month);
+            const days = daysInMonth(month);
+            if (!workSchedules[month]) workSchedules[month] = {};
+
+            // Tất cả nhân viên đều làm ca được chọn mỗi ngày (giống như auto schedule alternate nhưng ca chính cố định)
+            // Nếu chỉ có 1 ca, tất cả đều làm ca đó
+            // Nếu có nhiều ca, ca được chọn là ca chính, ca còn lại sẽ được chia xen kẽ cho các nhân viên còn lại
+
+            let otherShiftIdxs = [];
+            for (let i = 0; i < shifts.length; ++i) {
+                if (i !== shiftIdx) otherShiftIdxs.push(i);
+            }
+
+            for (let d = 1; d <= days; ++d) {
+                // Tất cả nhân viên đều làm ca chính
+                employees.forEach(emp => {
+                    if (!workSchedules[month][emp.id]) workSchedules[month][emp.id] = {};
+                    workSchedules[month][emp.id][d] = [shiftIdx];
+                });
+                // Nếu còn ca khác, chia ca phụ xen kẽ cho các nhân viên còn lại
+                if (otherShiftIdxs.length > 0) {
+                    // Mỗi ngày chỉ 1 nhân viên được thêm ca phụ, luân phiên qua các nhân viên
+                    let caPhuIdx = otherShiftIdxs[0];
+                    let empIdx = (d - 1) % employees.length;
+                    let emp = employees[empIdx];
+                    if (emp) {
+                        workSchedules[month][emp.id][d] = [shiftIdx, caPhuIdx];
+                    }
+                }
+            }
+            localStorage.setItem('workSchedules', JSON.stringify(workSchedules));
+            closeAllEmpSameShiftPopup();
+            renderWorkSchedule();
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+        }
+
+        // Lưu tên tuần vào localStorage
+        function getWeekNames(month, empId) {
+            let weekNames = JSON.parse(localStorage.getItem('workScheduleWeekNames') || '{}');
+            if (!weekNames[month]) weekNames[month] = {};
+            if (!weekNames[month][empId]) weekNames[month][empId] = {};
+            return weekNames;
+        }
+        function setWeekName(month, empId, weekIdx, name) {
+            let weekNames = getWeekNames(month, empId);
+            if (!weekNames[month][empId]) weekNames[month][empId] = {};
+            weekNames[month][empId][weekIdx] = name;
+            localStorage.setItem('workScheduleWeekNames', JSON.stringify(weekNames));
+        }
+        function getWeekName(month, empId, weekIdx) {
+            let weekNames = getWeekNames(month, empId);
+            return (weekNames[month] && weekNames[month][empId] && weekNames[month][empId][weekIdx]) || `Tuần ${weekIdx+1}`;
+        }
+
+        // Hiển thị lịch tuần, giao diện đẹp hơn, click vào ô ngày để sửa
+        function renderWorkScheduleWeek(ws, shifts, days, y, m) {
+            // Lấy ca mẫu tuần từ localStorage
+            const month = getCurrentMonth();
+            let weekTemplate = JSON.parse(localStorage.getItem('workScheduleWeekTemplate') || '{}');
+            if (!weekTemplate[month]) weekTemplate[month] = {};
+            // Thứ tự các thứ: 2=T2, ..., 7=T7, 7=CN (templateIdx)
+            let html = '';
+            html += `<div id="workScheduleWeek"><table style="width:100%;border-collapse:separate;border-spacing:0 8px;margin-top:12px;">`;
+            html += `<thead>
+                    <tr>
+                        <th style="width:120px;border-radius:10px 0 0 0;">Tuần</th>
+                        <th>T2</th>
+                        <th>T3</th>
+                        <th>T4</th>
+                        <th>T5</th>
+                        <th>T6</th>
+                        <th>T7</th>
+                        <th style="border-radius:0 10px 0 0;">CN</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            html += `<tr>`;
+            html += `<td style="padding:8px 4px;background:#e3f0ff;border-radius:8px 0 0 8px;font-weight:600;color:#1976d2;">Tuần</td>`;
+            // Lặp từ 1 (T2) đến 6 (T7), sau đó 7 (CN)
+            for (let i = 1; i <= 7; ++i) {
+                let templateIdx = (i === 7) ? 7 : i; // 7=CN, 1-6=T2-T7
+                let shiftArr = weekTemplate[month][templateIdx] || [];
+                if (!Array.isArray(shiftArr)) shiftArr = (shiftArr === "" || shiftArr === undefined) ? [] : [shiftArr];
+                let isOff = !shiftArr || shiftArr.length === 0;
+                let tdClass = "day-cell";
+                if (isOff) tdClass += " off";
+                html += `<td class="${tdClass}" onclick="editWeekDayShiftTemplate(${templateIdx})" title="Đặt ca cho ${templateIdx === 7 ? 'CN' : 'T' + templateIdx}">
+        <div class="day-number">${templateIdx === 7 ? 'CN' : 'T' + templateIdx}</div>`;
+        if (isOff) {
+            html += `<div class="off-label">Nghỉ</div>`;
+        } else {
+            html += shiftArr.map(idx =>
+                `<div class="shift-label">
+                    ${shifts[idx]?.name || ('Ca ' + (Number(idx)+1))}
+                    <div style="font-size:12px;color:#888;">${shifts[idx]?.start||'--'}-${shifts[idx]?.end||'--'}</div>
+                </div>`
+            ).join('<hr style="margin:2px 0;border:none;border-top:1px dashed #b3d1f7;" />');
+        }
+        html += `</td>`;
+            }
+            html += `</tr>`;
+            html += `</tbody></table></div>`;
+            document.getElementById('workScheduleWeek').innerHTML = html;
+        }
+
+        // Popup chọn ca cho từng thứ trong tuần mẫu
+        function editWeekDayShiftTemplate(weekday) {
+            const month = getCurrentMonth();
+            let shifts = getScheduleShifts(null, month);
+            let weekTemplate = JSON.parse(localStorage.getItem('workScheduleWeekTemplate') || '{}');
+            if (!weekTemplate[month]) weekTemplate[month] = {};
+            let checkedArr = weekTemplate[month][weekday] || [];
+            if (!Array.isArray(checkedArr)) checkedArr = (checkedArr === "" || checkedArr === undefined) ? [] : [checkedArr];
+            window._editingWeekday = weekday;
+            let html = '';
+            shifts.forEach((s, idx) => {
+                html += `<label style="display:block;margin-bottom:6px;">
+            <input type="checkbox" class="shift-checkbox" value="${idx}" ${checkedArr.includes(idx) ? 'checked' : ''} onchange="onShiftCheckboxChange()">
+            ${s.name || 'Ca ' + (idx+1)} <span style="color:#888;font-size:12px;">(${s.start||'--'}-${s.end||'--'})</span>
+        </label>`;
+            });
+            html += `<label style="display:block;margin-top:8px;">
+        <input type="checkbox" id="offCheckbox" ${checkedArr.length===0?'checked':''} onchange="onOffCheckboxChange()">
+        Nghỉ (không làm ca nào)
+    </label>`;
+            document.getElementById('popupDay').textContent = weekday === 7 ? 'CN' : 'T' + weekday;
+            document.getElementById('popupShiftCheckboxes').innerHTML = html;
+            // Gắn lại nút OK cho tuần mẫu
+            window._applyWeekTemplate = function() {
+                let checkboxes = document.querySelectorAll('#popupShiftCheckboxes input[type="checkbox"]:not(#offCheckbox)');
+                let checked = [];
+                checkboxes.forEach(cb => {
+                    if (cb.checked) checked.push(Number(cb.value));
+                });
+                if (document.getElementById('offCheckbox') && document.getElementById('offCheckbox').checked) {
+                    weekTemplate[month][window._editingWeekday] = [];
+                } else {
+                    weekTemplate[month][window._editingWeekday] = checked;
+                }
+                localStorage.setItem('workScheduleWeekTemplate', JSON.stringify(weekTemplate));
+                closeShiftPopup();
+                renderWorkScheduleWeek({}, shifts, 0, 0, 0);
+            };
+            // Override nút OK
+            document.querySelector('#shiftPopup .btn').onclick = window._applyWeekTemplate;
+            document.getElementById('shiftPopup').style.display = '';
+        }
+
+        // Khởi tạo giao diện
+        (function(){
+            renderEmpSelect();
+            // Set default month
+            const now = new Date();
+            const ym = now.toISOString().slice(0,7);
+            document.getElementById('wsMonth').value = ym;
+            renderWorkSchedule();
+        })();
+
+        document.getElementById('wsEmpSelect').addEventListener('change', renderWorkSchedule);
+        document.getElementById('wsMonth').addEventListener('change', renderWorkSchedule);
+
+        // Đóng popup khi click ra ngoài
+        document.addEventListener('mousedown', function(e) {
+            const popup = document.getElementById('shiftPopup');
+            if (popup.style.display !== 'none' && !popup.querySelector('.shift-popup-content').contains(e.target)) {
+                closeShiftPopup();
+            }
+            const allEmpPopup = document.getElementById('allEmpSameShiftPopup');
+            if (allEmpPopup && allEmpPopup.style.display !== 'none' && !allEmpPopup.querySelector('.shift-popup-content').contains(e.target)) {
+                closeAllEmpSameShiftPopup();
+            }
+        });
+        function clearAllWorkSchedules() {
+            if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch làm việc?')) {
+                localStorage.removeItem('workSchedules');
+                location.reload();
+            }
+        }
+        // Áp dụng lịch tuần mẫu cho tháng cho nhân viên đang chọn
+        function applyWeekTemplateToMonth() {
+            const empId = document.getElementById('wsEmpSelect').value;
+            const month = getCurrentMonth();
+            let weekTemplate = JSON.parse(localStorage.getItem('workScheduleWeekTemplate') || '{}');
+            let shifts = getScheduleShifts(empId, month);
+            if (!weekTemplate[month]) {
+                showMiniAlert('Chưa thiết lập lịch tuần mẫu cho tháng này.');
+                return;
+            }
+            if (!empId) {
+                showMiniAlert('Vui lòng chọn nhân viên.');
+                return;
+            }
+            let workSchedules = JSON.parse(localStorage.getItem('workSchedules') || '{}');
+            if (!workSchedules[month]) workSchedules[month] = {};
+            if (!workSchedules[month][empId]) workSchedules[month][empId] = {};
+            let ws = workSchedules[month][empId];
+            const days = daysInMonth(month);
+            for (let d = 1; d <= days; ++d) {
+                let date = new Date(month + '-01');
+                date.setDate(d);
+                let weekday = date.getDay(); // 0=CN, 1=T2,...,6=T7
+                let templateIdx = (weekday === 0) ? 7 : weekday; // 7=CN, 1-6=T2-T7
+                let arr = weekTemplate[month][templateIdx];
+                if (!Array.isArray(arr)) arr = (arr === "" || arr === undefined) ? [] : [arr];
+                ws[d] = arr.slice();
+            }
+            localStorage.setItem('workSchedules', JSON.stringify(workSchedules));
+            renderWorkSchedule();
+            showMiniAlert('Đã áp dụng lịch tuần mẫu cho tháng!');
+        }
+        // Thêm định nghĩa popup mini alert
+        function showMiniAlert(msg) {
+            document.getElementById('miniAlertMsg').innerHTML = msg;
+            document.getElementById('miniAlertPopup').style.display = '';
+        }
+        function closeMiniAlertPopup() {
+            document.getElementById('miniAlertPopup').style.display = 'none';
+        }
+        function exportAllData() {
+            const data = typeof getExportData === 'function' ? getExportData() : {};
+            // Lấy tên cửa hàng từ localStorage
+            const storeName = (localStorage.getItem('storeName') || 'LepShop').trim();
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const fileName = `${storeName.replace(/[^a-zA-Z0-9]/g, '')}-${pad(now.getDate())}-${pad(now.getMonth()+1)}-${now.getFullYear()}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.json`;
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+    <script src="footer.js"></script>
+    <script>renderFooter();</script>
+</body>
+</html>

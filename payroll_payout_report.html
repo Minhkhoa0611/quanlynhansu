@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html style="zoom:90%;">
+<head>
+    <meta charset="utf-8">
+    <title>Báo Cáo Chi Trả Tiền Lương</title>
+    <link rel="icon" type="image/png" href="iconlogo.png">
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #e3f0ff 0%, #f7f7f7 100%); margin: 0; }
+        .container { max-width: 800px; margin: 30px auto; background: #ffffffee; padding: 24px; border-radius: 16px; box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001; }
+        h2 { color: #1976d2; text-align: center; }
+        .filter-bar { margin-bottom: 18px; text-align: center; }
+        .filter-bar select { font-size: 16px; padding: 4px 12px; border-radius: 4px; margin: 0 8px; }
+        .export-btn { background:#1976d2;color:#fff;border:none;padding:6px 18px;border-radius:6px;cursor:pointer;margin:8px 0 0 0;font-size:15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; background: #fff; }
+        th, td { border: 1px solid #ccc; padding: 8px 10px; text-align: center; }
+        th { background: #e3f2fd; color: #1976d2; }
+        tfoot td { font-weight: bold; color: #1976d2; background: #f1f8e9; }
+        .note { color: #888; font-size: 13px; margin-top: 8px; }
+        .stat-bar { display:flex; align-items:flex-end; gap:8px; margin:18px 0 0 0; height:120px;}
+        .stat-bar-col { flex:1; background:#90caf9; border-radius:4px 4px 0 0; position:relative; min-width:30px;}
+        .stat-bar-col span { position:absolute; bottom:100%; left:50%; transform:translateX(-50%); font-size:12px; color:#1976d2; font-weight:bold;}
+        .stat-bar-label { text-align:center; font-size:12px; color:#555; margin-top:2px;}
+        .percent-change { font-size:13px; margin-left:6px;}
+        .percent-up { color:#388e3c; }
+        .percent-down { color:#d32f2f; }
+        #statBar { display: none !important; }
+    </style>
+    <script src="menu.js"></script>
+    <script src="footer.js"></script>
+</head>
+<body>
+    <script>renderMenu('payroll_payout_report');</script>
+    <div class="container">
+        <h2>BÁO CÁO CHI TRẢ TIỀN LƯƠNG</h2>
+        <div class="filter-bar">
+            <label for="reportType">Chọn loại báo cáo:</label>
+            <select id="reportType">
+                <option value="all">Tất cả</option>
+                <option value="month">Theo Tháng</option>
+                <option value="quarter">Theo Quý</option>
+                <option value="year">Theo Năm</option>
+            </select>
+            <span id="periodSelect"></span>
+            <button class="export-btn" onclick="exportToCSV()">Xuất Excel</button>
+        </div>
+        <div id="payoutTable"></div>
+        <div id="statBar"></div>
+        <div class="note">
+            * Báo cáo tổng hợp chi trả lương theo từng kỳ. Số tiền là tổng lương đã chi cho toàn bộ nhân viên trong kỳ tương ứng.
+        </div>
+    </div>
+    <script>
+        function formatVND(val) {
+            if (isNaN(val)) return '';
+            return Number(val).toLocaleString('vi-VN') + ' ₫';
+        }
+        // Tính tổng lương từng tháng dựa vào localStorage payrollInputs + employees
+        function getMonthlyPayrollTotals() {
+            let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            let monthsSet = new Set();
+            // Lấy tất cả các tháng có dữ liệu
+            for (let empId in payrollInputs) {
+                for (let month in payrollInputs[empId]) {
+                    monthsSet.add(month);
+                }
+            }
+            let months = Array.from(monthsSet).sort();
+            let result = [];
+            months.forEach(month => {
+                let total = 0;
+                employees.forEach(emp => {
+                    let input = payrollInputs?.[emp.id]?.[month] || {};
+                    let baseSalary = emp.base_salary || 0;
+                    let extraShifts = parseFloat((input.extraShifts + '').replace(',', '.')) || 0;
+                    let allowance = Number((input.allowance+'').replace(/[^\d]/g,'')) || 0;
+                    let bonus = Number((input.bonus+'').replace(/[^\d]/g,'')) || 0;
+                    let penalty = Number((input.penalty+'').replace(/[^\d]/g,'')) || 0;
+                    let advance = Number((input.advance+'').replace(/[^\d]/g,'')) || 0;
+                    let revenue = Number((input.revenue+'').replace(/[^\d]/g,'')) || 0;
+                    let perDayEmp = parseInt(localStorage.getItem('salaryPerDay_' + emp.id)) 
+                        || parseInt(localStorage.getItem('salaryPerDay') || '0');
+                    let stdDays = parseInt(localStorage.getItem('workDaysStd_' + emp.id)) 
+                        || parseInt(localStorage.getItem('workDaysStd') || '26');
+                    // Tính workdays
+                    let workdays = 0;
+                    if (typeof window.getWorkdaysWithFactor === 'function') {
+                        workdays = getWorkdaysWithFactor(emp, month) + extraShifts;
+                    }
+                    let extra = extraShifts * (perDayEmp || 0);
+                    let totalEmp = 0;
+                    if (emp.salary_type === 'shift') {
+                        // Không tính lương ca ở đây (cần dữ liệu shifts), bỏ qua hoặc có thể bổ sung nếu cần
+                        totalEmp = 0;
+                    } else if (emp.salary_type === 'em') {
+                        totalEmp = baseSalary + extra + allowance + bonus - penalty - advance + revenue;
+                    } else {
+                        if (workdays >= stdDays) {
+                            totalEmp = baseSalary + ((workdays - stdDays) * (perDayEmp || 0));
+                        } else {
+                            totalEmp = baseSalary - ((stdDays - workdays) * (perDayEmp || 0));
+                            if (totalEmp < 0) totalEmp = 0;
+                        }
+                        totalEmp += allowance + bonus + revenue - penalty - advance;
+                    }
+                    if (totalEmp < 0) totalEmp = 0;
+                    total += totalEmp;
+                });
+                result.push({ month, total });
+            });
+            return result;
+        }
+        // Helper: lấy danh sách các năm có dữ liệu
+        function getAvailableYears(monthlyData) {
+            let years = new Set();
+            monthlyData.forEach(row => {
+                let y = row.month.split('-')[0];
+                years.add(y);
+            });
+            return Array.from(years).sort();
+        }
+        // Helper: lấy danh sách các quý có dữ liệu
+        function getAvailableQuarters(monthlyData) {
+            let quarters = new Set();
+            monthlyData.forEach(row => {
+                let [y, m] = row.month.split('-');
+                let q = Math.floor((parseInt(m)-1)/3)+1;
+                quarters.add(`${y}-Q${q}`);
+            });
+            return Array.from(quarters).sort();
+        }
+        // Helper: lấy danh sách các tháng có dữ liệu
+        function getAvailableMonths(monthlyData) {
+            return monthlyData.map(row => row.month).sort();
+        }
+        // Tổng hợp dữ liệu theo kỳ
+        function aggregateDataByPeriod(monthlyData, type, periodValue) {
+            if (type === 'all') {
+                let total = monthlyData.reduce((a, b) => a + b.total, 0);
+                return [{ label: 'Tất cả các tháng', total }];
+            }
+            if (type === 'month') {
+                return monthlyData
+                    .filter(row => !periodValue || row.month === periodValue)
+                    .map(row => ({ label: row.month, total: row.total }));
+            }
+            if (type === 'quarter') {
+                // group by quarter
+                let map = {};
+                monthlyData.forEach(row => {
+                    let [y, m] = row.month.split('-');
+                    let q = Math.floor((parseInt(m)-1)/3)+1;
+                    let key = `${y}-Q${q}`;
+                    if (!periodValue || key === periodValue) {
+                        map[key] = (map[key]||0) + row.total;
+                    }
+                });
+                return Object.entries(map).sort().map(([label, total]) => ({ label, total }));
+            }
+            if (type === 'year') {
+                // group by year
+                let map = {};
+                monthlyData.forEach(row => {
+                    let y = row.month.split('-')[0];
+                    if (!periodValue || y === periodValue) {
+                        map[y] = (map[y]||0) + row.total;
+                    }
+                });
+                return Object.entries(map).sort().map(([label, total]) => ({ label, total }));
+            }
+            return [];
+        }
+        // Hiển thị select kỳ phụ thuộc loại báo cáo
+        function renderPeriodSelect(type, monthlyData) {
+            let html = '';
+            if (type === 'month') {
+                let months = getAvailableMonths(monthlyData);
+                html = `<select id="periodValue"><option value="">Tất cả các tháng</option>${months.map(m=>`<option value="${m}">${m}</option>`).join('')}</select>`;
+            } else if (type === 'quarter') {
+                let quarters = getAvailableQuarters(monthlyData);
+                html = `<select id="periodValue"><option value="">Tất cả các quý</option>${quarters.map(q=>`<option value="${q}">${q}</option>`).join('')}</select>`;
+            } else if (type === 'year') {
+                let years = getAvailableYears(monthlyData);
+                html = `<select id="periodValue"><option value="">Tất cả các năm</option>${years.map(y=>`<option value="${y}">${y}</option>`).join('')}</select>`;
+            }
+            document.getElementById('periodSelect').innerHTML = html;
+        }
+        function getEmployeeCountByPeriod(monthlyData, type, periodValue) {
+            let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            if (type === 'all') {
+                let empSet = new Set();
+                employees.forEach(emp => {
+                    for (let m in payrollInputs[emp.id]||{}) empSet.add(emp.id);
+                });
+                return empSet.size;
+            }
+            if (type === 'month') {
+                let empSet = new Set();
+                employees.forEach(emp => {
+                    if (payrollInputs[emp.id]?.[periodValue]) empSet.add(emp.id);
+                });
+                return periodValue ? empSet.size : employees.length;
+            }
+            if (type === 'quarter' || type === 'year') {
+                let empSet = new Set();
+                employees.forEach(emp => {
+                    for (let m in payrollInputs[emp.id]||{}) {
+                        if (type==='quarter') {
+                            let [y, mo] = m.split('-');
+                            let q = Math.floor((parseInt(mo)-1)/3)+1;
+                            let key = `${y}-Q${q}`;
+                            if (!periodValue || key === periodValue) empSet.add(emp.id);
+                        } else if (type==='year') {
+                            let y = m.split('-')[0];
+                            if (!periodValue || y === periodValue) empSet.add(emp.id);
+                        }
+                    }
+                });
+                return empSet.size;
+            }
+            return employees.length;
+        }
+        function renderStatBar(data) {
+            if (data.length < 2) { document.getElementById('statBar').innerHTML = ''; return; }
+            let max = Math.max(...data.map(d=>d.total));
+            let html = `<div class="stat-bar">`;
+            data.forEach((row, idx) => {
+                let h = max ? Math.round(row.total/max*100) : 0;
+                html += `<div class="stat-bar-col" style="height:${h}%;"><span>${formatVND(row.total)}</span></div>`;
+            });
+            html += `</div><div style="display:flex;gap:8px;">`;
+            data.forEach((row, idx) => {
+                html += `<div class="stat-bar-label" style="flex:1">${row.label}</div>`;
+            });
+            html += `</div>`;
+            document.getElementById('statBar').innerHTML = html;
+        }
+        function percentChange(curr, prev) {
+            if (!prev) return '';
+            let pct = ((curr-prev)/prev*100).toFixed(1);
+            let cls = pct>0?'percent-up':'percent-down';
+            let sign = pct>0?'+':'';
+            return `<span class="percent-change ${cls}">(${sign}${pct}%)</span>`;
+        }
+        function exportToCSV() {
+            let type = document.getElementById('reportType').value;
+            let monthlyData = getMonthlyPayrollTotals();
+            let periodValue = '';
+            let periodValueElem = document.getElementById('periodValue');
+            if (periodValueElem) periodValue = periodValueElem.value;
+            let data = aggregateDataByPeriod(monthlyData, type, periodValue);
+            let rows = [['STT', type==='month'?'Tháng':type==='quarter'?'Quý':type==='year'?'Năm':'Kỳ', 'Số Tiền']];
+            data.forEach((row, idx) => {
+                rows.push([idx+1, row.label, row.total]);
+            });
+            let csv = rows.map(r=>r.join(',')).join('\r\n');
+            let blob = new Blob([csv], {type:'text/csv'});
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'bao_cao_chi_tra_luong.csv';
+            a.click();
+        }
+        function renderPayoutTable() {
+            let type = document.getElementById('reportType').value;
+            let monthlyData = getMonthlyPayrollTotals();
+            renderPeriodSelect(type, monthlyData);
+            let periodValue = '';
+            let periodValueElem = document.getElementById('periodValue');
+            if (periodValueElem) periodValue = periodValueElem.value;
+            let data = aggregateDataByPeriod(monthlyData, type, periodValue);
+            let totalAll = data.reduce((a, b) => a + b.total, 0);
+            let empCount = getEmployeeCountByPeriod(monthlyData, type, periodValue);
+            let html = `<table>
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>${type==='month'?'Tháng':type==='quarter'?'Quý':type==='year'?'Năm':'Kỳ'}</th>
+                        <th>Số Tiền</th>
+                        <th>So với kỳ trước</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            data.forEach((row, idx) => {
+                let prev = idx>0 ? data[idx-1].total : null;
+                html += `<tr>
+                    <td>${idx+1}</td>
+                    <td>${row.label}</td>
+                    <td style="font-weight:bold;color:#1976d2;">${formatVND(row.total)}</td>
+                    <td>${percentChange(row.total, prev)}</td>
+                </tr>`;
+            });
+            html += `</tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" style="text-align:right;">TỔNG TIỀN:</td>
+                        <td style="font-weight:bold;font-size:18px;color:#388e3c;">${formatVND(totalAll)}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div style="margin-top:8px;color:#1976d2;font-weight:500;">
+                Tổng số kỳ: ${data.length} | Tổng số nhân viên được trả lương: ${empCount}
+            </div>`;
+            document.getElementById('payoutTable').innerHTML = html;
+            // renderStatBar(data); // Ẩn biểu đồ, không gọi hàm này nữa
+            // Gắn lại sự kiện khi select kỳ thay đổi
+            let periodValueElem2 = document.getElementById('periodValue');
+            if (periodValueElem2) {
+                periodValueElem2.onchange = renderPayoutTable;
+            }
+        }
+        // Đảm bảo hàm getWorkdaysWithFactor có sẵn (copy từ payroll_full.html nếu cần)
+        function getWorkdaysWithFactor(emp, month) {
+            let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            let workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+            let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+            let empAtt = (attendanceByMonth[month] && attendanceByMonth[month][emp.id]) || {};
+            let total = 0;
+            for (let d in empAtt) {
+                let arr = empAtt[d];
+                let factor = 1;
+                if (workFactorByMonth[month] && workFactorByMonth[month][emp.id] && typeof workFactorByMonth[month][emp.id][d] !== 'undefined') {
+                    factor = parseFloat(workFactorByMonth[month][emp.id][d]) || 1;
+                }
+                if (Array.isArray(arr) && arr.length > 0) {
+                    let shifts = shiftsByEmp[emp.id] || [];
+                    if (shifts.length > 0) {
+                        let sum = 0;
+                        arr.forEach(shiftIdx => {
+                            sum += (shifts[shiftIdx]?.half ? 0.5 : 1);
+                        });
+                        total += sum * factor;
+                    } else {
+                        total += factor;
+                    }
+                }
+            }
+            return total;
+        }
+        window.onload = function() {
+            renderPayoutTable();
+            document.getElementById('reportType').onchange = renderPayoutTable;
+        }
+    </script>
+    <script>renderFooter();</script>
+</body>
+</html>

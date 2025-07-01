@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html style="zoom:90%;">
+<head>
+    <meta charset="utf-8">
+    <title>TimePro HRM-Lập Báo Cáo Lương</title>
+        <link rel="icon" type="image/png" href="iconlogo.png">
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #e3f0ff 0%, #f7f7f7 100%); margin: 0; }
+        .container { max-width: 1100px; margin: 30px auto; background: #ffffffee; padding: 24px; border-radius: 16px; box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001; }
+        h2 { color: #1976d2; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; background: #fff; }
+        th, td { border: 1px solid #ccc; padding: 8px 10px; text-align: center; }
+        th { background: #e3f2fd; color: #1976d2; }
+        tfoot td { font-weight: bold; color: #1976d2; background: #f1f8e9; }
+        select { font-size: 16px; padding: 4px 12px; border-radius: 4px; }
+    </style>
+    <script src="menu.js"></script>
+    <script src="data_io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- ĐÃ XÓA chart.js vì không dùng biểu đồ nữa -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <script>renderMenu('payroll_report');</script>
+    <div class="container">
+        <h2>TimePro HRM-Lập Báo Cáo Lương</h2>
+        <div style="margin-bottom:18px;">
+            <!-- Đưa ô tìm kiếm nhân viên ra trước -->
+            <input type="text" id="employeeSearchInput" placeholder="Tìm nhân viên..." style="margin-right:18px;padding:6px 14px;min-width:180px;border-radius:6px;border:1px solid #ccc;font-size:16px;" oninput="renderPayrollReport()">
+            <label style="font-weight:500;color:#1976d2;">Chọn cửa hàng: </label>
+            <select id="reportStoreSelect" style="font-size:17px;padding:6px 16px;min-width:120px;border-radius:6px;" onchange="renderPayrollReport()">
+                <option value="">--Tất cả--</option>
+                <option value="LepShop">LepShop</option>
+                <option value="H'Farm">H'Farm</option>
+            </select>
+            <label style="font-weight:500;color:#1976d2;margin-left:12px;">Chọn tháng: </label>
+            <input type="month" id="reportMonth" style="font-size:17px;padding:6px 16px;min-width:160px;border-radius:6px;">
+            <button onclick="renderPayrollReport()" style="margin-left:12px;padding:6px 18px;background:#1976d2;color:#fff;border:none;border-radius:4px;cursor:pointer;">Xem báo cáo</button>
+            <!-- ĐÃ BỎ nút in báo cáo -->
+        </div>
+        <div id="payrollReportTable"></div>
+        <!-- ĐÃ XÓA phần biểu đồ bên dưới -->
+        <!--
+        <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin:32px 0 12px 0;">
+            <div style="flex:1;min-width:320px;max-width:520px;">
+                <canvas id="payrollBarChart" height="220"></canvas>
+            </div>
+            <div style="flex:1;min-width:320px;max-width:420px;">
+                <canvas id="storeTotalBarChart" height="220"></canvas>
+            </div>
+        </div>
+        -->
+    </div>
+    <script>
+        function formatVND(val) {
+            if (isNaN(val)) return '';
+            return Number(val).toLocaleString('vi-VN') + ' ₫';
+        }
+        function parseCurrency(val) {
+            return Number((val+'').replace(/[^\d]/g, '')) || 0;
+        }
+        function getPayrollInput(empId, month, field, defaultVal) {
+            let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+            return payrollInputs?.[empId]?.[month]?.[field] ?? defaultVal;
+        }
+        function getWorkdaysWithFactor(emp, month) {
+            let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            let workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+            let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+            let empAtt = (attendanceByMonth[month] && attendanceByMonth[month][emp.id]) || {};
+            let total = 0;
+            for (let d in empAtt) {
+                let arr = empAtt[d];
+                let factor = 1;
+                if (workFactorByMonth[month] && workFactorByMonth[month][emp.id] && typeof workFactorByMonth[month][emp.id][d] !== 'undefined') {
+                    factor = parseFloat(workFactorByMonth[month][emp.id][d]) || 1;
+                }
+                if (Array.isArray(arr) && arr.length > 0) {
+                    let shifts = shiftsByEmp[emp.id] || [];
+                    if (shifts.length > 0) {
+                        let sum = 0;
+                        arr.forEach(shiftIdx => {
+                            sum += (shifts[shiftIdx]?.half ? 0.5 : 1);
+                        });
+                        total += sum * factor;
+                    } else {
+                        // Nếu không có shifts, mỗi lần chấm công là 1 công
+                        total += arr.length * factor;
+                    }
+                }
+            }
+            return total;
+        }
+        // Thêm hàm lấy tổng công giống payroll.html
+        function getTongCong(empId, month) {
+            const attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            const shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            const workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+            let total = 0;
+            if (
+                attendanceByMonth[month] &&
+                attendanceByMonth[month][empId] &&
+                shiftsByEmpByMonth[month] &&
+                shiftsByEmpByMonth[month][empId]
+            ) {
+                const empAtt = attendanceByMonth[month][empId];
+                const shifts = shiftsByEmpByMonth[month][empId];
+                for (let d in empAtt) {
+                    let arr = empAtt[d];
+                    if (Array.isArray(arr)) {
+                        arr.forEach(shiftIdx => {
+                            let shiftVal = shifts[shiftIdx]?.half ? 0.5 : 1;
+                            let factor = 1;
+                            // factor key giống payroll.html: `${d}_${shiftIdx}`
+                            if (
+                                workFactorByMonth[month] &&
+                                workFactorByMonth[month][empId] &&
+                                typeof workFactorByMonth[month][empId][`${d}_${shiftIdx}`] !== 'undefined'
+                            ) {
+                                factor = parseFloat(workFactorByMonth[month][empId][`${d}_${shiftIdx}`]) || 1;
+                            }
+                            total += shiftVal * factor;
+                        });
+                    }
+                }
+            }
+            return total;
+        }
+        // Khai báo biến lưu chart để tái sử dụng
+        let payrollBarChartInstance = null;
+        let storeTotalBarChartInstance = null;
+
+        // Một số màu sắc đẹp cho các cột nhân viên
+        const payrollBarColors = [
+            '#1976d2', '#43a047', '#fbc02d', '#e53935', '#8e24aa', '#00acc1', '#fb8c00', '#6d4c41', '#c0ca33', '#d81b60',
+            '#3949ab', '#00897b', '#f4511e', '#7cb342', '#5e35b1', '#039be5', '#c62828', '#ffb300', '#8d6e63', '#00bcd4'
+        ];
+        // Màu cho từng cửa hàng
+        const storeColors = {
+            'LepShop': '#1976d2',
+            "H'Farm": '#43a047',
+            'Khác': '#fbc02d'
+        };
+
+        function renderPayrollReport() {
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
+            // Lọc theo cửa hàng
+            const store = document.getElementById('reportStoreSelect').value;
+            if (store) employees = employees.filter(e => (e.store || '') === store);
+            // Lọc theo tên nhân viên (tìm kiếm)
+            const searchVal = (document.getElementById('employeeSearchInput')?.value || '').trim().toLowerCase();
+            if (searchVal) {
+                employees = employees.filter(e => (e.name || '').toLowerCase().includes(searchVal));
+            }
+            let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            let workDaysStd = parseInt(localStorage.getItem('workDaysStd') || '26');
+            let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay') || '0');
+            let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+            let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+            let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            let month = document.getElementById('reportMonth').value;
+            if (!month) {
+                const now = new Date();
+                month = now.toISOString().slice(0,7);
+                document.getElementById('reportMonth').value = month;
+            }
+            let html = `<table>
+                <thead>
+                    <tr>
+                        <th colspan="9" style="font-size:20px;color:#1976d2;text-align:center;padding:12px 0;" id="payrollReportTitle"></th>
+                    </tr>
+                    <tr>
+                        <th>STT</th>
+                        <th>Họ tên</th>
+                        <th>Ngày Công</th>
+                        <th>Phụ cấp</th>
+                        <th>Thưởng lễ</th>
+                        <th>Doanh thu</th>
+                        <th>Phạt</th>
+                        <th>Tiền ứng</th>
+                        <th>Tổng lương</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            let totalAll = 0;
+            let totalRevenue = 0;
+            employees.forEach((emp, idx) => {
+                let empAtt = (attendanceByMonth[month] && attendanceByMonth[month][emp.id]) || {};
+                // Lấy ngày công chuẩn và tiền công/ngày riêng cho từng nhân viên nếu có
+                let stdDays = parseInt(localStorage.getItem('workDaysStd_' + emp.id)) 
+                    || parseInt(localStorage.getItem('workDaysStd') || '26');
+                let perDayEmp = parseInt(localStorage.getItem('salaryPerDay_' + emp.id)) 
+                    || parseInt(localStorage.getItem('salaryPerDay') || '0');
+                let workdays = 0;
+                let extraShiftsVal = getPayrollInput(emp.id, month, 'extraShifts', 0);
+                let extraShifts = parseFloat((extraShiftsVal + '').replace(',', '.')) || 0;
+                let allowanceVal = getPayrollInput(emp.id, month, 'allowance', 0);
+                let bonusVal = getPayrollInput(emp.id, month, 'bonus', 0);
+                let penaltyVal = getPayrollInput(emp.id, month, 'penalty', 0);
+                let advanceVal = getPayrollInput(emp.id, month, 'advance', 0);
+                let revenueVal = getPayrollInput(emp.id, month, 'revenue', 0);
+                let allowance = parseCurrency(allowanceVal);
+                let bonus = parseCurrency(bonusVal);
+                let penalty = parseCurrency(penaltyVal);
+                let advance = parseCurrency(advanceVal);
+                let revenue = parseCurrency(revenueVal);
+                let extra = extraShifts * (perDayEmp || 0);
+
+                let total = 0;
+                if (emp.salary_type === 'shift') {
+                    // Lấy ca/tháng đúng chuẩn
+                    let shifts = (shiftsByEmpByMonth[month] && shiftsByEmpByMonth[month][emp.id]) || [];
+                    let caCong = new Array(shifts.length).fill(0);
+                    for (let d in empAtt) {
+                        let arr = empAtt[d];
+                        if (Array.isArray(arr)) {
+                            arr.forEach(shiftIdx => {
+                                if (shifts[shiftIdx]) caCong[shiftIdx] += (shifts[shiftIdx].half ? 0.5 : 1);
+                            });
+                        }
+                    }
+                    let caSalaries = caCong.map((count, idx) => count * (parseInt(shifts[idx]?.salary) || 0));
+                    let totalCaSalary = caSalaries.reduce((a, b) => a + b, 0);
+                    total = totalCaSalary + allowance + bonus - penalty - advance;
+                    workdays = caCong.reduce((a, b) => a + b, 0); // workdays cho lương ca là tổng số ca
+                    var workDisplay = workdays;
+                } else {
+                    // Lương cơ bản
+                    // Ngày công = tổng công thực tế (attendance) + TC/LT (extraShifts)
+                    let workdays_att = getTongCong(emp.id, month); // dùng getTongCong thay vì getWorkdaysWithFactor
+                    let workdays = workdays_att + extraShifts; // cộng thêm TC/LT
+                    // Không làm tròn, giữ nguyên số thực
+                    let baseSalary = emp.base_salary || 0;
+                    let salary = 0;
+                    if (workdays >= stdDays) {
+                        salary = baseSalary + ((workdays - stdDays) * (perDayEmp || 0));
+                    } else {
+                        salary = baseSalary - ((stdDays - workdays) * (perDayEmp || 0));
+                        if (salary < 0) salary = 0;
+                    }
+                    // Doanh thu là số tiền nhập riêng, không liên quan ngày công
+                    total = salary + allowance + bonus + revenue - penalty - advance;
+                    totalRevenue += revenue;
+                    var workDisplay = workdays;
+                }
+                if (total < 0) total = 0;
+                totalAll += total;
+                html += `<tr>
+                    <td>${idx+1}</td>
+                    <td>${emp.name}</td>
+                    <td>${workDisplay}</td>
+                    <td>${formatVND(allowance)}</td>
+                    <td>${formatVND(bonus)}</td>
+                    <td>${emp.salary_type !== 'shift' ? formatVND(revenue) : ''}</td>
+                    <td>${formatVND(penalty)}</td>
+                    <td>${formatVND(advance)}</td>
+                    <td style="font-weight:bold;color:#1976d2;">${formatVND(total)}</td>
+                </tr>`;
+            });
+            html += `</tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="7" style="text-align:right;">TỔNG LƯƠNG TOÀN BỘ:</td>
+                        <td colspan="2" style="font-weight:bold;font-size:18px;color:#388e3c;">${formatVND(totalAll)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="9" style="text-align:left;font-style:italic;color:#1976d2;">
+                            Số tiền bằng chữ: <span id="totalAllText"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="9" style="text-align:right;color:#888;font-size:15px;">
+                            Số nhân viên: <span id="employeeCount">${employees.length}</span>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>`;
+            document.getElementById('payrollReportTable').innerHTML = html;
+            // XÓA gọi hàm renderPayrollReportQR();
+            // renderPayrollReportQR();
+            // Thêm dòng tiêu đề động đầu bảng
+            const storeSelect = document.getElementById('reportStoreSelect');
+            let storeName = storeSelect.selectedOptions[0].textContent;
+            if (storeSelect.value === '') {
+                // Nếu là tất cả cửa hàng, lấy tên hai cửa hàng đầu tiên
+                const opts = Array.from(storeSelect.options)
+                    .filter(opt => opt.value && opt.value !== '');
+                if (opts.length >= 2) {
+                    storeName = opts[0].textContent + '/' + opts[1].textContent;
+                } else if (opts.length === 1) {
+                    storeName = opts[0].textContent;
+                } else {
+                    storeName = 'Tất cả cửa hàng';
+                }
+            }
+            const [year, monthNum] = document.getElementById('reportMonth').value.split('-');
+            const monthLabel = monthNum ? `Tháng ${parseInt(monthNum,10)}` : '';
+            const yearLabel = year ? `năm ${year}` : '';
+            document.getElementById('payrollReportTitle').textContent = `Báo Cáo Lương ${storeName} ${monthLabel} ${yearLabel}`.replace(/\s+/g, ' ').trim();
+            // Chuyển số thành chữ và hiển thị
+            document.getElementById('totalAllText').textContent = numberToVietnameseWords(totalAll) + ' đồng';
+
+            // Thêm các nút Save PNG - Copy PNG - Save Excel dưới bảng
+            if (!document.getElementById('payrollReportActions')) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.id = 'payrollReportActions';
+                actionsDiv.style = 'margin-top:18px;text-align:center;';
+                actionsDiv.innerHTML = `
+                    <button onclick="savePayrollReportImage()" style="padding:7px 18px;margin:0 6px 8px 0;background:#1976d2;color:#fff;border:none;border-radius:4px;cursor:pointer;">Save Image</button>
+                    <button onclick="copyPayrollReportPNG()" style="padding:7px 18px;margin:0 6px 8px 0;background:#388e3c;color:#fff;border:none;border-radius:4px;cursor:pointer;">Copy Image</button>
+                    <button onclick="savePayrollReportExcel()" style="padding:7px 18px;margin:0 6px 8px 0;background:#fbc02d;color:#333;border:none;border-radius:4px;cursor:pointer;">Save Excel</button>
+                `;
+                document.querySelector('.container').appendChild(actionsDiv);
+            }
+
+        }
+
+               function savePayrollReportImage() {
+            if (typeof html2canvas !== 'function') {
+                alert('Thiếu thư viện html2canvas!');
+                return;
+            }
+            const table = document.querySelector('#payrollReportTable table');
+            const clone = table.cloneNode(true);
+            clone.style.background = '#fff';
+            clone.style.fontFamily = window.getComputedStyle(table).fontFamily || 'Arial, sans-serif';
+            clone.querySelectorAll('td,th').forEach(cell => {
+                cell.style.whiteSpace = 'pre-line';
+                cell.style.letterSpacing = '0.5px';
+                cell.style.fontFamily = clone.style.fontFamily;
+                cell.style.fontSize = window.getComputedStyle(table).fontSize || '16px';
+            });
+            clone.style.position = 'absolute';
+            clone.style.left = '-9999px';
+            document.body.appendChild(clone);
+            html2canvas(clone, {backgroundColor: '#fff', scale: 2}).then(canvas => {
+                document.body.removeChild(clone);
+                // Lấy tên file động theo tiêu đề báo cáo
+                window._payrollReportImageTitle = document.getElementById('payrollReportTitle').textContent.trim().replace(/[\\/:*?"<>|]/g, '');
+                // Hiển thị dialog chọn định dạng file
+                const formats = [
+                    {ext: 'png', mime: 'image/png', label: 'PNG'},
+                    {ext: 'jpeg', mime: 'image/jpeg', label: 'JPEG'},
+                    {ext: 'webp', mime: 'image/webp', label: 'WEBP'}
+                ];
+                let dialog = document.createElement('div');
+                dialog.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0005;z-index:9999;display:flex;align-items:center;justify-content:center;';
+                dialog.innerHTML = `
+                    <div style="background:#fff;padding:24px 32px;border-radius:8px;box-shadow:0 2px 12px #0003;text-align:center;">
+                        <div style="font-size:18px;font-weight:500;margin-bottom:16px;">Chọn định dạng ảnh để lưu</div>
+                        ${formats.map(f => `<button style="margin:0 8px 0 0;padding:8px 18px;border-radius:4px;border:none;background:#1976d2;color:#fff;cursor:pointer;" onclick="window._savePayrollReportImageDownload('${f.ext}','${f.mime}')">${f.label}</button>`).join('')}
+                        <button style="margin-left:12px;padding:8px 18px;border-radius:4px;border:none;background:#ccc;color:#333;cursor:pointer;" onclick="window._closePayrollReportImageDialog()">Hủy</button>
+                    </div>
+                `;
+                document.body.appendChild(dialog);
+
+                window._savePayrollReportImageDownload = function(ext, mime) {
+                    const title = window._payrollReportImageTitle || 'payroll_report';
+                    canvas.toBlob(function(blob) {
+                        const link = document.createElement('a');
+                        link.download = title + '.' + ext;
+                        link.href = URL.createObjectURL(blob);
+                        link.click();
+                        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+                        window._closePayrollReportImageDialog();
+                    }, mime, ext === 'jpeg' ? 0.95 : 1);
+                };
+                window._closePayrollReportImageDialog = function() {
+                    document.body.removeChild(dialog);
+                    delete window._savePayrollReportImageDownload;
+                    delete window._closePayrollReportImageDialog;
+                    delete window._payrollReportImageTitle;
+                };
+            });
+        }
+
+        function copyPayrollReportPNG() {
+            if (typeof html2canvas !== 'function' || !navigator.clipboard) {
+                alert('Thiếu thư viện html2canvas hoặc Clipboard API!');
+                return;
+            }
+            const table = document.querySelector('#payrollReportTable table');
+            const clone = table.cloneNode(true);
+            clone.style.background = '#fff';
+            clone.style.fontFamily = window.getComputedStyle(table).fontFamily || 'Arial, sans-serif';
+            clone.querySelectorAll('td,th').forEach(cell => {
+                cell.style.whiteSpace = 'pre-line';
+                cell.style.letterSpacing = '0.5px';
+                cell.style.fontFamily = clone.style.fontFamily;
+                cell.style.fontSize = window.getComputedStyle(table).fontSize || '16px';
+            });
+            clone.style.position = 'absolute';
+            clone.style.left = '-9999px';
+            document.body.appendChild(clone);
+            html2canvas(clone, {backgroundColor: '#fff', scale: 2}).then(canvas => {
+                canvas.toBlob(blob => {
+                    const item = new ClipboardItem({ 'image/png': blob });
+                    navigator.clipboard.write([item]).then(() => {
+                        // Hiển thị thông báo khi copy thành công
+                        const notify = document.createElement('div');
+                        notify.textContent = 'Đã copy hình ảnh vào clipboard!';
+                        notify.style = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#388e3c;color:#fff;padding:12px 32px;border-radius:6px;z-index:99999;font-size:18px;box-shadow:0 2px 8px #0003;';
+                        document.body.appendChild(notify);
+                        setTimeout(() => document.body.removeChild(notify), 1800);
+                    });
+                    document.body.removeChild(clone);
+                });
+            });
+        }
+
+        function savePayrollReportExcel() {
+            if (typeof XLSX === 'undefined') {
+                alert('Thiếu thư viện SheetJS (xlsx)!');
+                return;
+            }
+            const table = document.querySelector('#payrollReportTable table');
+            const wb = XLSX.utils.table_to_book(table, {sheet:"Báo Cáo Lương"});
+            XLSX.writeFile(wb, 'payroll_report.xlsx');
+        }
+        // Hàm chuyển số thành chữ tiếng Việt (đơn giản, đủ dùng cho tổng lương)
+        function numberToVietnameseWords(number) {
+            if (number === 0) return 'không';
+            const dv = ['','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+            const hang = ['','nghìn','triệu','tỷ','nghìn tỷ','triệu tỷ','tỷ tỷ'];
+            function docSo3(so) {
+                let tram = Math.floor(so/100), chuc = Math.floor((so%100)/10), donvi = so%10;
+                let str = '';
+                if (tram > 0) str += dv[tram] + ' trăm';
+                if (chuc > 1) str += (str ? ' ' : '') + dv[chuc] + ' mươi';
+                else if (chuc === 1) str += (str ? ' ' : '') + 'mười';
+                else if (tram > 0 && donvi > 0) str += ' lẻ';
+                if (donvi > 0) {
+                    if (chuc === 0 || chuc === 1) str += (str ? ' ' : '') + dv[donvi];
+                    else if (donvi === 1) str += (str ? ' ' : '') + 'mốt';
+                    else if (donvi === 5) str += (str ? ' ' : '') + 'lăm';
+                    else str += (str ? ' ' : '') + dv[donvi];
+                }
+                return str.trim();
+            }
+            let str = '', i = 0;
+            while (number > 0) {
+                let so3 = number % 1000;
+                if (so3 > 0) {
+                    let s = docSo3(so3);
+                    if (hang[i]) s += ' ' + hang[i];
+                    str = s + (str ? ' ' + str : '');
+                }
+                number = Math.floor(number / 1000);
+                i++;
+            }
+            return str.replace(/\s+/g, ' ').trim();
+        }
+        function exportAllData() {
+            const data = typeof getExportData === 'function' ? getExportData() : {};
+            // Lấy tên cửa hàng từ localStorage
+            const storeName = (localStorage.getItem('storeName') || 'LepShop').trim();
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const fileName = `${storeName.replace(/[^a-zA-Z0-9]/g, '')}-${pad(now.getDate())}-${pad(now.getMonth()+1)}-${now.getFullYear()}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.json`;
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        function importAllData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.employees && data.attendanceByMonth) {
+                        // Merge employees
+                        let oldEmployees = JSON.parse(localStorage.getItem('employees') || '[]');
+                        let newEmployees = data.employees || [];
+                        let empMap = {};
+                        oldEmployees.forEach(e => empMap[e.id] = e);
+                        newEmployees.forEach(e => empMap[e.id] = e);
+                        let mergedEmployees = Object.values(empMap);
+
+                        // Merge attendanceByMonth
+                        let oldAtt = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+                        let newAtt = data.attendanceByMonth || {};
+                        for (let month in newAtt) {
+                            if (!oldAtt[month]) oldAtt[month] = {};
+                            for (let empId in newAtt[month]) {
+                                if (!oldAtt[month][empId]) oldAtt[month][empId] = {};
+                                for (let day in newAtt[month][empId]) {
+                                    oldAtt[month][empId][day] = newAtt[month][empId][day];
+                                }
+                            }
+                        }
+
+                        // Merge shifts
+                        let oldShifts = JSON.parse(localStorage.getItem('shifts') || '[]');
+                        let newShifts = data.shifts || [];
+                        let shiftMap = {};
+                        oldShifts.forEach(s => shiftMap[s.id] = s);
+                        newShifts.forEach(s => shiftMap[s.id] = s);
+                        let mergedShifts = Object.values(shiftMap);
+
+                        // Merge shiftsByEmp
+                        let oldShiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+                        let newShiftsByEmp = data.shiftsByEmp || {};
+                        for (let empId in newShiftsByEmp) {
+                            if (!oldShiftsByEmp[empId]) oldShiftsByEmp[empId] = [];
+                            let oldArr = oldShiftsByEmp[empId];
+                            let newArr = newShiftsByEmp[empId];
+                            for (let i = 0; i < newArr.length; ++i) {
+                                let exists = oldArr.some(s =>
+                                    s.name === newArr[i].name &&
+                                    s.start === newArr[i].start &&
+                                    s.end === newArr[i].end &&
+                                    s.salary === newArr[i].salary
+                                );
+                                if (!exists) oldArr.push(newArr[i]);
+                            }
+                        }
+
+                        // Merge workDaysStd & salaryPerDay (ưu tiên giữ giá trị lớn nhất)
+                        let workDaysStd = Math.max(
+                            parseInt(localStorage.getItem('workDaysStd') || '26'),
+                            parseInt(data.workDaysStd || '26')
+                        );
+                        let salaryPerDay = Math.max(
+                            parseInt(localStorage.getItem('salaryPerDay') || '0'),
+                            parseInt(data.salaryPerDay || '0')
+                        );
+
+                        // Save merged data
+                        localStorage.setItem('employees', JSON.stringify(mergedEmployees));
+                        localStorage.setItem('attendanceByMonth', JSON.stringify(oldAtt));
+                        localStorage.setItem('shifts', JSON.stringify(mergedShifts));
+                        localStorage.setItem('shiftsByEmp', JSON.stringify(oldShiftsByEmp));
+                        localStorage.setItem('workDaysStd', workDaysStd.toString());
+                        localStorage.setItem('salaryPerDay', salaryPerDay.toString());
+                        // Thêm các dòng sau để đồng bộ lịch làm việc
+                        if (data.workSchedules) localStorage.setItem('workSchedules', JSON.stringify(data.workSchedules));
+                        if (data.scheduleShiftsByMonth) localStorage.setItem('scheduleShiftsByMonth', JSON.stringify(data.scheduleShiftsByMonth));
+                        if (data.workScheduleWeekTemplate) localStorage.setItem('workScheduleWeekTemplate', JSON.stringify(data.workScheduleWeekTemplate));
+                        if (data.workScheduleWeekNames) localStorage.setItem('workScheduleWeekNames', JSON.stringify(data.workScheduleWeekNames));
+                        // Áp dụng lại workDaysStdByEmp và salaryPerDayByEmp nếu có
+                        if (data.workDaysStdByEmp) {
+                            Object.keys(data.workDaysStdByEmp).forEach(empId => {
+                                localStorage.setItem('workDaysStd_' + empId, data.workDaysStdByEmp[empId]);
+                            });
+                        }
+                        if (data.salaryPerDayByEmp) {
+                            Object.keys(data.salaryPerDayByEmp).forEach(empId => {
+                                localStorage.setItem('salaryPerDay_' + empId, data.salaryPerDayByEmp[empId]);
+                            });
+                        }
+
+                        // Merge notes nếu có
+                        if (data.notes) {
+                            Object.keys(localStorage).forEach(k => {
+                                if (k.startsWith('note_')) localStorage.removeItem(k);
+                            });
+                            for (let k in data.notes) {
+                                localStorage.setItem(k, data.notes[k]);
+                            }
+                        }
+
+                        alert('Nhập dữ liệu thành công! Trang sẽ được tải lại.');
+                        if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+                        location.reload();
+                    } else {
+                        alert('File không đúng định dạng!');
+                    }
+                } catch (err) {
+                    alert('Lỗi khi đọc file dữ liệu!');
+                }
+            };
+            reader.readAsText(file);
+        }
+        // Tự động hiển thị báo cáo khi vào trang
+        window.onload = function() {
+            const now = new Date();
+            const month = now.toISOString().slice(0,7);
+            document.getElementById('reportMonth').value = month;
+            renderPayrollReport();
+            // Thêm sự kiện onchange để xem báo cáo ngay khi đổi tháng
+            document.getElementById('reportMonth').addEventListener('change', renderPayrollReport);
+        }
+    </script>
+    <script src="footer.js"></script>
+    <script>renderFooter();</script>
+</body>
+</html>
+</html>
+</html>

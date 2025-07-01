@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chỉnh sửa trạng thái</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255,255,255,0.98);
+            max-width: 540px;
+            margin: 48px auto 0 auto;
+            border-radius: 18px;
+            box-shadow: 0 4px 32px 0 rgba(37,99,235,0.13), 0 1.5px 8px rgba(44,62,80,0.09);
+            padding: 38px 38px 28px 38px;
+            border: 1.5px solid #dbeafe;
+        }
+        /* --- Đẹp hơn cho phần đăng nhập --- */
+        #login-container {
+            background: linear-gradient(120deg, #e0e7ff 0%, #c7d2fe 100%);
+            border: 2.5px solid #2563eb;
+            box-shadow: 0 8px 32px 0 rgba(37,99,235,0.18), 0 1.5px 8px rgba(44,62,80,0.09);
+            padding: 44px 38px 32px 38px;
+            border-radius: 22px;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-title {
+            text-align: center;
+            color: #2563eb;
+            margin-bottom: 22px;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 12px #dbeafe;
+        }
+        .login-label {
+            display: block;
+            margin-bottom: 7px;
+            color: #222;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .login-input-group {
+            position: relative;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(90deg, #f0f4ff 60%, #e0e7ff 100%);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(37,99,235,0.09);
+            padding: 14px 10px 14px 10px;
+        }
+        .login-input {
+            width: 170px;
+            padding: 12px 38px 12px 14px;
+            border: 1.5px solid #b6cdfd;
+            border-radius: 10px;
+            font-size: 16px;
+            background: #f8fafc;
+            transition: border 0.2s, box-shadow 0.2s;
+            color: #1741a6;
+            font-weight: 500;
+            box-shadow: 0 1px 6px #dbeafe33;
+        }
+        .login-input:focus {
+            border: 2px solid #2563eb;
+            outline: none;
+            background: #e0e7ff;
+            box-shadow: 0 0 0 2px #93c5fd55;
+        }
+        .eye-icon {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s, filter 0.2s;
+            filter: drop-shadow(0 1px 2px #2563eb22);
+        }
+        .eye-icon:hover { opacity: 1; filter: drop-shadow(0 2px 6px #2563eb33);}
+        .login-btn-group {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        .login-btn {
+            background: linear-gradient(90deg, #2563eb 60%, #5fa8ff 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 13px 0;
+            width: 100%;
+            font-size: 17px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(37,99,235,0.13);
+            transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+            letter-spacing: 0.7px;
+        }
+        .login-btn:hover, .login-btn:focus {
+            background: linear-gradient(90deg, #1741a6 60%, #2563eb 100%);
+            box-shadow: 0 8px 32px rgba(37,99,235,0.18);
+            transform: translateY(-2px) scale(1.04);
+        }
+        #login-status {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 16px;
+            min-height: 24px;
+            color: #e74c3c;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            text-shadow: 0 1px 4px #f3e8ff;
+        }
+        /* Main form */
+        .main-title {
+            text-align: center;
+            color: #2563eb;
+            margin-bottom: 18px;
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 8px #dbeafe;
+        }
+        .main-label {
+            display: block;
+            margin-bottom: 7px;
+            color: #1741a6;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .main-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid #b6cdfd;
+            border-radius: 10px;
+            font-size: 15px;
+            background: #f8fafc;
+            margin-bottom: 13px;
+            transition: border 0.2s, box-shadow 0.2s;
+            color: #1741a6;
+            font-weight: 500;
+            box-shadow: 0 1px 6px #dbeafe33;
+        }
+        .main-input:focus {
+            border: 2px solid #2563eb;
+            outline: none;
+            background: #e0e7ff;
+            box-shadow: 0 0 0 2px #93c5fd55;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        button {
+            background: linear-gradient(90deg, #2563eb 60%, #5fa8ff 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 11px 0;
+            width: 48%;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 12px rgba(44,62,80,0.11);
+            transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+            letter-spacing: 0.5px;
+        }
+        button:hover, button:focus {
+            background: linear-gradient(90deg, #1741a6 60%, #2563eb 100%);
+            box-shadow: 0 4px 18px rgba(44,62,80,0.18);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #e3eaf3;
+            border-radius: 8px;
+            margin: 16px 0 12px 0;
+            overflow: hidden;
+            display: none;
+            box-shadow: 0 1px 6px #dbeafe33;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2563eb 60%, #5fa8ff 100%);
+            border-radius: 8px;
+            transition: width 0.4s cubic-bezier(.4,0,.2,1);
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            border: 1.5px solid #b6cdfd;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 15px;
+            background: #f8fafc;
+            margin-bottom: 13px;
+            resize: vertical;
+            transition: border 0.2s, box-shadow 0.2s;
+            color: #1741a6;
+            font-weight: 500;
+            box-shadow: 0 1px 6px #dbeafe33;
+        }
+        textarea:focus {
+            border: 2px solid #2563eb;
+            outline: none;
+            background: #e0e7ff;
+            box-shadow: 0 0 0 2px #93c5fd55;
+        }
+        #status {
+            display: block;
+            text-align: center;
+            margin-top: 8px;
+            font-size: 15px;
+            min-height: 20px;
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        #status.success {
+            color: #27ae60;
+        }
+        @media (max-width: 700px) {
+            .container {
+                padding: 10px 2vw 8px 2vw;
+                max-width: 98vw;
+            }
+            button, .login-btn { font-size: 14px; }
+            #login-container { padding: 16px 2vw 12px 2vw; }
+        }
+    </style>
+</head>
+<body>
+    <div id="login-container" class="container">
+        <div style="display:flex;justify-content:center;margin-bottom:10px;">
+            <!-- SVG icon khiên bảo vệ -->
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M24 4L8 10V20C8 33 24 44 24 44C24 44 40 33 40 20V10L24 4Z" fill="#2563eb" stroke="#1741a6" stroke-width="2"/>
+                <path d="M24 14V28" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="24" cy="33" r="2" fill="#fff"/>
+            </svg>
+        </div>
+        <div style="background:linear-gradient(90deg,#fde68a,#fca5a5);color:#b91c1c;font-weight:700;text-align:center;padding:10px 18px;border-radius:8px;margin-bottom:14px;font-size:15px;box-shadow:0 2px 8px #fca5a555;">
+            CẢNH BÁO: Trang này chỉ dành cho Quản trị viên / Chủ cửa hàng.<br>Không phận sự, vui lòng không truy cập!
+        </div>
+        <h2 class="login-title">Admin Login</h2>
+        <div class="login-input-group">
+            <input type="text" id="admin-user" class="login-input" autocomplete="username" placeholder="Tài khoản">
+            <input type="password" id="admin-pass" class="login-input" autocomplete="current-password" placeholder="Mật khẩu">
+            <span class="eye-icon" id="toggle-pass" onclick="togglePassword()" style="right:18px;">
+                <!-- SVG icon con mắt -->
+                <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#555" width="22" height="22">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#555" width="22" height="22" style="display:none;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.956 9.956 0 012.293-3.95M6.873 6.872A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.956 9.956 0 01-4.043 5.306M15 12a3 3 0 11-6 0 3 3 0 016 0zm-6 0a3 3 0 016 0m-6 0L3 21m6-9l-6 6m6-6l6 6m-6-6l6-6" />
+                </svg>
+            </span>
+        </div>
+        <div class="login-btn-group">
+            <button class="login-btn" onclick="loginAdmin()">Đăng nhập</button>
+        </div>
+        <span id="login-status"></span>
+    </div>
+    <div id="main-container" class="container" style="display:none;">
+        <h2 class="main-title">Chỉnh sửa trạng thái cửa hàng</h2>
+        <label class="main-label">Chủ sở hữu repo:
+            <input type="text" id="owner" class="main-input" value="Minhkhoa0611">
+        </label>
+        <label class="main-label">Tên repo:
+            <input type="text" id="repo" class="main-input" value="quanlynhansu">
+        </label>
+        <label class="main-label">Đường dẫn file:
+            <input type="text" id="path" class="main-input" value="Trangthai.txt">
+        </label>
+        <div class="btn-group">
+            <button onclick="loadFromGitHub()">Tải file từ GitHub</button>
+            <button onclick="saveToGitHub()">Lưu lên GitHub</button>
+        </div>
+        <div class="progress-bar-bg" id="progress-bg">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <textarea id="content" placeholder="Nội dung trạng thái..."></textarea>
+        <span id="status"></span>
+    </div>
+    <script>
+        let originalFileName = "Trangthai.txt";
+        let githubToken = "";
+
+        function showProgress(percent) {
+            const bg = document.getElementById('progress-bg');
+            const bar = document.getElementById('progress-bar');
+            bg.style.display = 'block';
+            bar.style.width = percent + '%';
+        }
+        function hideProgress() {
+            const bg = document.getElementById('progress-bg');
+            const bar = document.getElementById('progress-bar');
+            bar.style.width = '0%';
+            setTimeout(() => { bg.style.display = 'none'; }, 400);
+        }
+
+        // Hàm lấy token từ Apps Script endpoint (dạng: "Token đã lưu: ghp_xxx")
+        async function fetchGitHubToken() {
+            showProgress(10);
+            const url = "https://script.google.com/macros/s/AKfycbyJb1ThLmmYzwNfHh55y89tgdxB8tw3hiCElacAqlDPMJG630IRF7zGbC-M2AJ2rQEp/exec";
+            try {
+                const res = await fetch(url);
+                showProgress(30);
+                if (!res.ok) throw new Error("Không lấy được token");
+                const text = await res.text();
+                showProgress(50);
+                const match = text.match(/Token đã lưu:\s*([a-zA-Z0-9_]+)/);
+                if (match && match[1]) {
+                    githubToken = match[1];
+                    showProgress(70);
+                } else {
+                    setStatus("Không tìm thấy token trong phản hồi!", false);
+                    hideProgress();
+                    throw new Error("Không tìm thấy token");
+                }
+                showProgress(100);
+                setTimeout(hideProgress, 400);
+            } catch (e) {
+                setStatus("Không lấy được token từ Apps Script!", false);
+                hideProgress();
+                throw e;
+            }
+        }
+
+        function setStatus(msg, success) {
+            const st = document.getElementById('status');
+            st.innerText = msg;
+            if (success) {
+                st.classList.add('success');
+            } else {
+                st.classList.remove('success');
+            }
+        }
+
+        async function loadFromGitHub() {
+            setStatus("Đang lấy token...", false);
+            showProgress(5);
+            await fetchGitHubToken();
+            const owner = document.getElementById('owner').value.trim();
+            const repo = document.getElementById('repo').value.trim();
+            const path = document.getElementById('path').value.trim();
+            if (!githubToken || !owner || !repo || !path) {
+                setStatus("Vui lòng nhập đủ thông tin!", false);
+                hideProgress();
+                return;
+            }
+            setStatus("Đang tải...", false);
+            showProgress(30);
+            try {
+                const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+                    headers: { Authorization: `token ${githubToken}` }
+                });
+                showProgress(70);
+                if (!res.ok) {
+                    setStatus("Không thể tải file! Kiểm tra token hoặc repo.", false);
+                    hideProgress();
+                    return;
+                }
+                const data = await res.json();
+                showProgress(90);
+                const content = atob(data.content.replace(/\n/g, ""));
+                document.getElementById('content').value = content;
+                setStatus("Đã tải file từ GitHub.", true);
+                document.getElementById('content').dataset.sha = data.sha;
+                showProgress(100);
+                setTimeout(hideProgress, 600);
+            } catch (e) {
+                setStatus("Lỗi khi tải file!", false);
+                hideProgress();
+            }
+        }
+
+        async function saveToGitHub() {
+            setStatus("Đang lấy token...", false);
+            showProgress(5);
+            await fetchGitHubToken();
+            const owner = document.getElementById('owner').value.trim();
+            const repo = document.getElementById('repo').value.trim();
+            const path = document.getElementById('path').value.trim();
+            const content = document.getElementById('content').value;
+            const sha = document.getElementById('content').dataset.sha || "";
+            if (!githubToken || !owner || !repo || !path) {
+                setStatus("Vui lòng nhập đủ thông tin!", false);
+                hideProgress();
+                return;
+            }
+            setStatus("Đang lưu...", false);
+            showProgress(30);
+            try {
+                const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `token ${githubToken}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        message: "Cập nhật trạng thái từ web",
+                        content: btoa(unescape(encodeURIComponent(content))),
+                        sha: sha || undefined
+                    })
+                });
+                showProgress(80);
+                if (!res.ok) {
+                    setStatus("Không thể lưu file! Kiểm tra token hoặc repo.", false);
+                    hideProgress();
+                    return;
+                }
+                const data = await res.json();
+                document.getElementById('content').dataset.sha = data.content.sha;
+                setStatus("Đã lưu file lên GitHub.", true);
+                showProgress(100);
+                setTimeout(hideProgress, 600);
+            } catch (e) {
+                setStatus("Lỗi khi lưu file!", false);
+                hideProgress();
+            }
+        }
+        function togglePassword() {
+            const passInput = document.getElementById('admin-pass');
+            const eyeOpen = document.getElementById('eye-open');
+            const eyeClosed = document.getElementById('eye-closed');
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                eyeOpen.style.display = "none";
+                eyeClosed.style.display = "inline";
+            } else {
+                passInput.type = "password";
+                eyeOpen.style.display = "inline";
+                eyeClosed.style.display = "none";
+            }
+        }
+        // Thêm hàm đăng nhập admin
+        function loginAdmin() {
+            const user = document.getElementById('admin-user').value.trim();
+            const pass = document.getElementById('admin-pass').value;
+            const loginStatus = document.getElementById('login-status');
+            loginStatus.innerText = "ĐANG XÁC MINH THÔNG TIN TÀI KHOẢN...";
+            setTimeout(() => {
+                if (user === "Quanlytimeprohrm" && pass === "Minhkhoa@2206") {
+                    loginStatus.innerText = "KIỂM TRA THÀNH CÔNG";
+                    setTimeout(() => {
+                        document.getElementById('login-container').style.display = "none";
+                        document.getElementById('main-container').style.display = "block";
+                        loginStatus.innerText = "";
+                    }, 1000);
+                } else {
+                    loginStatus.innerText = "Sai tài khoản hoặc mật khẩu!";
+                }
+            }, 900);
+        }
+        // Ẩn main, chỉ hiện sau khi đăng nhập
+        window.onload = function() {
+            document.getElementById('login-container').style.display = "block";
+            document.getElementById('main-container').style.display = "none";
+        };
+    </script>
+</body>
+</html>

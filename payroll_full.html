@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html style="zoom:90%;">
+<head>
+    <meta charset="utf-8">
+    <title>TimePro HRM - Bảng Lương Tổng Hợp</title>
+    <link rel="icon" type="image/png" href="iconlogo.png">
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #e3f0ff 0%, #f7f7f7 100%); margin: 0; }
+        .container { max-width: 1200px; margin: 30px auto; background: #ffffffee; padding: 24px; border-radius: 16px; box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001; }
+        h2 { color: #1976d2; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; background: #fff; }
+        th, td { border: 1px solid #ccc; padding: 8px 10px; text-align: center; }
+        th { background: #e3f2fd; color: #1976d2; }
+        tfoot td { font-weight: bold; color: #1976d2; background: #f1f8e9; }
+        select, input[type="month"] { font-size: 16px; padding: 4px 12px; border-radius: 4px; }
+    </style>
+    <script src="menu.js"></script>
+    <script src="data_io.js"></script>
+    <script src="footer.js"></script>
+</head>
+<body>
+    <script>renderMenu('payroll_full');</script>
+    <div class="container">
+        <!-- Tiêu đề riêng cho LepShop -->
+        <h2 style="color:#1976d2;text-align:center;">BẢNG LƯƠNG TỔNG HỢP NHÂN VIÊN CỬA HÀNG LepShop</h2>
+        <div style="margin-bottom:18px;">
+            <label style="font-weight:500;color:#1976d2;">Chọn tháng: </label>
+            <input type="month" id="fullPayrollMonth_LepShop" style="min-width:160px;" />
+            <label style="font-weight:500;color:#1976d2;margin-left:12px;">Hình thức nhận:</label>
+            <select id="payMethodFilter_LepShop" style="font-size:17px;padding:6px 16px;min-width:120px;border-radius:6px;margin-left:4px;">
+                <option value="">--Tất cả--</option>
+                <option value="cash">Tiền mặt</option>
+                <option value="bank">Chuyển khoản</option>
+            </select>
+            <label style="font-weight:500;color:#1976d2;margin-left:12px;">Tiền mặt trong cửa hàng LepShop: </label>
+            <input type="text" id="storeCashInput_LepShop" style="font-size:17px;padding:6px 16px;min-width:160px;border-radius:6px;margin-right:24px;" placeholder="Nhập số tiền mặt" oninput="formatStoreCashInput(this)" />
+        </div>
+        <div id="fullPayrollTable_LepShop"></div>
+        <hr style="margin:32px 0;">
+        <!-- Tiêu đề riêng cho H'Farm -->
+        <h2 style="color:#1976d2;text-align:center;">BẢNG LƯƠNG TỔNG HỢP NHÂN VIÊN CỬA HÀNG H'Farm</h2>
+        <div style="margin-bottom:18px;">
+            <label style="font-weight:500;color:#1976d2;">Chọn tháng: </label>
+            <input type="month" id="fullPayrollMonth_HFarm" style="min-width:160px;" />
+            <label style="font-weight:500;color:#1976d2;margin-left:12px;">Hình thức nhận:</label>
+            <select id="payMethodFilter_HFarm" style="font-size:17px;padding:6px 16px;min-width:120px;border-radius:6px;margin-left:4px;">
+                <option value="">--Tất cả--</option>
+                <option value="cash">Tiền mặt</option>
+                <option value="bank">Chuyển khoản</option>
+            </select>
+            <label style="font-weight:500;color:#1976d2;margin-left:12px;">Tiền mặt trong cửa hàng H'Farm: </label>
+            <input type="text" id="storeCashInput_HFarm" style="font-size:17px;padding:6px 16px;min-width:160px;border-radius:6px;" placeholder="Nhập số tiền mặt" oninput="formatStoreCashInput(this)" />
+        </div>
+        <div id="fullPayrollTable_HFarm"></div>
+    </div>
+    <script>
+        function formatVND(val) {
+            if (isNaN(val)) return '';
+            return Number(val).toLocaleString('vi-VN') + ' ₫';
+        }
+        function parseCurrency(val) {
+            return Number((val+'').replace(/[^\d]/g, '')) || 0;
+        }
+        function getPayrollInput(empId, month, field, defaultVal) {
+            let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+            return payrollInputs?.[empId]?.[month]?.[field] ?? defaultVal;
+        }
+        function getWorkdaysWithFactor(emp, month) {
+            let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            let workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+            let shiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+            let empAtt = (attendanceByMonth[month] && attendanceByMonth[month][emp.id]) || {};
+            let total = 0;
+            for (let d in empAtt) {
+                let arr = empAtt[d];
+                let factor = 1;
+                if (workFactorByMonth[month] && workFactorByMonth[month][emp.id] && typeof workFactorByMonth[month][emp.id][d] !== 'undefined') {
+                    factor = parseFloat(workFactorByMonth[month][emp.id][d]) || 1;
+                }
+                if (Array.isArray(arr) && arr.length > 0) {
+                    let shifts = shiftsByEmp[emp.id] || [];
+                    if (shifts.length > 0) {
+                        let sum = 0;
+                        arr.forEach(shiftIdx => {
+                            sum += (shifts[shiftIdx]?.half ? 0.5 : 1);
+                        });
+                        total += sum * factor;
+                    } else {
+                        total += factor;
+                    }
+                }
+            }
+            return total;
+        }
+        function setPayMethod(empId, value) {
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            let idx = employees.findIndex(e => e.id === empId);
+            if (idx !== -1) {
+                employees[idx].pay_method = value;
+                localStorage.setItem('employees', JSON.stringify(employees));
+            }
+            // Cập nhật lại cả hai bảng ngay lập tức
+            renderFullPayroll_LepShop();
+            renderFullPayroll_HFarm();
+        }
+        function formatStoreCashInput(input) {
+            let val = input.value.replace(/[^\d]/g, '');
+            if (val) {
+                input.value = Number(val).toLocaleString('vi-VN');
+            } else {
+                input.value = '';
+            }
+        }
+        function getStoreCash(store) {
+            let id = store === "LepShop" ? "storeCashInput_LepShop" : "storeCashInput_HFarm";
+            let val = document.getElementById(id).value || '';
+            return Number(val.replace(/[^\d]/g, '')) || 0;
+        }
+        function getMonth(store) {
+            return document.getElementById(store === "LepShop" ? "fullPayrollMonth_LepShop" : "fullPayrollMonth_HFarm").value;
+        }
+        function getPayMethodFilter(store) {
+            return document.getElementById(store === "LepShop" ? "payMethodFilter_LepShop" : "payMethodFilter_HFarm").value;
+        }
+        function numberToVietnameseWords(number) {
+            // Đơn giản hóa: chỉ dùng cho số lớn, không đọc từng số lẻ
+            // Có thể thay bằng thư viện ngoài nếu cần chính xác hơn
+            const ones = ["không","một","hai","ba","bốn","năm","sáu","bảy","tám","chín"];
+            function readTriple(num) {
+                let str = "";
+                let hundred = Math.floor(num / 100);
+                let ten = Math.floor((num % 100) / 10);
+                let unit = num % 10;
+                if (hundred > 0) str += ones[hundred] + " trăm";
+                if (ten > 1) {
+                    str += (str ? " " : "") + ones[ten] + " mươi";
+                    if (unit === 1) str += " mốt";
+                    else if (unit === 5) str += " lăm";
+                    else if (unit > 0) str += " " + ones[unit];
+                } else if (ten === 1) {
+                    str += (str ? " " : "") + "mười";
+                    if (unit === 5) str += " lăm";
+                    else if (unit > 0) str += " " + ones[unit];
+                } else if (unit > 0) {
+                    if (str) str += " linh";
+                    str += " " + ones[unit];
+                }
+                return str.trim();
+            }
+            if (number === 0) return "KHÔNG ĐỒNG";
+            let parts = [];
+            let units = ["", "nghìn", "triệu", "tỷ"];
+            let i = 0;
+            while (number > 0 && i < units.length) {
+                let n = number % 1000;
+                if (n > 0) {
+                    let prefix = readTriple(n);
+                    if (units[i]) prefix += " " + units[i];
+                    parts.unshift(prefix);
+                }
+                number = Math.floor(number / 1000);
+                i++;
+            }
+            let result = parts.join(" ").replace(/\s+/g, " ").trim();
+            return (result + " đồng").toUpperCase();
+        }
+        function renderPayrollTable(employees, title, store, month, showCashRemainRow = false) {
+            let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
+            let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            if (!month) {
+                const now = new Date();
+                month = now.toISOString().slice(0,7);
+            }
+            let html = `<h3 style="color:#1976d2;text-align:left;margin-top:32px;">${title}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Họ tên</th>
+                        <th>Cửa hàng</th>
+                        <th>Loại lương</th>
+                        <th>Ngày công / Số ca</th>
+                        <th>Lương cơ bản</th>
+                        <th>Phụ cấp</th>
+                        <th>Thưởng lễ</th>
+                        <th>Doanh thu</th>
+                        <th>Phạt</th>
+                        <th>Tiền ứng</th>
+                        <th>Hình thức nhận lương</th>
+                        <th>Tổng lương</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            let totalAll = 0;
+            employees.forEach((emp, idx) => {
+                // ...lấy dữ liệu từng nhân viên...
+                let stdDays = parseInt(localStorage.getItem('workDaysStd_' + emp.id)) 
+                    || parseInt(localStorage.getItem('workDaysStd') || '26');
+                let perDayEmp = parseInt(localStorage.getItem('salaryPerDay_' + emp.id)) 
+                    || parseInt(localStorage.getItem('salaryPerDay') || '0');
+                let baseSalary = emp.base_salary || 0;
+                let extraShiftsVal = getPayrollInput(emp.id, month, 'extraShifts', 0);
+                let allowanceVal = getPayrollInput(emp.id, month, 'allowance', 0);
+                let bonusVal = getPayrollInput(emp.id, month, 'bonus', 0);
+                let penaltyVal = getPayrollInput(emp.id, month, 'penalty', 0);
+                let advanceVal = getPayrollInput(emp.id, month, 'advance', 0);
+                let revenueVal = getPayrollInput(emp.id, month, 'revenue', 0);
+                let extraShifts = parseFloat((extraShiftsVal + '').replace(',', '.')) || 0;
+                let allowance = parseCurrency(allowanceVal);
+                let bonus = parseCurrency(bonusVal);
+                let penalty = parseCurrency(penaltyVal);
+                let advance = parseCurrency(advanceVal);
+                let revenue = parseCurrency(revenueVal);
+                let extra = extraShifts * (perDayEmp || 0);
+                let workdays = 0, total = 0, workDisplay = '';
+                if (emp.salary_type === 'shift') {
+                    let shifts = (shiftsByEmpByMonth[month] && shiftsByEmpByMonth[month][emp.id]) || [];
+                    let empAtt = (attendanceByMonth[month] && attendanceByMonth[month][emp.id]) || {};
+                    let caCong = new Array(shifts.length).fill(0);
+                    for (let d in empAtt) {
+                        let arr = empAtt[d];
+                        if (Array.isArray(arr)) {
+                            arr.forEach(shiftIdx => {
+                                if (shifts[shiftIdx]) caCong[shiftIdx] += (shifts[shiftIdx].half ? 0.5 : 1);
+                            });
+                        }
+                    }
+                    let caSalaries = caCong.map((count, idx) => count * (parseInt(shifts[idx]?.salary) || 0));
+                    let totalCaSalary = caSalaries.reduce((a, b) => a + b, 0);
+                    total = totalCaSalary + allowance + bonus - penalty - advance;
+                    workdays = caCong.reduce((a, b) => a + b, 0);
+                    workDisplay = workdays % 1 === 0 ? workdays : workdays.toFixed(1);
+                } else if (emp.salary_type === 'em') {
+                    workdays = getWorkdaysWithFactor(emp, month) + extraShifts;
+                    total = baseSalary + extra + allowance + bonus - penalty - advance + revenue;
+                    workDisplay = workdays % 1 === 0 ? workdays : workdays.toFixed(2);
+                } else {
+                    workdays = getWorkdaysWithFactor(emp, month) + extraShifts;
+                    let salary = 0;
+                    if (workdays >= stdDays) {
+                        salary = baseSalary + ((workdays - stdDays) * (perDayEmp || 0));
+                    } else {
+                        salary = baseSalary - ((stdDays - workdays) * (perDayEmp || 0));
+                        if (salary < 0) salary = 0;
+                    }
+                    total = salary + allowance + bonus + revenue - penalty - advance;
+                    workDisplay = workdays % 1 === 0 ? workdays : workdays.toFixed(2);
+                }
+                if (total < 0) total = 0;
+                totalAll += total;
+                let payMethodVal = emp.pay_method || 'cash';
+                html += `<tr>
+                    <td>${idx+1}</td>
+                    <td>${emp.name}</td>
+                    <td>${emp.store || ''}</td>
+                    <td>${emp.salary_type === 'shift' ? 'Lương ca' : (emp.salary_type === 'em' ? 'Lương cơ bản' : 'Lương cơ bản')}</td>
+                    <td>${workDisplay}</td>
+                    <td>${emp.salary_type !== 'shift' ? formatVND(baseSalary) : ''}</td>
+                    <td>${formatVND(allowance)}</td>
+                    <td>${formatVND(bonus)}</td>
+                    <td>${emp.salary_type !== 'shift' ? formatVND(revenue) : ''}</td>
+                    <td>${formatVND(penalty)}</td>
+                    <td>${formatVND(advance)}</td>
+                    <td>
+                        <select onchange="setPayMethod('${emp.id}', this.value)">
+                            <option value="cash" ${payMethodVal==='cash'?'selected':''}>Tiền mặt</option>
+                            <option value="bank" ${payMethodVal==='bank'?'selected':''}>Chuyển khoản</option>
+                        </select>
+                    </td>
+                    <td style="font-weight:bold;color:#1976d2;">${formatVND(total)}</td>
+                </tr>`;
+            });
+            html += `</tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="12" style="text-align:right;">TỔNG LƯƠNG:</td>
+                        <td style="font-weight:bold;font-size:18px;color:#388e3c;">${formatVND(totalAll)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="13" style="text-align:left;font-weight:bold;color:#1976d2;font-size:15px;">
+                            SỐ TIỀN BẰNG CHỮ: ${numberToVietnameseWords(totalAll)}
+                        </td>
+                    </tr>
+                    ${
+                        showCashRemainRow
+                        ? `<tr>
+                            <td colspan="12" style="text-align:right;">TIỀN MẶT CÒN LẠI SAU KHI TRẢ LƯƠNG:</td>
+                            <td style="font-weight:bold;font-size:18px;color:#d32f2f;">
+                                ${formatVND(getStoreCash(store) - totalAll)}
+                            </td>
+                        </tr>`
+                        : ''
+                    }
+                </tfoot>
+            </table>`;
+            return html;
+        }
+        function renderFullPayroll_LepShop() {
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden && (e.store || '') === 'LepShop');
+            let payMethodFilter = getPayMethodFilter("LepShop");
+            let month = getMonth("LepShop");
+            if (payMethodFilter) employees = employees.filter(e => (e.pay_method || 'cash') === payMethodFilter);
+            let cashEmployees = employees.filter(e => (e.pay_method || 'cash') === 'cash');
+            let bankEmployees = employees.filter(e => (e.pay_method || 'cash') === 'bank');
+            let html = '';
+            html += renderPayrollTable(cashEmployees, "BẢNG LƯƠNG NHÂN VIÊN NHẬN TIỀN MẶT - LepShop", "LepShop", month, true);
+            html += renderPayrollTable(bankEmployees, "BẢNG LƯƠNG NHÂN VIÊN NHẬN CHUYỂN KHOẢN - LepShop", "LepShop", month, false);
+            document.getElementById('fullPayrollTable_LepShop').innerHTML = html;
+        }
+        function renderFullPayroll_HFarm() {
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden && (e.store || '') === "H'Farm");
+            let payMethodFilter = getPayMethodFilter("H'Farm");
+            let month = getMonth("H'Farm");
+            if (payMethodFilter) employees = employees.filter(e => (e.pay_method || 'cash') === payMethodFilter);
+            let cashEmployees = employees.filter(e => (e.pay_method || 'cash') === 'cash');
+            let bankEmployees = employees.filter(e => (e.pay_method || 'cash') === 'bank');
+            let html = '';
+            html += renderPayrollTable(cashEmployees, "BẢNG LƯƠNG NHÂN VIÊN NHẬN TIỀN MẶT - H'Farm", "H'Farm", month, true);
+            html += renderPayrollTable(bankEmployees, "BẢNG LƯƠNG NHÂN VIÊN NHẬN CHUYỂN KHOẢN - H'Farm", "H'Farm", month, false);
+            document.getElementById('fullPayrollTable_HFarm').innerHTML = html;
+        }
+        // Tự động hiển thị bảng lương khi vào trang
+        window.onload = function() {
+            const now = new Date();
+            const month = now.toISOString().slice(0,7);
+            document.getElementById('fullPayrollMonth_LepShop').value = month;
+            document.getElementById('fullPayrollMonth_HFarm').value = month;
+            renderFullPayroll_LepShop();
+            renderFullPayroll_HFarm();
+            document.getElementById('fullPayrollMonth_LepShop').addEventListener('change', renderFullPayroll_LepShop);
+            document.getElementById('payMethodFilter_LepShop').addEventListener('change', renderFullPayroll_LepShop);
+            document.getElementById('storeCashInput_LepShop').addEventListener('input', renderFullPayroll_LepShop);
+            document.getElementById('fullPayrollMonth_HFarm').addEventListener('change', renderFullPayroll_HFarm);
+            document.getElementById('payMethodFilter_HFarm').addEventListener('change', renderFullPayroll_HFarm);
+            document.getElementById('storeCashInput_HFarm').addEventListener('input', renderFullPayroll_HFarm);
+        }
+    </script>
+    <script>renderFooter();</script>
+</body>
+
+    <script>renderFooter();</script>
+</body>
+</html>

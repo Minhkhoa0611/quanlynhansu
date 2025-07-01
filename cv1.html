@@ -1,0 +1,45 @@
+<div id="excelPreviewModal" style="display:none;position:fixed;z-index:2600;left:0;top:0;width:100vw;height:100vh;background:#0005;display:flex;align-items:center;justify-content:center;">
+    <div style="background:#fff;padding:28px 24px 20px;border-radius:14px;max-width:900px;min-width:340px;box-shadow:0 8px 36px #0003;position:relative;overflow:hidden;">
+        
+        <!-- Tiêu đề -->
+        <div style="font-size:1.3rem;font-weight:700;color:#1976d2;margin-bottom:14px;text-align:center;">
+            Xác nhận dữ liệu nhân viên từ Excel
+        </div>
+        
+        <!-- Mô tả -->
+        <div style="margin-bottom:12px;font-size:1rem;color:#555;text-align:center;">
+            Kiểm tra, chỉnh sửa hoặc xóa các dòng không hợp lệ trước khi nhập vào hệ thống.
+        </div>
+        
+        <!-- Bảng hiển thị dữ liệu -->
+        <div style="max-height:380px;overflow:auto;border-radius:10px;border:1px solid #d0e4ff;background:#fbfdff;margin-bottom:10px;padding:0;">
+            <table id="excelPreviewTable" style="width:100%;min-width:800px;border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f0f7ff;">
+                        <th style="padding:12px 14px;font-size:1rem;font-weight:600;text-align:left;">Tên</th>
+                        <th style="padding:12px 14px;font-size:1rem;font-weight:600;text-align:left;">Chức vụ</th>
+                        <th style="padding:12px 14px;font-size:1rem;font-weight:600;text-align:left;">Cửa hàng</th>
+                        <th style="padding:12px 14px;font-size:1rem;font-weight:600;text-align:left;">Hình thức trả lương</th>
+                        <th style="padding:12px 14px;font-size:1rem;font-weight:600;text-align:left;">Lương cơ bản</th>
+                        <th style="padding:12px 14px;font-size:1rem;font-weight:600;text-align:center;">Xóa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được thêm động ở đây -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Thông báo lỗi -->
+        <div id="excelPreviewError" style="color:#e53935;font-size:1rem;margin-bottom:8px;display:none;"></div>
+
+        <!-- Nút điều hướng -->
+        <div style="text-align:right;margin-top:10px;">
+            <button class="btn" type="button" onclick="closeExcelPreviewModal()" style="background:#f5f5f5;color:#1976d2;padding:8px 16px;border-radius:6px;margin-right:10px;">Hủy</button>
+            <button class="btn" style="background:#43a047;color:white;padding:8px 18px;border-radius:6px;min-width:80px;" type="button" onclick="confirmImportExcelEmployees()">OK</button>
+        </div>
+
+        <!-- Nút đóng -->
+        <button onclick="closeExcelPreviewModal()" style="position:absolute;top:10px;right:18px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#888;">&times;</button>
+    </div>
+</div>
