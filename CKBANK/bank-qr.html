@@ -89,18 +89,6 @@
             color: #fff;
             border-color: #5a3ec8;
         }
-        @media (max-width: 600px) {
-            .bank-section {
-                margin: 18px 0;
-                padding: 18px 8px 16px 8px;
-                width: 90vw;
-                max-width: 340px;
-            }
-            img {
-                width: 90vw;
-                max-width: 220px;
-            }
-        }
     </style>
     <script>
         // Thay đổi tài khoản hiển thị
@@ -132,6 +120,11 @@
         <div>
             <img src="https://img.vietqr.io/image/tpb-0867544809-compact2.png?accountName=TRAN%20MINH%20KHOA" alt="QR TPBank" width="220">
         </div>
+        <!-- Chữ ký TRAN MINH KHOA: chữ, ảnh, và canvas JSON -->
+        <div style="margin-top:18px;text-align:center;">
+            <canvas id="signature-khoa" width="160" height="60" style="background:transparent;max-width:160px;width:80%;display:block;margin:8px auto 0 auto;"></canvas>
+            <div style="font-size:0.95em;color:#888;margin-top:4px;">TRAN MINH KHOA</div>
+        </div>
     </div>
     <div class="bank-section" style="display:none">
         <div class="bank-title">TPBank</div>
@@ -150,6 +143,57 @@
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
     }
+
+    // VẼ chữ ký TRAN MINH KHOA từ file JSON signature.json
+    window.addEventListener('DOMContentLoaded', function() {
+        const canvas = document.getElementById('signature-khoa');
+        if (!canvas || !canvas.getContext) return;
+        fetch('signature.json')
+            .then(res => {
+                if (!res.ok) throw new Error('Không tìm thấy file signature.json');
+                return res.json();
+            })
+            .then(signatureData => {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.strokeStyle = "#222";
+                ctx.lineWidth = 2.2;
+                ctx.lineCap = "round";
+                // Tìm min/max để scale vừa canvas
+                let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
+                signatureData.forEach(stroke => {
+                    stroke.forEach(([x,y]) => {
+                        if(x<minX)minX=x; if(y<minY)minY=y;
+                        if(x>maxX)maxX=x; if(y>maxY)maxY=y;
+                    });
+                });
+                if (!isFinite(minX) || !isFinite(minY) || !isFinite(maxX) || !isFinite(maxY)) return;
+                const pad = 6;
+                const scaleX = (canvas.width-2*pad)/(maxX-minX||1);
+                const scaleY = (canvas.height-2*pad)/(maxY-minY||1);
+                const scale = Math.min(scaleX, scaleY);
+                signatureData.forEach(stroke => {
+                    if (stroke.length < 2) return;
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        pad + (stroke[0][0]-minX)*scale,
+                        pad + (stroke[0][1]-minY)*scale
+                    );
+                    for (let i=1; i<stroke.length; ++i) {
+                        ctx.lineTo(
+                            pad + (stroke[i][0]-minX)*scale,
+                            pad + (stroke[i][1]-minY)*scale
+                        );
+                    }
+                    ctx.stroke();
+                });
+            })
+            .catch(e => {
+                // Nếu lỗi, xóa canvas
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+            });
+    });
 
     // PWA Add to Home Screen
     let deferredPrompt;
