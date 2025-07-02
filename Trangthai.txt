@@ -1,2 +1,2 @@
-LepShop : OFF
+LepShop : ON
 H'Farm : ON
