@@ -391,7 +391,7 @@ function renderMenu(active) {
                 <button type="button" class="menu-payroll-full-btn" onclick="location.href='payroll_full.html'" style="color:#1976d2;">📊 Bảng lương chi tiết</button>
                 <button type="button" class="menu-payroll-payout-report-btn" onclick="location.href='payroll_payout_report.html'" style="color:#1976d2;">📑 Báo Cáo Chi Trả Lương</button>
                 <button type="button" class="menu-ckbank" onclick="location.href='CKBANK/bank-qr.html'" style="color:#2563eb;">🏦BANK</button>
-                <button type="button" class="menu-ckbank" onclick="location.href='Login.html'" style="color:#2563eb;">🔐ADMIN</button>
+                <button type="button" class="menu-ckbank" onclick="location.href='Admin.html'" style="color:#2563eb;">🔐ADMIN</button>
                 <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ Giới thiệu</button>
 
             </div>
