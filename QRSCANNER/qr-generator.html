@@ -211,6 +211,9 @@
                 <div id="qrInputs">
                     <input type="text" id="content" name="content" required placeholder="Nhập liên kết hoặc nội dung">
                 </div>
+                <div id="charCount" style="text-align:right;color:#64748b;font-size:0.97em;margin-top:2px;margin-bottom:2px;min-height:18px;">
+                    0 ký tự
+                </div>
                 <button type="submit">Tạo mã QR</button>
             </form>
             <div class="qr-container">
@@ -273,18 +276,23 @@
                 let wifitype = document.getElementById('wifitype').value;
                 qrValue = `WIFI:T:${wifitype};S:${ssid};P:${pass};${wifitype==='nopass'?'H:true;':''};`;
             }
+
             var qrcodeDiv = document.getElementById('qrcode');
             qrcodeDiv.innerHTML = '';
-            new QRCode(qrcodeDiv, {
-                text: qrValue,
-                width: 256,
-                height: 256,
-                colorDark: "#111", // Đậm nét hơn
-                colorLight: "#f1f5fa",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-            document.querySelector('.qr-icon').style.display = 'block';
-            document.getElementById('downloadQR').style.display = 'inline-block';
+            try {
+                new QRCode(qrcodeDiv, {
+                    text: qrValue,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#111",
+                    colorLight: "#f1f5fa",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                document.querySelector('.qr-icon').style.display = 'block';
+                document.getElementById('downloadQR').style.display = 'inline-block';
+            } catch (err) {
+                alert('Không thể tạo mã QR: Nội dung quá dài hoặc có ký tự đặc biệt vượt quá khả năng mã hóa của QR code.\nVui lòng rút ngắn hoặc đơn giản hóa nội dung.');
+            }
         });
 
         // Biến đếm số lần tải trong phiên
@@ -411,5 +419,67 @@
 
         // Xóa nút tải ứng dụng PWA
         // <button id="pwa-install-btn">Tải ứng dụng</button>
+        // Hàm cập nhật số ký tự (không giới hạn)
+    function updateCharCount() {
+        let type = document.getElementById('qrType').value;
+        let val = '';
+        if (type === 'wifi') {
+            let ssid = document.getElementById('ssid') ? document.getElementById('ssid').value : '';
+            let pass = document.getElementById('wifipass') ? document.getElementById('wifipass').value : '';
+            let wifitype = document.getElementById('wifitype') ? document.getElementById('wifitype').value : '';
+            val = `WIFI:T:${wifitype};S:${ssid};P:${pass};${wifitype==='nopass'?'H:true;':''};`;
+        } else {
+            let content = document.getElementById('content');
+            val = content ? content.value : '';
+        }
+        document.getElementById('charCount').textContent = `${val.length} ký tự`;
+    }
+
+    // Gắn sự kiện cập nhật số ký tự cho input/textarea động
+    function attachCharCountListener() {
+        let type = document.getElementById('qrType').value;
+        if (type === 'wifi') {
+            ['ssid','wifipass','wifitype'].forEach(id => {
+                let el = document.getElementById(id);
+                if (el) el.addEventListener('input', updateCharCount);
+            });
+        } else {
+            let content = document.getElementById('content');
+            if (content) content.addEventListener('input', updateCharCount);
+        }
+        updateCharCount();
+    }
+
+    // Khi đổi loại QR, cập nhật lại bộ đếm ký tự
+    qrType.addEventListener('change', function() {
+        let html = '';
+        switch (qrType.value) {
+            case 'link':
+                html = `<input type="text" id="content" name="content" required placeholder="Nhập liên kết (https://...)">`;
+                break;
+            case 'text':
+                html = `<textarea id="content" name="content" required placeholder="Nhập văn bản" style="height:60px;"></textarea>`;
+                break;
+            case 'phone':
+                html = `<input type="tel" id="content" name="content" required placeholder="Nhập số điện thoại">`;
+                break;
+            case 'wifi':
+                html = `<input type="text" id="ssid" name="ssid" required placeholder="Tên WiFi (SSID)"><br>
+                        <input type="text" id="wifipass" name="wifipass" style="margin-top:4px;" placeholder="Mật khẩu WiFi"><br>
+                        <select id="wifitype" name="wifitype" style="width: 120px; margin-top:4px;">
+                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">Không mật khẩu</option>
+                        </select>`;
+                break;
+        }
+        qrInputs.innerHTML = html;
+        setTimeout(attachCharCountListener, 0);
+    });
+
+    // Lần đầu load trang
+    window.addEventListener('DOMContentLoaded', function() {
+        attachCharCountListener();
+    });
     </script>
 </html>
