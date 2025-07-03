@@ -89,6 +89,39 @@
             color: #fff;
             border-color: #5a3ec8;
         }
+        .amount-input-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            gap: 10px;
+        }
+        .amount-input {
+            padding: 8px 12px;
+            border: 1.5px solid #d1c4e9;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 140px;
+            outline: none;
+            transition: border 0.16s;
+        }
+        .amount-input:focus {
+            border-color: #5a3ec8;
+        }
+        .amount-label {
+            font-size: 1em;
+            color: #5a3ec8;
+            font-weight: 500;
+        }
+        .amount-text {
+            text-align: center;
+            color: #5a3ec8;
+            font-size: 0.98em;
+            margin-bottom: 8px;
+            min-height: 18px;
+            font-style: italic;
+            letter-spacing: 0.2px;
+        }
     </style>
     <script>
         // Thay đổi tài khoản hiển thị
@@ -99,7 +132,109 @@
             document.querySelectorAll('.account-btn').forEach((btn, i) => {
                 btn.classList.toggle('selected', i === idx);
             });
+            // Cập nhật QR khi chuyển tài khoản
+            updateQR();
         }
+
+        // Hàm cập nhật QR dựa vào số tiền nhập
+        function updateQR() {
+            const raw = document.getElementById('amount-input').value.replace(/\D/g, '');
+            const amount = raw;
+            const sections = document.querySelectorAll('.bank-section');
+            const idx = Array.from(sections).findIndex(sec => sec.style.display !== 'none');
+            if (idx === -1) return;
+            const qrImgs = [
+                sections[0].querySelector('img'),
+                sections[1].querySelector('img')
+            ];
+            const qrData = [
+                {
+                    base: "https://img.vietqr.io/image/tpb-0867544809-compact2.png?accountName=TRAN%20MINH%20KHOA"
+                },
+                {
+                    base: "https://img.vietqr.io/image/tpb-40868442054-compact2.png?accountName=TRAN%20HOANG%20THAO%20VY"
+                }
+            ];
+            for (let i = 0; i < qrImgs.length; ++i) {
+                let url = qrData[i].base;
+                if (amount && !isNaN(amount) && amount !== '0') {
+                    url += "&amount=" + encodeURIComponent(amount);
+                }
+                qrImgs[i].src = url;
+            }
+        }
+
+        // Hàm chuyển số thành chữ tiếng Việt
+        function numberToVietnameseWords(number) {
+            if (!number || isNaN(number)) return '';
+            number = Number(number);
+            if (number === 0) return 'Không đồng';
+            const dv = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ', 'triệu tỷ', 'tỷ tỷ'];
+            const cs = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+            let str = '';
+            let i = 0;
+            let so = number;
+            while (so > 0) {
+                let block = so % 1000;
+                if (block !== 0) {
+                    let blockStr = '';
+                    let tram = Math.floor(block / 100);
+                    let chuc = Math.floor((block % 100) / 10);
+                    let donvi = block % 10;
+                    if (tram > 0) {
+                        blockStr += cs[tram] + ' trăm';
+                        if (chuc === 0 && donvi > 0) blockStr += ' linh';
+                    }
+                    if (chuc > 1) {
+                        blockStr += ' ' + cs[chuc] + ' mươi';
+                        if (donvi === 1) blockStr += ' mốt';
+                        else if (donvi === 5) blockStr += ' lăm';
+                        else if (donvi > 0) blockStr += ' ' + cs[donvi];
+                    } else if (chuc === 1) {
+                        blockStr += ' mười';
+                        if (donvi === 1) blockStr += ' một';
+                        else if (donvi === 5) blockStr += ' lăm';
+                        else if (donvi > 0) blockStr += ' ' + cs[donvi];
+                    } else if (chuc === 0 && donvi > 0) {
+                        blockStr += ' ' + cs[donvi];
+                    }
+                    str = blockStr.trim() + (dv[i] ? ' ' + dv[i] : '') + (str ? ' ' + str : '');
+                }
+                so = Math.floor(so / 1000);
+                i++;
+            }
+            str = str.replace(/\s+/g, ' ').trim();
+            str = str.charAt(0).toUpperCase() + str.slice(1) + ' đồng';
+            return str;
+        }
+
+        // Định dạng số tiền khi nhập
+        function formatAmountInput(e) {
+            let input = e.target;
+            let value = input.value.replace(/\D/g, '');
+            if (!value) {
+                input.value = '';
+                showAmountText('');
+                updateQR();
+                return;
+            }
+            // Giới hạn tối đa 13 số (tới hàng nghìn tỷ)
+            value = value.slice(0, 13);
+            input.value = Number(value).toLocaleString('vi-VN');
+            showAmountText(value);
+            updateQR();
+        }
+
+        // Hiển thị phần chữ số tiền
+        function showAmountText(val) {
+            const textDiv = document.getElementById('amount-text');
+            if (!val) {
+                textDiv.textContent = '';
+                return;
+            }
+            textDiv.textContent = numberToVietnameseWords(val);
+        }
+
         window.onload = function() {
             showAccount(0);
         };
@@ -107,6 +242,12 @@
 </head>
 <body>
     <h2><i class="fa-solid fa-qrcode" style="color:#5a3ec8"></i> Mã QR chuyển khoản</h2>
+    <div class="amount-input-container">
+        <span class="amount-label"><i class="fa-solid fa-money-bill-wave"></i> Số tiền:</span>
+        <input id="amount-input" class="amount-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Nhập số tiền" oninput="formatAmountInput(event)" autocomplete="off" />
+        <button type="button" onclick="document.getElementById('amount-input').value='';showAmountText('');updateQR();" style="background:none;border:none;color:#5a3ec8;cursor:pointer;font-size:1.1em;" title="Xóa số tiền"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="amount-text" class="amount-text"></div>
     <div class="account-selector">
         <button class="account-btn selected" onclick="showAccount(0)">TRAN MINH KHOA</button>
         <button class="account-btn" onclick="showAccount(1)">TRAN HOANG THAO VY</button>

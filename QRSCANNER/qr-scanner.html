@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quét mã QR chuyên dụng</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!-- Ngăn cache cũ -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <!-- PWA manifest và meta -->
+          <link rel="icon" href="image.png" type="image/png">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196f3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #2196f3; /* màu xanh */
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            font-size: 16px;
+        }
+        .scanner-card {
+            background: rgba(255,255,255,0.98);
+            border-radius: 28px;
+            box-shadow: 0 8px 32px 0 rgba(79,140,255,0.13), 0 1.5px 6px 0 rgba(127,170,255,0.10);
+            padding: 24px 10px 18px 10px;
+            margin-top: 24px;
+            min-width: unset;
+            width: 98vw;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 {
+            color: #2563eb;
+            margin-bottom: 22px;
+            text-align: center;
+            letter-spacing: 1px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        #qr-reader {
+            margin: 0 auto 18px auto;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 3px solid #2196f3; /* màu xanh */
+            box-shadow: 0 0 0 4px #e0e7ef, 0 2px 12px 0 rgba(79,140,255,0.10);
+            background: #2196f3; /* màu xanh */
+            position: relative;
+            width: 92vw !important;
+            max-width: 340px;
+            min-width: 220px;
+            height: 92vw !important;
+            max-height: 340px;
+            min-height: 220px;
+            aspect-ratio: 1/1;
+        }
+        /* Đảm bảo video camera phủ kín khung */
+        #qr-reader video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            background: #000;
+        }
+        /* Hiệu ứng quét */
+        .scan-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #4f8cff 0%, #7faaff 100%);
+            opacity: 0.85;
+            z-index: 10;
+            animation: scanmove 1.8s linear infinite;
+        }
+        @keyframes scanmove {
+            0% { top: 0; }
+            100% { top: calc(100% - 4px); }
+        }
+        .result-box {
+            background: linear-gradient(90deg, #e0e7ef 0%, #f8fafc 100%);
+            border-radius: 14px;
+            padding: 14px 8px 10px 8px;
+            margin-top: 14px;
+            font-size: 1rem;
+            word-break: break-all;
+            box-shadow: 0 2px 8px 0 rgba(127,170,255,0.10);
+            color: #1e293b;
+            min-height: 32px;
+        }
+        .action-btn {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 14px 0;
+            width: 100%;
+            background: linear-gradient(90deg, #4f8cff 0%, #7faaff 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 2px 8px 0 rgba(127,170,255,0.10);
+        }
+        .action-btn:hover {
+            background: linear-gradient(90deg, #3b6eea 0%, #4f8cff 100%);
+            transform: scale(1.04);
+        }
+        .icon-qr {
+            display: block;
+            margin: 0 auto 10px auto;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 2px 8px 0 rgba(127,170,255,0.10);
+            object-fit: contain;
+        }
+        .menu-bar {
+            width: 100vw;
+            background: linear-gradient(90deg, #4f8cff 0%, #7faaff 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            padding: 0 0;
+            margin: 0;
+            box-shadow: 0 2px 8px 0 rgba(79,140,255,0.08);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            height: 48px;
+            font-size: 1rem;
+        }
+        .menu-link {
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            padding: 0 10px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            transition: background 0.18s, color 0.18s;
+        }
+        .menu-link.active, .menu-link:hover {
+            background: rgba(255,255,255,0.13);
+            color: #f8fafc;
+        }
+        .main-content {
+            margin-top: 56px;
+            flex: 1 0 auto;
+        }
+        footer {
+            width: 100vw;
+            text-align: center;
+            padding: 24px 0 16px 0;
+            color: #475569;
+            font-size: 0.98rem;
+            background: linear-gradient(90deg,#e0e7ef 0%,#f8fafc 100%);
+            letter-spacing: 0.5px;
+            border-top: 1.5px solid #dbeafe;
+            font-family: 'Segoe UI',Arial,sans-serif;
+            font-weight: 400;
+            flex-shrink: 0;
+        }
+        .pwa-install-btn {
+            display: none;
+            margin: 18px auto 0 auto;
+            padding: 12px 0;
+            width: 90%;
+            background: linear-gradient(90deg, #4f8cff 0%, #7faaff 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 2px 8px 0 rgba(127,170,255,0.10);
+            transition: background 0.2s, transform 0.15s;
+        }
+        .pwa-install-btn.show {
+            display: block;
+        }
+        /* Mobile responsive */
+        @media (max-width: 600px) {
+            body {
+                font-size: 15px;
+            }
+            .scanner-card {
+                padding: 10px 2vw 12px 2vw;
+                width: 99vw;
+                max-width: 99vw;
+                border-radius: 16px;
+                margin-top: 12vw;
+            }
+            #qr-reader {
+                width: 96vw !important;
+                max-width: 96vw;
+                min-width: unset !important;
+                height: 96vw !important;
+                max-height: 96vw;
+                min-height: unset !important;
+                aspect-ratio: 1/1;
+                border: 3px solid #2196f3; /* màu xanh */
+                background: #2196f3; /* màu xanh */
+            }
+            .main-content {
+                margin-top: 54px;
+            }
+            .result-box {
+                font-size: 0.98rem;
+                padding: 10px 4px 8px 4px;
+            }
+            .action-btn {
+                font-size: 1rem;
+                padding: 12px 0;
+            }
+            .icon-qr {
+                width: 34px;
+                height: 34px;
+            }
+        }
+        /* Hide menu-bar on scroll down for mobile app-like feel */
+        @media (max-width: 600px) {
+            .menu-bar {
+                position: sticky;
+                top: 0;
+                transition: top 0.3s;
+            }
+        }
+        /* Remove tap highlight on mobile */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <nav class="menu-bar" id="menuBar">
+        <a href="qr-generator.html" class="menu-link">Tạo mã QR</a>
+        <a href="qr-scanner.html" class="menu-link active">Quét mã QR</a>
+    </nav>
+    <div class="main-content">
+        <div class="scanner-card">
+            <img src="image.png" alt="QR" class="icon-qr">
+            <h2>Quét mã QR</h2>
+            <div id="qr-reader">
+                <div class="scan-line"></div>
+            </div>
+            <div id="qr-result" class="result-box"></div>
+            <button id="pwa-install-btn" class="pwa-install-btn">Tải ứng dụng về máy</button>
+        </div>
+    </div>
+    <footer>
+        <div style="max-width:420px;margin:0 auto;">
+            <span style="font-weight:600;color:#2563eb;">© 2025 QR Scanner</span>
+            &nbsp;|&nbsp;
+            <span>by MKHOME</span>
+        </div>
+    </footer>
+    <script>
+        function handleQRResult(decodedText) {
+            const resultBox = document.getElementById('qr-result');
+            resultBox.innerHTML = '';
+            let lower = decodedText.toLowerCase();
+
+            // Link
+            if (/^(https?:\/\/|www\.)/.test(lower)) {
+                let url = decodedText.startsWith('http') ? decodedText : 'https://' + decodedText;
+                resultBox.innerHTML = `🔗 <b>Phát hiện liên kết:</b><br><a href="${url}" target="_blank" class="action-btn">Mở liên kết</a>`;
+                window.open(url, '_blank');
+            }
+            // WiFi
+            else if (lower.startsWith('wifi:')) {
+                let ssid = decodedText.match(/S:([^;]*)/i);
+                let pass = decodedText.match(/P:([^;]*)/i);
+                let type = decodedText.match(/T:([^;]*)/i);
+                resultBox.innerHTML = `📶 <b>WiFi:</b><br>
+                    SSID: <b>${ssid ? ssid[1] : ''}</b><br>
+                    Mật khẩu: <b>${pass ? pass[1] : '(Không mật khẩu)'}</b><br>
+                    Loại: <b>${type ? type[1] : ''}</b>`;
+            }
+            // Số điện thoại
+            else if (/^\+?\d{8,}$/.test(decodedText.replace(/\s/g,''))) {
+                let phone = decodedText.replace(/\s/g,'');
+                resultBox.innerHTML = `📞 Số điện thoại: <b>${phone}</b><br><a href="tel:${phone}" class="action-btn">Gọi ngay</a>`;
+            }
+            // Văn bản
+            else {
+                resultBox.innerHTML = `📝 <b>Nội dung:</b><br>${decodedText}`;
+            }
+        }
+
+        let lastResult = '';
+        // Đặt qrbox đúng bằng kích thước vùng chứa để không có phần mờ
+        function getQrBoxSize() {
+            const qrReaderDiv = document.getElementById('qr-reader');
+            if (!qrReaderDiv) return 220;
+            let w = qrReaderDiv.offsetWidth;
+            let h = qrReaderDiv.offsetHeight;
+            return Math.floor(Math.min(w, h)); // 100% vùng chứa
+        }
+        const qrReader = new Html5Qrcode("qr-reader");
+        function startScanner() {
+            const qrboxSize = getQrBoxSize();
+            qrReader.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: qrboxSize
+                },
+                (decodedText, decodedResult) => {
+                    if (decodedText !== lastResult) {
+                        lastResult = decodedText;
+                        handleQRResult(decodedText);
+                    }
+                },
+                (errorMessage) => {
+                    // ignore errors
+                }
+            );
+        }
+        window.addEventListener('DOMContentLoaded', startScanner);
+        window.addEventListener('resize', function() {
+            qrReader.stop().then(startScanner);
+        });
+
+        // Đảm bảo hiệu ứng scan-line luôn nằm trên camera
+        // Nếu html5-qrcode thay đổi nội dung, thêm lại scan-line
+        const qrReaderDiv = document.getElementById('qr-reader');
+        function ensureScanLine() {
+            if (!qrReaderDiv.querySelector('.scan-line')) {
+                const line = document.createElement('div');
+                line.className = 'scan-line';
+                qrReaderDiv.appendChild(line);
+            }
+        }
+        // Gọi lại sau mỗi 2s để đảm bảo hiệu ứng không bị mất
+        setInterval(ensureScanLine, 2000);
+
+        // Ẩn menu-bar khi cuộn xuống (giả lập app)
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', function() {
+            const menu = document.getElementById('menuBar');
+            if (window.scrollY > lastScrollY && window.scrollY > 10) {
+                menu.style.top = '-60px';
+            } else {
+                menu.style.top = '0';
+            }
+            lastScrollY = window.scrollY;
+        });
+
+        // PWA install prompt
+        let deferredPrompt;
+        const pwaBtn = document.getElementById('pwa-install-btn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaBtn.classList.add('show');
+        });
+        if (pwaBtn) {
+            pwaBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        pwaBtn.classList.remove('show');
+                    }
+                    deferredPrompt = null;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
