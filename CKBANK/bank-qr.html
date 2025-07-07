@@ -3,57 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <title>Mã QR chuyển khoản ngân hàng</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link rel="icon" type="image/png" sizes="192x192" href="image.png">
     <link rel="apple-touch-icon" sizes="192x192" href="image.png">
     <link rel="apple-touch-icon" sizes="512x512" href="image.png">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#a18cd1">
+    <meta name="theme-color" content="#6a4bc7">
     <!-- Font Awesome CDN for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #a18cd1 50%, #fbc2eb 100%);
+            font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #6a4bc7 100%);
             min-height: 100vh;
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
         }
-        h2 {
-            margin-top: 40px;
-            color: #3b3b3b;
-            letter-spacing: 1px;
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 22px 22px 0 0;
+            box-shadow: 0 8px 32px rgba(106,75,199,0.13), 0 2px 8px rgba(90,62,200,0.09);
+            padding: 0 0 24px 0;
+            min-height: 100vh;
+            position: relative;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        @media (min-width: 900px) {
+            html, body {
+                height: 100%;
+                min-height: 100vh;
+                background: linear-gradient(135deg, #f8fafc 0%, #6a4bc7 100%);
+            }
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+            }
+            .app-container {
+                margin: 0 auto;
+                border-radius: 32px;
+                box-shadow: 0 16px 48px 0 rgba(106,75,199,0.18), 0 2px 16px rgba(90,62,200,0.13);
+                min-height: 720px;
+                max-width: 420px;
+                height: auto;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+        }
+        .app-header {
+            background: linear-gradient(90deg, #6a4bc7 60%, #a18cd1 100%);
+            border-radius: 22px 22px 0 0;
+            padding: 32px 0 18px 0;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(106,75,199,0.10);
+        }
+        .app-header i {
+            font-size: 2.1em;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .app-title {
+            color: #fff;
+            font-size: 1.25em;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            margin-top: 6px;
+            margin-bottom: 0;
+        }
+        .amount-input-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 22px 0 10px 0;
+            gap: 10px;
+        }
+        .amount-label {
+            font-size: 1.08em;
+            color: #6a4bc7;
+            font-weight: 600;
+        }
+        .amount-input {
+            padding: 12px 16px;
+            border: 1.8px solid #d1c4e9;
+            border-radius: 12px;
+            font-size: 1.15em;
+            width: 160px;
+            outline: none;
+            background: #f7f5ff;
+            transition: border 0.16s, box-shadow 0.16s;
+            box-shadow: 0 1px 4px rgba(106,75,199,0.06);
+        }
+        .amount-input:focus {
+            border-color: #6a4bc7;
+            background: #f3f0ff;
+        }
+        .amount-input:focus + .amount-clear-btn ~ #amount-suggest-list,
+        .amount-input:active + .amount-clear-btn ~ #amount-suggest-list {
+            display: flex;
+        }
+        .amount-clear-btn {
+            background: none;
+            border: none;
+            color: #6a4bc7;
+            cursor: pointer;
+            font-size: 1.25em;
+            margin-left: 2px;
+            padding: 0 4px;
+            border-radius: 50%;
+            transition: background 0.15s;
+        }
+        .amount-clear-btn:active {
+            background: #ece6ff;
+        }
+        .amount-suggest-list {
+            display: none;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .amount-suggest-item {
+            background: #f3f0ff;
+            color: #6a4bc7;
+            border: 1.2px solid #d1c4e9;
+            border-radius: 9px;
+            padding: 7px 18px;
+            font-size: 1.05em;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border 0.15s;
+            margin-bottom: 2px;
+            user-select: none;
+            font-weight: 600;
+        }
+        .amount-suggest-item:hover, .amount-suggest-item:active {
+            background: #6a4bc7;
+            color: #fff;
+            border-color: #6a4bc7;
+        }
+        .amount-text {
+            text-align: center;
+            color: #6a4bc7;
+            font-size: 1.05em;
+            margin-bottom: 12px;
+            min-height: 18px;
+            font-style: italic;
+            letter-spacing: 0.2px;
+            font-weight: 500;
+        }
+        .account-selector {
+            margin: 18px 0 18px 0;
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+        }
+        .account-btn {
+            background: #f7f5ff;
+            color: #6a4bc7;
+            border: 1.5px solid #d1c4e9;
+            border-radius: 10px;
+            padding: 12px 28px;
+            font-size: 1.08em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.16s, color 0.16s, border 0.16s, box-shadow 0.16s;
+            box-shadow: 0 1px 4px rgba(106,75,199,0.07);
+        }
+        .account-btn.selected,
+        .account-btn:hover {
+            background: #6a4bc7;
+            color: #fff;
+            border-color: #6a4bc7;
+            box-shadow: 0 2px 8px rgba(106,75,199,0.13);
         }
         .bank-section {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin: 30px;
+            margin: 18px 12px 0 12px;
             background: #fff;
             border-radius: 18px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
-            padding: 32px 28px 24px 28px;
+            box-shadow: 0 4px 24px rgba(106,75,199,0.09), 0 1.5px 4px rgba(90,62,200,0.04);
+            padding: 28px 12px 18px 12px;
             transition: transform 0.18s, box-shadow 0.18s;
+            min-width: 0;
         }
-        .bank-section:hover {
-            transform: translateY(-6px) scale(1.03);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+        /* Thêm căn giữa QR trên desktop */
+        @media (min-width: 900px) {
+            .bank-section {
+                align-items: center;
+                justify-content: center;
+                margin-left: auto;
+                margin-right: auto;
+                max-width: 340px;
+            }
+            .bank-section img {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
         }
         .bank-title {
-            font-size: 1.3em;
-            margin-bottom: 14px;
-            color: #5a3ec8;
-            font-weight: 600;
+            font-size: 1.18em;
+            margin-bottom: 10px;
+            color: #6a4bc7;
+            font-weight: 700;
             letter-spacing: 0.5px;
             text-align: center;
             width: 100%;
         }
         .account-info {
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             color: #444;
-            font-size: 1.08em;
+            font-size: 1.05em;
             text-align: center;
             width: 100%;
             display: flex;
@@ -61,66 +237,61 @@
             align-items: center;
         }
         img {
-            border-radius: 10px;
+            border-radius: 14px;
             border: 1.5px solid #e0e7ef;
-            box-shadow: 0 2px 8px rgba(90,62,200,0.07);
+            box-shadow: 0 2px 8px rgba(106,75,199,0.09);
             background: #f6f8fa;
-        }
-        .account-selector {
-            margin: 32px 0 18px 0;
-            display: flex;
-            gap: 18px;
-            justify-content: center;
-        }
-        .account-btn {
-            background: #f3f0ff;
-            color: #5a3ec8;
-            border: 1.5px solid #d1c4e9;
-            border-radius: 8px;
-            padding: 10px 22px;
-            font-size: 1em;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background 0.16s, color 0.16s, border 0.16s;
-        }
-        .account-btn.selected,
-        .account-btn:hover {
-            background: #5a3ec8;
-            color: #fff;
-            border-color: #5a3ec8;
-        }
-        .amount-input-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 18px;
-            gap: 10px;
-        }
-        .amount-input {
-            padding: 8px 12px;
-            border: 1.5px solid #d1c4e9;
-            border-radius: 8px;
-            font-size: 1em;
-            width: 140px;
-            outline: none;
-            transition: border 0.16s;
-        }
-        .amount-input:focus {
-            border-color: #5a3ec8;
-        }
-        .amount-label {
-            font-size: 1em;
-            color: #5a3ec8;
-            font-weight: 500;
-        }
-        .amount-text {
-            text-align: center;
-            color: #5a3ec8;
-            font-size: 0.98em;
             margin-bottom: 8px;
-            min-height: 18px;
-            font-style: italic;
-            letter-spacing: 0.2px;
+            max-width: 220px;
+            width: 90vw;
+            height: auto;
+        }
+        #a2hs-btn {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            padding: 14px 22px;
+            background: linear-gradient(90deg,#6a4bc7 60%,#a18cd1 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.08em;
+            box-shadow: 0 2px 8px rgba(106,75,199,0.18);
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.18s, box-shadow 0.18s;
+        }
+        #a2hs-btn:active {
+            background: #6a4bc7;
+        }
+        @media (max-width: 600px) {
+            .app-container {
+                max-width: 100vw;
+                border-radius: 0;
+                min-height: 100vh;
+                padding: 0 0 18px 0;
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+            .bank-section {
+                margin: 12px 2vw 0 2vw;
+                padding: 18px 2vw 12px 2vw;
+            }
+            img {
+                max-width: 98vw;
+            }
+        }
+        @media (max-width: 400px) {
+            .amount-input {
+                width: 110px;
+                font-size: 1em;
+            }
+            .account-btn {
+                padding: 10px 10vw;
+                font-size: 1em;
+            }
         }
     </style>
     <script>
@@ -155,12 +326,13 @@
                     base: "https://img.vietqr.io/image/tpb-40868442054-compact2.png?accountName=TRAN%20HOANG%20THAO%20VY"
                 }
             ];
-            for (let i = 0; i < qrImgs.length; ++i) {
-                let url = qrData[i].base;
+            // Sửa: chỉ cập nhật QR cho tài khoản đang hiển thị
+            if (idx >= 0 && idx < qrImgs.length) {
+                let url = qrData[idx].base;
                 if (amount && !isNaN(amount) && amount !== '0') {
                     url += "&amount=" + encodeURIComponent(amount);
                 }
-                qrImgs[i].src = url;
+                qrImgs[idx].src = url;
             }
         }
 
@@ -208,6 +380,68 @@
             return str;
         }
 
+        // Gợi ý số tiền dựa trên input
+        function getAmountSuggestions(val) {
+            if (!val) return [];
+            let n = val.replace(/\D/g, '');
+            if (!n) return [];
+            // Nếu nhập 1 số, gợi ý 1.000, 10.000, 100.000, 1.000.000
+            if (n.length === 1) {
+                return [n + '000', n + '0000', n + '00000', n + '000000'];
+            }
+            // Nếu nhập 2 số, gợi ý n.000, n0.000, n00.000, n.000.000
+            if (n.length === 2) {
+                return [n + '000', n + '0000', n + '00000', n[0] + '.' + n[1] + '00000'];
+            }
+            // Nếu nhập 3 số trở lên, gợi ý các số tiền tăng dần
+            let base = Number(n);
+            if (isNaN(base) || base === 0) return [];
+            let arr = [
+                base * 1000,
+                base * 10000,
+                base * 100000,
+                base * 1000000
+            ];
+            // Loại bỏ trùng lặp, chỉ lấy số hợp lệ
+            arr = arr.filter((v, i, a) => v && a.indexOf(v) === i);
+            return arr.map(x => x.toString());
+        }
+
+        // Hiển thị gợi ý số tiền
+        function showAmountSuggestions(val) {
+            const suggestDiv = document.getElementById('amount-suggest-list');
+            // Chỉ hiện gợi ý khi input đang focus
+            if (document.activeElement !== document.getElementById('amount-input')) {
+                suggestDiv.style.display = 'none';
+                return;
+            }
+            let suggestions = getAmountSuggestions(val);
+            suggestDiv.innerHTML = '';
+            let n = val.replace(/\D/g, '');
+            if (n && !suggestions.includes(n)) {
+                suggestions.unshift(n);
+            } else if (n && suggestions[0] !== n) {
+                suggestions = [n, ...suggestions.filter(s => s !== n)];
+            }
+            if (suggestions.length > 0) {
+                suggestDiv.style.display = 'flex';
+                suggestions.slice(0, 4).forEach(s => {
+                    const btn = document.createElement('div');
+                    btn.className = 'amount-suggest-item';
+                    btn.textContent = Number(s).toLocaleString('vi-VN');
+                    btn.onclick = function() {
+                        document.getElementById('amount-input').value = Number(s).toLocaleString('vi-VN');
+                        showAmountText(s);
+                        updateQR();
+                        showAmountSuggestions(s);
+                    };
+                    suggestDiv.appendChild(btn);
+                });
+            } else {
+                suggestDiv.style.display = 'none';
+            }
+        }
+
         // Định dạng số tiền khi nhập
         function formatAmountInput(e) {
             let input = e.target;
@@ -216,6 +450,7 @@
                 input.value = '';
                 showAmountText('');
                 updateQR();
+                showAmountSuggestions('');
                 return;
             }
             // Giới hạn tối đa 13 số (tới hàng nghìn tỷ)
@@ -223,6 +458,7 @@
             input.value = Number(value).toLocaleString('vi-VN');
             showAmountText(value);
             updateQR();
+            showAmountSuggestions(value);
         }
 
         // Hiển thị phần chữ số tiền
@@ -237,105 +473,48 @@
 
         window.onload = function() {
             showAccount(0);
+            showAmountSuggestions('');
         };
     </script>
 </head>
 <body>
-    <h2><i class="fa-solid fa-qrcode" style="color:#5a3ec8"></i> Mã QR chuyển khoản</h2>
-    <div class="amount-input-container">
-        <span class="amount-label"><i class="fa-solid fa-money-bill-wave"></i> Số tiền:</span>
-        <input id="amount-input" class="amount-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Nhập số tiền" oninput="formatAmountInput(event)" autocomplete="off" />
-        <button type="button" onclick="document.getElementById('amount-input').value='';showAmountText('');updateQR();" style="background:none;border:none;color:#5a3ec8;cursor:pointer;font-size:1.1em;" title="Xóa số tiền"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div id="amount-text" class="amount-text"></div>
-    <div class="account-selector">
-        <button class="account-btn selected" onclick="showAccount(0)">TRAN MINH KHOA</button>
-        <button class="account-btn" onclick="showAccount(1)">TRAN HOANG THAO VY</button>
-    </div>
-    <div class="bank-section">
-        <div class="bank-title">TPBank</div>
-        <div class="account-info">
-            Số tài khoản: <b>0867544809</b><br>
-            Chủ tài khoản: <b>TRAN MINH KHOA</b>
+    <div class="app-container">
+        <div class="app-header">
+            <i class="fa-solid fa-building-columns"></i>
+            <div class="app-title">APP BANK MK - QR CHUYỂN KHOẢN</div>
         </div>
-        <div>
-            <img src="https://img.vietqr.io/image/tpb-0867544809-compact2.png?accountName=TRAN%20MINH%20KHOA" alt="QR TPBank" width="220">
+        <div class="amount-input-container">
+            <span class="amount-label"><i class="fa-solid fa-money-bill-wave"></i> Số tiền:</span>
+            <input id="amount-input" class="amount-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Nhập số tiền" oninput="formatAmountInput(event)" autocomplete="off" />
+            <button type="button" class="amount-clear-btn" onclick="document.getElementById('amount-input').value='';showAmountText('');updateQR();showAmountSuggestions('');" title="Xóa số tiền"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <!-- Chữ ký TRAN MINH KHOA: chữ, ảnh, và canvas JSON -->
-        <div style="margin-top:18px;text-align:center;">
-            <canvas id="signature-khoa" width="160" height="60" style="background:transparent;max-width:160px;width:80%;display:block;margin:8px auto 0 auto;"></canvas>
-            <div style="font-size:0.95em;color:#888;margin-top:4px;">TRAN MINH KHOA</div>
+        <div id="amount-suggest-list" class="amount-suggest-list"></div>
+        <div id="amount-text" class="amount-text"></div>
+        <div class="account-selector">
+            <button class="account-btn selected" onclick="showAccount(0)">TRAN MINH KHOA</button>
+            <button class="account-btn" onclick="showAccount(1)">TRAN HOANG THAO VY</button>
         </div>
-    </div>
-    <div class="bank-section" style="display:none">
-        <div class="bank-title">TPBank</div>
-        <div class="account-info">
-            Số tài khoản: <b>40868442054</b><br>
-            Chủ tài khoản: <b>TRAN HOANG THAO VY</b>
+        <div class="bank-section">
+            <div>
+                <img src="https://img.vietqr.io/image/tpb-0867544809-compact2.png?accountName=TRAN%20MINH%20KHOA" alt="QR TPBank" width="220">
+            </div>
         </div>
-        <div>
-            <img src="https://img.vietqr.io/image/tpb-40868442054-compact2.png?accountName=TRAN%20HOANG%20THAO%20VY" alt="QR TPBank" width="220">
+        <div class="bank-section" style="display:none">
+
+            <div>
+                <img src="https://img.vietqr.io/image/tpb-40868442054-compact2.png?accountName=TRAN%20HOANG%20THAO%20VY" alt="QR TPBank" width="220">
+            </div>
         </div>
     </div>
-    <button id="a2hs-btn" style="display:none;position:fixed;bottom:24px;right:24px;z-index:1000;padding:12px 20px;background:#5a3ec8;color:#fff;border:none;border-radius:8px;font-size:1em;box-shadow:0 2px 8px rgba(90,62,200,0.18);cursor:pointer;">
-        <i class="fa-solid fa-download"></i> Thêm vào màn hình chính
+    <button id="a2hs-btn">
+        <i class="fa-solid fa-download"></i> 
     </button>
     <script>
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
     }
 
-    // VẼ chữ ký TRAN MINH KHOA từ file JSON signature.json
-    window.addEventListener('DOMContentLoaded', function() {
-        const canvas = document.getElementById('signature-khoa');
-        if (!canvas || !canvas.getContext) return;
-        fetch('signature.json')
-            .then(res => {
-                if (!res.ok) throw new Error('Không tìm thấy file signature.json');
-                return res.json();
-            })
-            .then(signatureData => {
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0,0,canvas.width,canvas.height);
-                ctx.strokeStyle = "#222";
-                ctx.lineWidth = 2.2;
-                ctx.lineCap = "round";
-                // Tìm min/max để scale vừa canvas
-                let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
-                signatureData.forEach(stroke => {
-                    stroke.forEach(([x,y]) => {
-                        if(x<minX)minX=x; if(y<minY)minY=y;
-                        if(x>maxX)maxX=x; if(y>maxY)maxY=y;
-                    });
-                });
-                if (!isFinite(minX) || !isFinite(minY) || !isFinite(maxX) || !isFinite(maxY)) return;
-                const pad = 6;
-                const scaleX = (canvas.width-2*pad)/(maxX-minX||1);
-                const scaleY = (canvas.height-2*pad)/(maxY-minY||1);
-                const scale = Math.min(scaleX, scaleY);
-                signatureData.forEach(stroke => {
-                    if (stroke.length < 2) return;
-                    ctx.beginPath();
-                    ctx.moveTo(
-                        pad + (stroke[0][0]-minX)*scale,
-                        pad + (stroke[0][1]-minY)*scale
-                    );
-                    for (let i=1; i<stroke.length; ++i) {
-                        ctx.lineTo(
-                            pad + (stroke[i][0]-minX)*scale,
-                            pad + (stroke[i][1]-minY)*scale
-                        );
-                    }
-                    ctx.stroke();
-                });
-            })
-            .catch(e => {
-                // Nếu lỗi, xóa canvas
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0,0,canvas.width,canvas.height);
-            });
-    });
-
+    
     // PWA Add to Home Screen
     let deferredPrompt;
     const a2hsBtn = document.getElementById('a2hs-btn');
