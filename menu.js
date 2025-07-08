@@ -397,6 +397,9 @@ function renderMenu(active) {
                 <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ Giới thiệu</button>
             </div>
         </div>
+
+
+        
     `;
     document.body.insertBefore(nav, document.body.firstChild);
 
