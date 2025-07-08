@@ -25,14 +25,15 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Nếu là request GET và là cùng origin
-  if (event.request.method === 'GET' && event.request.url.startsWith(self.location.origin)) {
+  if (event.request.method === 'GET') {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          // Nếu fetch thành công, cập nhật cache và trả về bản mới nhất
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+          // Chỉ cache nếu response hợp lệ
+          if (response && response.status === 200 && response.type === 'basic') {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+          }
           return response;
         })
         .catch(() => {
@@ -41,10 +42,7 @@ self.addEventListener('fetch', event => {
         })
     );
   }
-  // Nếu là request ngoài origin (CDN, API...), fallback về cache nếu offline
-  else {
+});
     event.respondWith(
       fetch(event.request).catch(() => caches.match(event.request))
     );
-  }
-});
