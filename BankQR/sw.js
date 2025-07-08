@@ -1,7 +1,7 @@
 const CACHE_NAME = 'bankqr-v1';
 const URLS_TO_CACHE = [
   '/',
-  '/bank-qr.html',
+  '/BankQR.html',
   '/image.png',
   '/manifest.json',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css'
