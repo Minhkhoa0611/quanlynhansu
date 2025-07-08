@@ -390,7 +390,7 @@ function renderMenu(active) {
                 <button type="button" class="menu-work-schedule-btn" onclick="location.href='work_schedule.html'" style="color:#1976d2;">📅 Lịch làm việc</button>
                 <button type="button" class="menu-payroll-full-btn" onclick="location.href='payroll_full.html'" style="color:#1976d2;">📊 Bảng lương chi tiết</button>
                 <button type="button" class="menu-payroll-payout-report-btn" onclick="location.href='payroll_payout_report.html'" style="color:#1976d2;">📑 Báo Cáo Chi Trả Lương</button>
-                <button type="button" class="menu-ckbank" onclick="location.href='CKBANK/bank-qr.html'" style="color:#2563eb;">🏦BANK</button>
+                <button type="button" class="menu-ckbank" onclick="location.href='BankQR/BankQR.html'" style="color:#2563eb;">🏦BANK</button>
                 <button type="button" class="menu-qrscanner" onclick="location.href='QRSCANNER/qr-scanner.html'" style="color:#2563eb;">📷 QR-Scanner</button>
                 <button type="button" class="menu-admin" onclick="location.href='Admin.html'" style="color:#2563eb;">🔐ADMIN</button>
                 <button type="button" class="menu-hfarm-product" onclick="window.open('https://minhkhoa0611.github.io/H-FARM/danhsachsanpham.html','_blank')" style="color:#2e7d32;">🌱 Quản Lý Sản Phẩm H'Farm</button>
