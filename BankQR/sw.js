@@ -1,19 +1,37 @@
-const CACHE_NAME = 'bankqr-v1';
-const URLS_TO_CACHE = [
-  '/',
-  '/bank-qr.html',
-  '/image.png',
-  '/manifest.json',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css'
-  // Thêm các file tĩnh khác nếu cần
+const CACHE_NAME = 'bankqr-cache-v1';
+const urlsToCache = [
+  './BankQR.html',
+  './manifest.json',
+  './image.png',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
+  'https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap'
+  // Thêm các file khác nếu cần
 ];
 
+// Caching files on install
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(URLS_TO_CACHE))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
+// Network first, fallback to cache if offline
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        // Lưu bản mới nhất vào cache
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseClone);
+        });
+        return response;
+      })
+      .catch(() => caches.match(event.request))
+  );
+});
+
+// Clean up old caches on activate
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -23,26 +41,3 @@ self.addEventListener('activate', event => {
     )
   );
 });
-
-self.addEventListener('fetch', event => {
-  if (event.request.method === 'GET') {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          // Chỉ cache nếu response hợp lệ
-          if (response && response.status === 200 && response.type === 'basic') {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
-          }
-          return response;
-        })
-        .catch(() => {
-          // Nếu offline, trả về từ cache
-          return caches.match(event.request);
-        })
-    );
-  }
-});
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
