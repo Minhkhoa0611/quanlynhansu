@@ -1,7 +1,7 @@
 {
   "name": "Mã QR chuyển khoản ngân hàng",
-  "short_name": "Bank QR",
-  "start_url": "./bank-qr.html",
+  "short_name": "Bank QR MK",
+  "start_url": "./BankQR.html",
   "display": "standalone",
   "background_color": "#a18cd1",
   "theme_color": "#a18cd1",
