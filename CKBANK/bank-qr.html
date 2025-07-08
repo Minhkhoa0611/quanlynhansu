@@ -293,6 +293,22 @@
                 font-size: 1em;
             }
         }
+        .watermark {
+            position: absolute;
+            top: 18px;
+            right: 22px;
+            z-index: 10;
+            color: #6a4bc7;
+            opacity: 0.13;
+            font-size: 1.25em;
+            font-weight: 700;
+            font-style: italic;
+            pointer-events: none;
+            user-select: none;
+            text-shadow: 0 1px 4px #fff, 0 0px 2px #6a4bc7;
+            transform: rotate(-8deg);
+            letter-spacing: 1.5px;
+        }
     </style>
     <script>
         // Thay đổi tài khoản hiển thị
@@ -483,6 +499,7 @@
             <i class="fa-solid fa-building-columns"></i>
             <div class="app-title">APP BANK MK - QR CHUYỂN KHOẢN</div>
         </div>
+        <div style="position:absolute;top:18px;right:22px;z-index:10;font-size:1em;color:#6a4bc7;font-weight:600;">Version: 1.5</div>
         <div class="amount-input-container">
             <span class="amount-label"><i class="fa-solid fa-money-bill-wave"></i> Số tiền:</span>
             <input id="amount-input" class="amount-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Nhập số tiền" oninput="formatAmountInput(event)" autocomplete="off" />
