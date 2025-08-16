@@ -593,6 +593,17 @@
     <script src="footer.js"></script>
     <script>renderFooter();</script>
 </body>
-</html>
-</html>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Lấy ngày hiện tại
+    const today = new Date();
+    const redirectDate = new Date("2025-09-1");
+
+    // Nếu hôm nay >= 01/09/2025 thì chuyển trang
+    if (today >= redirectDate) {
+        window.location.href = "baocaoluong.html";
+    }
+});
+</script>
+     <script src="thongbao.js"></script>
 </html>

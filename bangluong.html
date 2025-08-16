@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html style="zoom:90%;">
+<head>
+    <meta charset="utf-8">
+    <title>TimePro HRM - Bảng Lương Nhân Viên</title>
+    <link rel="icon" type="image/png" href="iconlogo.png">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(120deg, #e3f0ff 0%, #f7f7f7 100%);
+            margin: 0;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 38px auto 30px auto;
+            background: #ffffffee; /* làm sáng hơn, thêm độ trong suốt nhẹ */
+            padding: 32px 28px 28px 28px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001;
+        }
+        h2 {
+            color: #1976d2;
+            font-size: 2rem;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px #1976d220;
+        }
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fafcff;
+            box-shadow: 0 2px 8px #0001;
+        }
+        table, th, td {
+            border: 1px solid #e3eaf3;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px 6px;
+            text-align: center;
+            font-size: 15px;
+        }
+        th {
+            background: #e3f0ff;
+            color: #1976d2;
+            font-weight: 600;
+        }
+        input[type="number"], input[type="text"], input[type="time"], input[type="month"] {
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid #b0bec5;
+            font-size: 15px;
+            background: #f7fafd;
+            transition: border 0.2s;
+        }
+        input[type="number"]:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="month"]:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+            background: #e3f0ff;
+        }
+        .form-row {
+            margin-bottom: 18px;
+        }
+        .form-row label {
+            display: inline-block;
+            width: 120px;
+            font-weight: 500;
+            color: #1976d2;
+        }
+        .btn {
+            background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
+            color: #fff;
+            border: none;
+            padding: 7px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px #1976d220;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+            box-shadow: 0 4px 16px #1976d220;
+        }
+        .shift-setup-table input[type="text"], .shift-setup-table input[type="time"] {
+            width: 90px;
+        }
+        .shift-setup-table th, .shift-setup-table td {
+            padding: 7px 4px;
+        }
+        .shift-setup-table tr td:last-child {
+            text-align: center;
+        }
+        .shift-setup-table tr td button {
+            padding: 5px 14px;
+            font-size: 14px;
+        }
+        .shift-setup-table tr td button.btn {
+            background: #e53935;
+            background: linear-gradient(90deg, #e53935 60%, #ff7043 100%);
+        }
+        .shift-setup-table tr td button.btn:hover {
+            background: #b71c1c;
+        }
+        .emp-row-color-0 { background: #e8f5e9; }
+        .emp-row-color-1 { background: #f3e5f5; }
+        .emp-row-color-2 { background: #e3f2fd; }
+        .emp-row-color-3 { background: #fffde7; }
+        .emp-row-color-4 { background: #fce4ec; }
+        .emp-row-color-5 { background: #e0f2f1; }
+        .emp-row-color-6 { background: #fbe9e7; }
+        /* Employee table wrapper */
+        #attTableWrap > div {
+            background: #f7fafd;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px #1976d210;
+            padding: 18px 18px 10px 18px;
+            margin-bottom: 36px;
+            border: 1.5px solid #e3f0ff;
+            transition: box-shadow 0.2s;
+        }
+        #attTableWrap > div:hover {
+            box-shadow: 0 6px 24px #1976d230;
+        }
+        /* Employee name */
+        #attTableWrap > div > div {
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #1976d2;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 8px #1976d220;
+        }
+        /* Shift legend */
+        #shiftLegend span {
+            background: #e3f0ff;
+            color: #1976d2;
+            border-radius: 6px;
+            padding: 4px 12px;
+            margin-right: 8px;
+            font-size: 15px;
+            box-shadow: 0 1px 4px #1976d210;
+            display: inline-block;
+        }
+        #shiftLegend i {
+            color: #888;
+            font-size: 15px;
+        }
+        /* Checkbox style */
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #1976d2;
+            cursor: pointer;
+            vertical-align: middle; /* Thêm dòng này để căn giữa checkbox */
+        }
+        /* Sologan fire effect */
+        .sologan-fire {
+            background: linear-gradient(90deg, #ff9800 0%, #ff5722 40%, #ffd600 60%, #ff9800 100%);
+            color: #fff;
+            font-size: 1.35rem;
+            font-weight: bold;
+            margin-bottom: 22px;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px #ff980080, 0 0 16px #ffd60080 inset;
+            padding: 16px 0 14px 0;
+            letter-spacing: 1.5px;
+            text-shadow:
+                0 2px 8px #ff9800cc,
+                0 0 12px #ffd600cc,
+                0 0 2px #fff;
+            position: relative;
+            overflow: hidden;
+            animation: fireGlow 2s infinite alternate;
+            cursor: pointer;
+            user-select: none;
+        }
+        @keyframes fireGlow {
+            0% {
+                box-shadow: 0 4px 24px #ff980080, 0 0 16px #ffd60080 inset;
+                text-shadow:
+                    0 2px 8px #ff9800cc,
+                    0 0 12px #ffd600cc,
+                    0 0 2px #fff;
+            }
+            100% {
+                box-shadow: 0 8px 36px #ff5722cc, 0 0 32px #ffd600cc inset;
+                text-shadow:
+                    0 4px 16px #ff5722cc,
+                    0 0 24px #ffd600cc,
+                    0 0 6px #fff;
+            }
+        }
+        .sologan-fire .flame {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            width: 38px;
+            height: 38px;
+            pointer-events: none;
+            z-index: 2;
+            animation: flameMove 1.2s infinite alternate;
+        }
+        @keyframes flameMove {
+            0% { transform: translateX(-50%) scaleY(1); opacity: 1; }
+            100% { transform: translateX(-50%) scaleY(1.18); opacity: 0.85; }
+        }
+        .sologan-fire .flame svg {
+            display: block;
+            width: 38px;
+            height: 38px;
+        }
+        /* Làm nổi bật cột ngày hôm nay */
+        .today-col {
+            background: #ffe0ef !important; /* màu hồng nhạt */
+            color: #d32f2f !important;
+            font-weight: bold;
+            box-shadow: 0 0 8px #ffd6e6 inset;
+        }
+        /* Thêm style cho ngày lễ */
+        .holiday-col {
+            background: #ffe082 !important; /* vàng nhạt */
+            color: #b8860b !important;
+            font-weight: bold;
+            box-shadow: 0 0 8px #ffe082 inset;
+        }
+        .holiday-marker {
+            color: #b8860b;
+            font-size: 13px;
+            display: block;
+            margin-top: 2px;
+        }
+        /* Responsive */
+        @media (max-width: 900px) {
+            .container { padding: 12px 2vw; }
+            table, th, td { font-size: 13px; }
+            #attTableWrap > div > div { font-size: 17px; }
+        }
+        @media (max-width: 600px) {
+            .navbar { flex-direction: column; gap: 8px; padding: 10px 6px; }
+            .container { padding: 6px 1vw; }
+            h2 { font-size: 1.2rem; }
+        }
+        /* --- Thêm đoạn này để fix lật ngược camera sau khi quét QR --- */
+        #qr-reader video, #qr-reader canvas {
+            transform: scaleX(-1) !important;
+        }
+        /* Khung quét QR nổi bật */
+        .qr-scan-frame {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 220px;
+            height: 220px;
+            transform: translate(-50%, -50%);
+            border: 4px solid #00e676;
+            border-radius: 18px;
+            box-shadow: 0 0 16px #00e67680, 0 0 0 4px #fff8 inset;
+            pointer-events: none;
+            z-index: 10;
+            animation: qrFrameGlow 1.2s infinite alternate;
+        }
+        @keyframes qrFrameGlow {
+            0% { box-shadow: 0 0 16px #00e67680, 0 0 0 4px #fff8 inset; }
+            100% { box-shadow: 0 0 32px #00e676cc, 0 0 0 4px #fff8 inset; }
+        }
+        /* --- Hiệu ứng scan line cho QR --- */
+        .qr-scan-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #00e676 0%, #fff 50%, #00e676 100%);
+            opacity: 0.85;
+            border-radius: 2px;
+            box-shadow: 0 0 12px #00e676cc, 0 0 4px #fff;
+            animation: qrScanLineMove 1.6s linear infinite;
+            z-index: 11;
+        }
+        @keyframes qrScanLineMove {
+            0% { top: 0; }
+            100% { top: calc(100% - 3px); }
+        }
+        #qr-reader {
+            position: relative;
+            min-height: 240px;
+        }
+        .qr-animated-wrap {
+            position: relative;
+            display: inline-block;
+        }
+        .qr-animated-border {
+            position: absolute;
+            top: -8px; left: -8px; right: -8px; bottom: -8px;
+            border-radius: 16px;
+            pointer-events: none;
+            z-index: 2;
+            border: 3px solid #1976d2;
+            box-shadow: 0 0 18px 4px #1976d2a0, 0 0 0 0 #fff;
+            animation: qrBorderColor 3s linear infinite;
+        }
+        @keyframes qrBorderColor {
+            0%   { border-color: #1976d2; box-shadow: 0 0 18px 4px #1976d2a0; }
+            20%  { border-color: #43a047; box-shadow: 0 0 18px 4px #43a047a0; }
+            40%  { border-color: #ff9800; box-shadow: 0 0 18px 4px #ff9800a0; }
+            60%  { border-color: #e53935; box-shadow: 0 0 18px 4px #e53935a0; }
+            80%  { border-color: #8e24aa; box-shadow: 0 0 18px 4px #8e24aaa0; }
+            100% { border-color: #1976d2; box-shadow: 0 0 18px 4px #1976d2a0; }
+        }
+        /* --- Thay đổi: làm to bảng chấm công lương ca vừa phải --- */
+        .shift-salary-table-big {
+            font-size: 18px !important;
+            zoom: 1.12;
+        }
+        .shift-salary-table-big th, .shift-salary-table-big td {
+            padding: 10px 6px !important;
+            font-size: 15px !important;
+        }
+        .shift-salary-table-big input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+        .shift-salary-table-big input[type="number"],
+        .shift-salary-table-big input[type="text"] {
+            font-size: 15px !important;
+        }
+        @media (max-width: 900px) {
+            .shift-salary-table-big {
+                font-size: 13px !important;
+                zoom: 1;
+            }
+            .shift-salary-table-big th, .shift-salary-table-big td {
+                font-size: 13px !important;
+                padding: 8px 4px !important;
+            }
+        }
+        @media (max-width: 600px) {
+            .shift-salary-table-big {
+                font-size: 12px !important;
+                zoom: 1;
+            }
+            .shift-salary-table-big th, .shift-salary-table-big td {
+                font-size: 12px !important;
+                padding: 5px 2px !important;
+            }
+        }
+        /* --- Thu nhỏ phần cảnh báo Lưu ý --- */
+        .notice-warning {
+            background: #fff3cd;
+            color: #b8860b;
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 1rem;
+            font-weight: 500;
+            box-shadow: 0 2px 8px #ffc10730;
+            border: 1.5px solid #ffc107;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .notice-warning .notice-main {
+            flex: 1;
+            min-width: 0;
+        }
+        .notice-warning .notice-title {
+            font-size: 1.1rem;
+            color: #d32f2f;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            font-family: 'Segoe UI Semibold','Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .notice-bold {
+            color: #d32f2f;
+            font-size: 1.05rem;
+            font-weight: 700;
+            display: block;
+            margin: 6px 0 6px 0;
+            font-family: 'Segoe UI Semibold','Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .notice-small {
+            color: #d32f2f;
+            font-size: 0.98rem;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0;
+            font-family: 'Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .notice-qr {
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .notice-warning .notice-qr span {
+            font-size: 0.98rem;
+            color: #1976d2;
+            display: block;
+            margin-bottom: 6px;
+            font-family: 'Segoe UI Semibold','Segoe UI',Arial,sans-serif;
+        }
+        .notice-warning .qr-animated-wrap img {
+            width: 80px !important;
+            height: 80px !important;
+            border-radius: 8px;
+            border: 1.5px solid #1976d2;
+        }
+        /* Popup holiday calendar style */
+        .holiday-calendar-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 4px;
+            margin: 0 auto 10px auto;
+            background: #f7fafd;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #b8860b20;
+        }
+        .holiday-calendar-table th {
+            background: #ffe082;
+            color: #b8860b;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 6px 0;
+            border: none;
+        }
+        .holiday-calendar-table td {
+            text-align: center;
+            padding: 0;
+            border-radius: 8px;
+            border: none;
+            height: 38px;
+            width: 38px;
+            position: relative;
+            background: #fff;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .holiday-calendar-table td .holiday-checkbox-modal {
+            display: none;
+        }
+        .holiday-calendar-table td label {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            border-radius: 8px;
+            line-height: 38px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #b8860b;
+            transition: background 0.2s, color 0.2s;
+            user-select: none;
+            position: relative;
+        }
+        .holiday-calendar-table td.selected label {
+            background: linear-gradient(90deg, #ffe082 60%, #ffd54f 100%);
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 2px 8px #ffe08280;
+            border: 2px solid #b8860b;
+        }
+        .holiday-calendar-table td.selected label::after {
+            content: "★";
+            color: #ff9800;
+            font-size: 18px;
+            position: absolute;
+            top: 2px;
+            right: 6px;
+            pointer-events: none;
+            text-shadow: 0 1px 4px #fff8, 0 0 2px #ff9800;
+        }
+        .holiday-calendar-table td.today label {
+            border: 2px solid #1976d2;
+            background: #e3f0ff;
+            color: #1976d2;
+        }
+        .holiday-calendar-table td:hover label {
+            background: #ffe08280;
+            color: #b8860b;
+        }
+        .holiday-calendar-table td.disabled label {
+            color: #ccc;
+            background: #f5f5f5;
+            cursor: default;
+        }
+        @media (max-width: 600px) {
+            .holiday-calendar-table td, .holiday-calendar-table th {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+                line-height: 28px;
+            }
+        }
+        .salary-extra-row {
+            background: #f7fafd;
+        }
+        .salary-extra-label {
+            color: #1976d2;
+            font-weight: 500;
+            min-width: 120px;
+            display: inline-block;
+        }
+        .salary-extra-input {
+            width: 120px;
+            font-size: 15px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid #b0bec5;
+            background: #fff;
+            text-align: right;
+        }
+        .salary-extra-note {
+            color: #d32f2f;
+            font-size: 13px;
+            margin-left: 8px;
+        }
+        .salary-extra-vnd {
+            color: #388e3c;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        .salary-final-row {
+            font-weight: bold;
+            color: #388e3c;
+            font-size: 18px;
+            background: #e3f9e5;
+        }
+        .salary-detail-table th, .salary-detail-table td {
+            padding: 10px 6px !important;
+            font-size: 15px !important;
+        }
+        .salary-detail-table {
+            margin-bottom: 0;
+            width: 100%;
+            background: #fafcff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0001;
+            border-collapse: collapse;
+        }
+        .salary-detail-table th {
+            background: #e3f0ff;
+            color: #1976d2;
+            font-weight: 600;
+        }
+        .salary-detail-table td {
+            text-align: center;
+        }
+        .salary-extra-summary-table {
+            margin-top: 18px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .salary-extra-summary-table td {
+            padding: 8px 6px;
+            font-size: 15px;
+            color: #1976d2;
+            background: #f7fafd;
+        }
+        .salary-extra-summary-table .label {
+            font-weight: 500;
+            text-align: right;
+            width: 140px;
+        }
+        .salary-extra-summary-table .value {
+            font-weight: bold;
+            color: #388e3c;
+            text-align: left;
+        }
+        /* --- Thay đổi giao diện nhập các khoản phụ cấp, thưởng lễ, ứng, phạt --- */
+        .salary-extra-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px 32px;
+            margin-bottom: 22px;
+            background: #f7fafd;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px #1976d210;
+            padding: 18px 18px 10px 18px;
+            border: 1.5px solid #e3f0ff;
+            align-items: flex-end;
+        }
+        .salary-extra-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 180px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        .salary-extra-label {
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .salary-extra-label .icon {
+            font-size: 18px;
+            vertical-align: middle;
+            margin-right: 2px;
+        }
+        .salary-extra-input {
+            width: 120px;
+            font-size: 15px;
+            padding: 7px 12px;
+            border-radius: 8px;
+            border: 1.5px solid #b3d1f7;
+            background: #fff;
+            text-align: right;
+            box-shadow: 0 1px 4px #1976d210;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        .salary-extra-input:focus {
+            border: 2px solid #1976d2;
+            box-shadow: 0 2px 8px #1976d220;
+            background: #e3f0ff;
+        }
+        .salary-extra-note {
+            color: #d32f2f;
+            font-size: 13px;
+            margin-left: 8px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .salary-extra-form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-bottom: 18px;
+            background: #f7fafd;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #1976d210;
+            padding: 12px 18px;
+            border: 1.5px solid #e3f0ff;
+            align-items: center;
+        }
+        .salary-extra-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 160px;
+            margin-bottom: 0;
+            position: relative;
+        }
+        .salary-extra-label {
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .salary-extra-label .icon {
+            font-size: 17px;
+            vertical-align: middle;
+            margin-right: 2px;
+        }
+        .salary-extra-input {
+            width: 110px;
+            font-size: 15px;
+            padding: 6px 10px;
+            border-radius: 7px;
+            border: 1.5px solid #b3d1f7;
+            background: #fff;
+            text-align: right;
+            box-shadow: 0 1px 4px #1976d210;
+            transition: border 0.2s, box-shadow 0.2s;
+            margin-bottom: 2px;
+        }
+        .salary-extra-input:focus {
+            border: 2px solid #1976d2;
+            box-shadow: 0 2px 8px #1976d220;
+            background: #e3f0ff;
+        }
+        .salary-extra-note {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-left: 4px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .salary-extra-remark {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+            margin-left: 2px;
+            font-style: italic;
+        }
+        @media (max-width: 900px) {
+            .salary-extra-form-row { flex-direction: column; gap: 8px 0; padding: 8px 6px; }
+            .salary-extra-cell { min-width: 120px; }
+        }
+    </style>
+    <script src="menu.js"></script>
+    <script src="data_io.js"></script>
+</head>
+<body>
+    <script>
+        if (typeof renderMenu === 'function') renderMenu();
+    </script>
+    <div class="container">
+        <div style="display:flex;justify-content:center;align-items:center;margin-bottom:18px;">
+            <div style="border-radius:14px;padding:12px 36px;background:#e3f0ff;color:#1976d2;font-size:2.1rem;font-weight:bold;letter-spacing:2px;text-transform:uppercase;text-align:center;box-shadow:0 2px 12px #1976d220;">
+                Time Pro HRM - BẢNG LƯƠNG NHÂN VIÊN
+            </div>
+        </div>
+        <div class="form-row">
+            <label style="width:130px;">Chọn cửa hàng:</label>
+            <select id="storeSelect" onchange="renderEmpSelect();renderSalaryTable()" style="font-size:18px;padding:8px 18px;min-width:180px;border-radius:8px;border:1.5px solid #b3d1f7;background:#f7fbff;color:#1976d2;font-weight:500;box-shadow:0 1px 6px #1976d210;">
+                <option value="">--Tất cả--</option>
+                <option value="LepShop">LepShop</option>
+                <option value="H'Farm">H'Farm</option>
+            </select>
+            <label>Chọn nhân viên:</label>
+            <select id="empSelect" onchange="renderSalaryTable()" style="font-size:20px;padding:8px 18px;min-width:220px;border-radius:8px;">
+            </select>
+        </div>
+        <div class="form-row">
+            <label>Chọn tháng:</label>
+            <input type="month" id="salaryMonth" onchange="renderSalaryTable()">
+        </div>
+        <!-- Phần nhập các khoản bổ sung: 1 hàng, có ghi chú -->
+        <div class="salary-extra-form-row">
+            <div class="salary-extra-cell">
+                <label class="salary-extra-label" for="extraAllowance">
+                    <span class="icon">💸</span>Phụ cấp:
+                </label>
+                <input type="text" class="salary-extra-input" id="extraAllowance"
+                    value=""
+                    oninput="formatVNDInput(this)"
+                    onchange="saveSalaryExtrasUI('allowance')">
+                <span class="salary-extra-note">•</span>
+                <span class="salary-extra-remark">Nhập tổng phụ cấp tháng</span>
+            </div>
+            <div class="salary-extra-cell">
+                <label class="salary-extra-label" for="extraBonus">
+                    <span class="icon">🎁</span>Thưởng lễ:
+                </label>
+                <input type="text" class="salary-extra-input" id="extraBonus"
+                    value=""
+                    oninput="formatVNDInput(this)"
+                    onchange="saveSalaryExtrasUI('bonus')">
+                <span class="salary-extra-note">•</span>
+                <span class="salary-extra-remark">Thưởng các dịp lễ/tháng</span>
+            </div>
+            <div class="salary-extra-cell">
+                <label class="salary-extra-label" for="extraAdvance">
+                    <span class="icon">💳</span>Tiền ứng:
+                </label>
+                <input type="text" class="salary-extra-input" id="extraAdvance"
+                    value=""
+                    oninput="formatVNDInput(this)"
+                    onchange="saveSalaryExtrasUI('advance')">
+                <span class="salary-extra-note">•</span>
+                <span class="salary-extra-remark">Tiền ứng trong tháng</span>
+            </div>
+            <div class="salary-extra-cell">
+                <label class="salary-extra-label" for="extraPenalty">
+                    <span class="icon">⚠️</span>Phạt:
+                </label>
+                <input type="text" class="salary-extra-input" id="extraPenalty"
+                    value=""
+                    oninput="formatVNDInput(this)"
+                    onchange="saveSalaryExtrasUI('penalty')">
+                <span class="salary-extra-note">•</span>
+                <span class="salary-extra-remark">Các khoản phạt tháng này</span>
+            </div>
+            <!-- Thêm phần nhập Doanh Thu cho nhân viên lương cơ bản -->
+            <div class="salary-extra-cell" id="revenueInputCell" style="display:none;">
+                <label class="salary-extra-label" for="extraRevenue">
+                    <span class="icon">📈</span>Doanh Thu:
+                </label>
+                <input type="text" class="salary-extra-input" id="extraRevenue"
+                    value=""
+                    oninput="formatVNDInput(this)"
+                    onchange="saveRevenueUI()">
+                <span class="salary-extra-note">•</span>
+                <span class="salary-extra-remark">Nhập doanh thu tháng</span>
+            </div>
+            <!-- Thêm ô nhập TC/LT (Tăng ca/Làm thêm) -->
+            <div class="salary-extra-cell" id="tcInputCell">
+                <label class="salary-extra-label" for="extraTC">
+                    <span class="icon">⏫</span>TC/LT:
+                </label>
+                <input type="number" min="0" step="0.1" class="salary-extra-input" id="extraTC"
+                    value=""
+                    onchange="saveTCUI()">
+                <span class="salary-extra-note">•</span>
+                <span class="salary-extra-remark">Nhập hệ số tăng ca/làm thêm (ví dụ 1 = 1 ca)</span>
+                <!-- Dropdown chọn ca làm việc cho TC/LT, chỉ hiện với nhân viên lương ca -->
+                <select id="tcShiftSelect" style="margin-top:4px;display:none;" onchange="renderSalaryTable()"></select>
+            </div>
+        </div>
+        <div id="salaryTableWrap" style="overflow-x:auto"></div>
+    </div>
+    <script>
+        // ====== DỮ LIỆU ======
+        let employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
+        let attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+        let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+        let workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+        // Dữ liệu các khoản phụ cấp, thưởng lễ, ứng, phạt
+        let salaryExtrasByEmpMonth = JSON.parse(localStorage.getItem('salaryExtrasByEmpMonth') || '{}');
+        // Dữ liệu hệ số tăng ca/làm thêm
+        let tcByEmpMonth = JSON.parse(localStorage.getItem('tcByEmpMonth') || '{}');
+
+        function getCurrentMonth() {
+            let m = document.getElementById('salaryMonth').value;
+            if (!m) {
+                const now = new Date();
+                m = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+                document.getElementById('salaryMonth').value = m;
+            }
+            return m;
+        }
+        function daysInMonth(month) {
+            const [y, m] = month.split('-').map(Number);
+            return new Date(y, m, 0).getDate();
+        }
+        function formatVND(val) {
+            if (isNaN(val)) return '0 ₫';
+            return Number(val).toLocaleString('vi-VN') + ' ₫';
+        }
+        function parseCurrency(val) {
+            return Number((val+'').replace(/[^\d\-]/g, '')) || 0;
+        }
+        function getShiftsForEmpMonth(empId, month) {
+            if (!shiftsByEmpByMonth[month]) shiftsByEmpByMonth[month] = {};
+            if (!shiftsByEmpByMonth[month][empId]) shiftsByEmpByMonth[month][empId] = [];
+            return shiftsByEmpByMonth[month][empId];
+        }
+        function getWorkFactor(month, empId, dayShift) {
+            if (!workFactorByMonth[month]) workFactorByMonth[month] = {};
+            if (!workFactorByMonth[month][empId]) workFactorByMonth[month][empId] = {};
+            if (typeof workFactorByMonth[month][empId][dayShift] === 'undefined') {
+                workFactorByMonth[month][empId][dayShift] = 1;
+            }
+            return workFactorByMonth[month][empId][dayShift];
+        }
+        // Đọc lại dữ liệu từ localStorage của payroll.html nếu có
+        function getSalaryExtras(empId, month) {
+            // Nếu có dữ liệu từ payroll.html thì lấy, nếu không thì lấy dữ liệu hiện tại
+            let payrollData = JSON.parse(localStorage.getItem('payrollData') || '{}');
+            if (payrollData[month] && payrollData[month][empId]) {
+                return payrollData[month][empId];
+            }
+            if (!salaryExtrasByEmpMonth[month]) salaryExtrasByEmpMonth[month] = {};
+            if (!salaryExtrasByEmpMonth[month][empId]) {
+                salaryExtrasByEmpMonth[month][empId] = {
+                    allowance: 0,
+                    bonus: 0,
+                    advance: 0,
+                    penalty: 0
+                };
+            }
+            return salaryExtrasByEmpMonth[month][empId];
+        }
+        function saveSalaryExtras(empId, month, key, value) {
+            if (!salaryExtrasByEmpMonth[month]) salaryExtrasByEmpMonth[month] = {};
+            if (!salaryExtrasByEmpMonth[month][empId]) salaryExtrasByEmpMonth[month][empId] = {};
+            salaryExtrasByEmpMonth[month][empId][key] = value;
+            localStorage.setItem('salaryExtrasByEmpMonth', JSON.stringify(salaryExtrasByEmpMonth));
+            renderSalaryTable();
+        }
+        function formatVNDInput(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            if (!value) value = '0';
+            input.value = Number(value).toLocaleString('vi-VN');
+        }
+        function saveSalaryExtrasUI(key) {
+            const empId = document.getElementById('empSelect').value;
+            const month = getCurrentMonth();
+            let val = document.getElementById('extra' + capitalize(key)).value;
+            saveSalaryExtras(empId, month, key, parseCurrency(val));
+        }
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function renderEmpSelect() {
+            const sel = document.getElementById('empSelect');
+            const store = document.getElementById('storeSelect').value;
+            let filtered = employees;
+            if (store) filtered = employees.filter(e => (e.store || '') === store);
+            sel.innerHTML = filtered.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            // Hiển thị/ẩn phần nhập doanh thu khi chọn nhân viên lương cơ bản
+            setTimeout(() => {
+                const empId = sel.value;
+                const emp = employees.find(e => e.id == empId);
+                document.getElementById('revenueInputCell').style.display = (emp && emp.salary_type === 'base') ? '' : 'none';
+                // Hiển thị dropdown chọn ca cho TC/LT nếu là nhân viên lương ca
+                const tcShiftSelect = document.getElementById('tcShiftSelect');
+                if (emp && emp.salary_type === 'shift') {
+                    let shifts = getShiftsForEmpMonth(emp.id, getCurrentMonth());
+                    tcShiftSelect.innerHTML = shifts.map((c, i) => `<option value="${i}">${c?.name || 'Ca ' + (i+1)}</option>`).join('');
+                    tcShiftSelect.style.display = '';
+                } else {
+                    tcShiftSelect.style.display = 'none';
+                }
+            }, 0);
+        }
+
+        function saveRevenueUI() {
+            const empId = document.getElementById('empSelect').value;
+            const month = getCurrentMonth();
+            let val = document.getElementById('extraRevenue').value;
+            let revenueData = JSON.parse(localStorage.getItem('revenueByEmpByMonth') || '{}');
+            if (!revenueData[month]) revenueData[month] = {};
+            revenueData[month][empId] = parseCurrency(val);
+            localStorage.setItem('revenueByEmpByMonth', JSON.stringify(revenueData));
+            renderSalaryTable();
+        }
+
+        function saveTCUI() {
+            const empId = document.getElementById('empSelect').value;
+            const month = getCurrentMonth();
+            let val = parseFloat(document.getElementById('extraTC').value) || 0;
+            if (!tcByEmpMonth[month]) tcByEmpMonth[month] = {};
+            tcByEmpMonth[month][empId] = val;
+            localStorage.setItem('tcByEmpMonth', JSON.stringify(tcByEmpMonth));
+            renderSalaryTable();
+        }
+
+        function renderSalaryTable() {
+            // Luôn nạp lại dữ liệu từ localStorage khi render để đảm bảo dữ liệu mới nhất khi chuyển tháng
+            shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+            workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+            attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
+            salaryExtrasByEmpMonth = JSON.parse(localStorage.getItem('salaryExtrasByEmpMonth') || '{}');
+            tcByEmpMonth = JSON.parse(localStorage.getItem('tcByEmpMonth') || '{}');
+            const month = getCurrentMonth();
+            const days = daysInMonth(month);
+            const empId = document.getElementById('empSelect').value;
+            if (!empId) {
+                document.getElementById('salaryTableWrap').innerHTML = '<div style="color:#e53935;font-size:18px;padding:24px 0;text-align:center;">Vui lòng chọn nhân viên.</div>';
+                return;
+            }
+            const emp = employees.find(e => e.id == empId);
+            if (!emp) {
+                document.getElementById('salaryTableWrap').innerHTML = '<div style="color:#e53935;font-size:18px;padding:24px 0;text-align:center;">Không tìm thấy nhân viên.</div>';
+                return;
+            }
+            let empAtt = attendanceByMonth[month]?.[emp.id] || {};
+            let shifts = getShiftsForEmpMonth(emp.id, month);
+            let workDaysStd = parseInt(localStorage.getItem('workDaysStd_' + empId)) 
+                || parseInt(localStorage.getItem('workDaysStd') || '26');
+            let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay_' + empId)) 
+                || parseInt(localStorage.getItem('salaryPerDay') || '0');
+            let extras = getSalaryExtras(emp.id, month);
+
+            // Luôn cập nhật lại các khoản phụ cấp, thưởng lễ, ứng, phạt từ localStorage khi render
+            document.getElementById('extraAllowance').value = extras.allowance ? Number(extras.allowance).toLocaleString('vi-VN') : '';
+            document.getElementById('extraBonus').value = extras.bonus ? Number(extras.bonus).toLocaleString('vi-VN') : '';
+            document.getElementById('extraAdvance').value = extras.advance ? Number(extras.advance).toLocaleString('vi-VN') : '';
+            document.getElementById('extraPenalty').value = extras.penalty ? Number(extras.penalty).toLocaleString('vi-VN') : '';
+            // Hiển thị giá trị doanh thu trong ô nhập nếu là nhân viên lương cơ bản
+            let revenueData = JSON.parse(localStorage.getItem('revenueByEmpByMonth') || '{}');
+            let revenue = revenueData[getCurrentMonth()]?.[emp.id] || 0;
+            if (emp.salary_type === 'base') {
+                document.getElementById('revenueInputCell').style.display = '';
+                document.getElementById('extraRevenue').value = revenue ? Number(revenue).toLocaleString('vi-VN') : '';
+            } else {
+                document.getElementById('revenueInputCell').style.display = 'none';
+                document.getElementById('extraRevenue').value = '';
+            }
+            // Hiển thị giá trị TC/LT khi render
+            let hesoTC = tcByEmpMonth[getCurrentMonth()]?.[emp.id] || 0;
+            document.getElementById('extraTC').value = hesoTC ? hesoTC : '';
+            // Lấy ca chọn cho TC/LT nếu là nhân viên lương ca
+            let tcShiftIndex = 0;
+            if (emp.salary_type === 'shift') {
+                let tcShiftSelect = document.getElementById('tcShiftSelect');
+                tcShiftIndex = parseInt(tcShiftSelect.value) || 0;
+                tcShiftSelect.style.display = '';
+            } else {
+                document.getElementById('tcShiftSelect').style.display = 'none';
+            }
+            // Tính chi tiết từng ca
+            let caCong = [];
+            let caSalaries = [];
+            let numShifts = shifts.length || 1;
+            for(let s=0; s<numShifts; ++s) {
+                let rowWork = 0;
+                for(let d=1; d<=days; ++d) {
+                    let checked = (empAtt[d] && empAtt[d].includes(s)) ? 'checked' : '';
+                    let shiftVal = shifts[s]?.half ? 0.5 : 1;
+                    let factor = getWorkFactor(month, emp.id, `${d}_${s}`);
+                    if (checked) rowWork += shiftVal * factor;
+                }
+                caCong[s] = rowWork;
+                let caSalary = parseInt(shifts[s]?.salary || 0);
+                caSalaries[s] = caSalary;
+            }
+            let tongCong = caCong.reduce((a, b) => a + b, 0);
+            let tongLuong = 0;
+            let caThanhTien = [];
+            let luongThucNhan = 0; // <-- Khai báo biến ở đây
+            let html = `<div style="margin-bottom:32px;">`;
+            html += `<div style="font-weight:bold;font-size:18px;margin-bottom:8px;color:#1976d2">${emp.name}</div>`;
+
+            if (emp.salary_type === 'shift') {
+                html += `<table class="salary-detail-table"><thead>
+                    <tr>
+                        <th>Ca làm việc</th>
+                        <th>Số ca</th>
+                        <th>Lương ca</th>
+                        <th>Thành tiền</th>
+                    </tr></thead><tbody>`;
+                for(let s=0; s<numShifts; ++s) {
+                    caThanhTien[s] = caCong[s] * caSalaries[s];
+                    tongLuong += caThanhTien[s];
+                    html += `<tr>
+                        <td>${shifts[s]?.name || 'Ca ' + (s+1)}</td>
+                        <td>${caCong[s]}</td>
+                        <td>${formatVND(caSalaries[s])}</td>
+                        <td>${formatVND(caThanhTien[s])}</td>
+                    </tr>`;
+                }
+                // Thêm dòng tổng ca và tổng lương
+                html += `<tr style="background:#fff;">
+                    <td colspan="4" style="padding:0;">
+                    <div style="display:flex;justify-content:center;align-items:center;font-size:1.45rem;font-weight:bold;color:#222;">
+                        <span style="background:#e3f0ff;border-radius:8px;padding:8px 24px 8px 18px;margin-right:18px;box-shadow:0 2px 8px #1976d210;">
+                            TỔNG CA <span style="font-size:1.7rem;color:#222;font-weight:bold;margin-left:12px;">${tongCong}</span>
+                        </span>
+                        <span style="background:#e3f0ff;border-radius:8px;padding:8px 24px 8px 18px;box-shadow:0 2px 8px #1976d210;">
+                            TỔNG LƯƠNG <span style="font-size:1.7rem;color:#222;font-weight:bold;margin-left:12px;">${formatVND(tongLuong)}</span>
+                        </span>
+                    </div>
+                </td>
+            </tr>`;
+                html += `</tbody></table>`;
+
+                // Tính tiền tăng ca/làm thêm nếu có
+                let tienTC = hesoTC * (caSalaries[tcShiftIndex] || 0);
+
+                // Tính lương thực nhận cho nhân viên lương ca
+                luongThucNhan = tongLuong + parseCurrency(extras.allowance) + parseCurrency(extras.bonus)
+                    - parseCurrency(extras.advance) - parseCurrency(extras.penalty)
+                    + tienTC;
+
+                // Bảng chi tiết từng khoản như excel
+                html += `<table class="salary-detail-table" style="margin-bottom:0;width:100%;"><thead>
+                    <tr>
+                        <th style="text-align:left;">Khoản mục</th>
+                        <th style="text-align:right;">Số tiền</th>
+                    </tr>
+                </thead><tbody>
+                    <tr>
+                        <td style="text-align:left;">Tổng lương ca</td>
+                        <td style="text-align:right;">${formatVND(tongLuong)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">TC/LT (Tăng ca/Làm thêm - ${shifts[tcShiftIndex]?.name || 'Ca ' + (tcShiftIndex+1)})</td>
+                        <td style="text-align:right;">${formatVND(tienTC)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">Phụ cấp</td>
+                        <td style="text-align:right;">${formatVND(extras.allowance)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">Thưởng lễ</td>
+                        <td style="text-align:right;">${formatVND(extras.bonus)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">Phạt</td>
+                        <td style="text-align:right;">- ${formatVND(extras.penalty)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">Tiền ứng</td>
+                        <td style="text-align:right;">- ${formatVND(extras.advance)}</td>
+                    </tr>
+                    <tr class="salary-final-row">
+                        <td style="text-align:left;font-weight:bold;">LƯƠNG THỰC NHẬN</td>
+                        <td style="text-align:right;font-weight:bold;font-size:1.2rem;">${formatVND(luongThucNhan)}</td>
+                    </tr>
+                </tbody></table>`;
+            } else {
+                // Làm lại bảng chi tiết lương cơ bản như excel
+                let baseSalary = emp.base_salary || 0;
+                let salaryDay = salaryPerDay;
+                let workDaysStdVal = workDaysStd;
+                let revenueData = JSON.parse(localStorage.getItem('revenueByEmpByMonth') || '{}');
+                let revenue = revenueData[getCurrentMonth()]?.[emp.id] || 0;
+
+                // Tính lương ngày công
+                let luongNgayCong = 0;
+                if (tongCong >= workDaysStdVal) {
+                    luongNgayCong = (tongCong - workDaysStdVal) * salaryDay;
+                } else {
+                    luongNgayCong = -((workDaysStdVal - tongCong) * salaryDay);
+                }
+                // Tổng lương trước cộng/trừ các khoản
+                tongLuong = baseSalary + luongNgayCong;
+                if (tongLuong < 0) tongLuong = 0;
+
+                // Tính tiền tăng ca/làm thêm
+                let tienTC = hesoTC * salaryPerDay;
+
+                // Tính lương thực nhận cho nhân viên lương cơ bản (cộng doanh thu và tăng ca)
+                luongThucNhan = tongLuong + parseCurrency(extras.allowance) + parseCurrency(extras.bonus)
+                    - parseCurrency(extras.advance) - parseCurrency(extras.penalty)
+                    + parseCurrency(revenue) + tienTC;
+
+                // Bảng chi tiết từng khoản như excel
+                html += `<table class="salary-detail-table" style="margin-bottom:0;width:100%;"><thead>
+                    <tr>
+                        <th style="text-align:left;">Khoản mục</th>
+                        <th style="text-align:right;">Số tiền</th>
+                    </tr>
+                </thead><tbody>
+                    <tr>
+                        <td style="text-align:left;">Lương cơ bản (${workDaysStdVal} công)</td>
+                        <td style="text-align:right;">${formatVND(baseSalary)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">Lương ngày công (${tongCong} công)</td>
+                        <td style="text-align:right;">${formatVND(luongNgayCong)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">TC/LT (Tăng ca/Làm thêm)</td>
+                        <td style="text-align:right;">${formatVND(tienTC)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">Phụ cấp</td>
+                        <td style="text-align:right;">${formatVND(extras.allowance)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">Thưởng lễ</td>
+                        <td style="text-align:right;">${formatVND(extras.bonus)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">Phạt</td>
+                        <td style="text-align:right;">- ${formatVND(extras.penalty)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">Tiền ứng</td>
+                        <td style="text-align:right;">- ${formatVND(extras.advance)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">Doanh thu tháng</td>
+                        <td style="text-align:right;">${formatVND(revenue)}</td>
+                    </tr>
+                    <tr class="salary-final-row">
+                        <td style="text-align:left;font-weight:bold;">LƯƠNG THỰC NHẬN</td>
+                        <td style="text-align:right;font-weight:bold;font-size:1.2rem;">${formatVND(luongThucNhan)}</td>
+                    </tr>
+                </tbody></table>`;
+            }
+            // Lương thực nhận cuối cùng
+            html += `<table style="margin-top:18px;width:100%;"><tbody>`;
+            html += `<tr class="salary-final-row">
+                <td colspan="4" style="text-align:center;">
+                    <div style="font-size:2.1rem;font-weight:bold;color:#388e3c;letter-spacing:2px;text-transform:uppercase;">
+                        LƯƠNG THỰC NHẬN: ${formatVND(luongThucNhan)}
+                    </div>
+                </td>
+            </tr>`;
+            html += `</tbody></table>`;
+            document.getElementById('salaryTableWrap').innerHTML = html;
+        }
+
+        // ====== KHỞI TẠO ======
+        (function(){
+            const now = new Date();
+            const ym = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            const salaryMonthInput = document.getElementById('salaryMonth');
+            if (salaryMonthInput.value !== ym) salaryMonthInput.value = ym;
+            renderEmpSelect();
+            renderSalaryTable();
+        })();
+    </script>
+    <script src="footer.js"></script>
+    <script>renderFooter();</script>
+</body>
+</html>

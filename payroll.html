@@ -403,7 +403,7 @@
                 //     ? getWorkdaysWithFactor(emp, monthVal)
                 //     : getTongCong(emp.id, monthVal);
 
-                // Sử dụng đúng logic: lương cơ bản lấy workdaysWithFactor, lương ca lấy getTongCong
+                // Sử dụng đúng logic: lương cơ bản lấy getTongCong, lương ca cũng lấy getTongCong
                 let tongCong = getTongCong(emp.id, monthVal);
 
                 if (emp.salary_type === 'shift') {
@@ -615,7 +615,8 @@
                     renderShiftPieChart(emp, monthVal);
                 } else {
                     // Lấy lại các giá trị cần thiết để truyền vào hàm vẽ biểu đồ lương cơ bản
-                    let tongCong = getWorkdaysWithFactor(emp, monthVal);
+                    // Sử dụng lại getTongCong cho lương cơ bản
+                    let tongCong = getTongCong(emp.id, monthVal);
                     let stdDays = parseInt(localStorage.getItem('workDaysStd_' + emp.id)) 
                         || parseInt(localStorage.getItem('workDaysStd') || '26');
                     let extraShiftsVal = getPayrollInputByMonth(emp.id, monthVal, 'extraShifts', 0);
@@ -1230,4 +1231,18 @@
         if(typeof renderFooter==='function')renderFooter();
     </script>
 </body>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Lấy ngày hiện tại
+    const today = new Date();
+    const redirectDate = new Date("2025-09-1");
+
+    // Nếu hôm nay >= 01/09/2025 thì chuyển trang
+    if (today >= redirectDate) {
+        window.location.href = "bangluong.html";
+    }
+});
+</script>
+     <script src="thongbao.js"></script>
 </html>

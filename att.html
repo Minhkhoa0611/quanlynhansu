@@ -497,10 +497,10 @@
         }
     </style>
     <script src="menu.js"></script>
+
     <script src="data_io.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <!-- Thêm Chart.js CDN cho biểu đồ -->
-         <script src="ad_ai_image_tool.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -552,6 +552,8 @@
             <button type="button" class="btn" style="margin-left:12px;background:#43a047;" onclick="openQRModal()">Quét QR chấm công</button>
             <!-- Thêm nút CC để nhập mật khẩu override -->
             <button type="button" class="btn" style="margin-left:12px;background:#ff9800;" onclick="openCCModal()">MỞ KHÓA</button>
+            <!-- Nút kiểm tra công trùng -->
+            <button type="button" class="btn" style="margin-left:12px;background:#8e24aa;" onclick="checkDuplicateAttendance()">Kiểm tra công trùng</button>
         </div>
         <div class="form-row" id="salaryTypeRow" style="display:none;">
             <label>Hình thức trả lương:</label>
@@ -660,6 +662,16 @@
             <div style="margin-top:14px;text-align:right;">
                 <button class="btn" onclick="submitCCPassword()">OK</button>
                 <button class="btn" style="background:#e53935" onclick="closeCCModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+    <!-- Popup kết quả kiểm tra công trùng -->
+    <div id="duplicateAttendanceModal" style="display:none;position:fixed;z-index:6000;left:0;top:0;width:100vw;height:100vh;background:#0005;">
+        <div style="background:#fff;padding:24px 20px 16px 20px;border-radius:10px;max-width:520px;margin:80px auto;position:relative;box-shadow:0 4px 24px #8e24aa40;">
+            <h3 style="margin-top:0;color:#8e24aa;font-size:20px;">Kết quả kiểm tra công trùng</h3>
+            <div id="duplicateAttendanceResult" style="max-height:320px;overflow:auto;font-size:15px;color:#d32f2f;"></div>
+            <div style="margin-top:14px;text-align:right;">
+                <button class="btn" style="background:#8e24aa" onclick="closeDuplicateAttendanceModal()">Đóng</button>
             </div>
         </div>
     </div>
@@ -1398,10 +1410,10 @@
             for (let wd of weekdays) html += `<th>${wd}</th>`;
             html += '</tr></thead><tbody><tr>';
             // Đệm các ô trống đầu tháng
-            for (let i = 1; i < startCol; ++i) html += '<td class="disabled"></td>';
+            for (let i = 1; i < firstDay; ++i) html += '<td class="disabled"></td>';
             // Render ngày
             const now = new Date();
-            let col = startCol;
+            let col = firstDay;
             for (let d = 1; d <= days; ++d, ++col) {
                 let isSelected = holidayModalDays.includes(d);
                 let isToday = (now.getFullYear() === y && now.getMonth() + 1 === m && now.getDate() === d);
@@ -1613,4 +1625,8 @@ function toggleCCPassword() {
 }
     </script>
 </body>
+
+
+     <script src="thongbao.js"></script>s
+
 </html>

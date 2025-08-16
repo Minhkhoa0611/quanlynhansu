@@ -41,6 +41,8 @@
                 <option value="year">Theo Năm</option>
             </select>
             <span id="periodSelect"></span>
+            <label for="storeSelect">Chọn cửa hàng:</label>
+            <select id="storeSelect"></select>
             <button class="export-btn" onclick="exportToCSV()">Xuất Excel</button>
         </div>
         <div id="payoutTable"></div>
@@ -54,10 +56,36 @@
             if (isNaN(val)) return '';
             return Number(val).toLocaleString('vi-VN') + ' ₫';
         }
-        // Tính tổng lương từng tháng dựa vào localStorage payrollInputs + employees
+        // Helper: lấy danh sách các cửa hàng từ employees
+        function getAvailableStores() {
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            let stores = new Set();
+            employees.forEach(emp => {
+                if (emp.store) stores.add(emp.store);
+            });
+            return Array.from(stores).sort();
+        }
+        // Hiển thị select cửa hàng
+        function renderStoreSelect() {
+            let stores = getAvailableStores();
+            let html = `<option value="">Tất cả cửa hàng</option>`;
+            stores.forEach(store => {
+                html += `<option value="${store}">${store}</option>`;
+            });
+            let storeSelect = document.getElementById('storeSelect');
+            storeSelect.innerHTML = html;
+        }
+        // Lấy giá trị cửa hàng đang chọn
+        function getSelectedStore() {
+            let storeSelect = document.getElementById('storeSelect');
+            return storeSelect ? storeSelect.value : '';
+        }
+        // Tính tổng lương từng tháng dựa vào localStorage payrollInputs + employees, chỉ cho cửa hàng đã chọn
         function getMonthlyPayrollTotals() {
             let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
             let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            let selectedStore = getSelectedStore();
+            let filteredEmployees = selectedStore ? employees.filter(emp => emp.store === selectedStore) : employees;
             let monthsSet = new Set();
             // Lấy tất cả các tháng có dữ liệu
             for (let empId in payrollInputs) {
@@ -69,7 +97,7 @@
             let result = [];
             months.forEach(month => {
                 let total = 0;
-                employees.forEach(emp => {
+                filteredEmployees.forEach(emp => {
                     let input = payrollInputs?.[emp.id]?.[month] || {};
                     let baseSalary = emp.base_salary || 0;
                     let extraShifts = parseFloat((input.extraShifts + '').replace(',', '.')) || 0;
@@ -188,23 +216,25 @@
         function getEmployeeCountByPeriod(monthlyData, type, periodValue) {
             let payrollInputs = JSON.parse(localStorage.getItem('payrollInputs') || '{}');
             let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            let selectedStore = getSelectedStore();
+            let filteredEmployees = selectedStore ? employees.filter(emp => emp.store === selectedStore) : employees;
             if (type === 'all') {
                 let empSet = new Set();
-                employees.forEach(emp => {
+                filteredEmployees.forEach(emp => {
                     for (let m in payrollInputs[emp.id]||{}) empSet.add(emp.id);
                 });
                 return empSet.size;
             }
             if (type === 'month') {
                 let empSet = new Set();
-                employees.forEach(emp => {
+                filteredEmployees.forEach(emp => {
                     if (payrollInputs[emp.id]?.[periodValue]) empSet.add(emp.id);
                 });
-                return periodValue ? empSet.size : employees.length;
+                return periodValue ? empSet.size : filteredEmployees.length;
             }
             if (type === 'quarter' || type === 'year') {
                 let empSet = new Set();
-                employees.forEach(emp => {
+                filteredEmployees.forEach(emp => {
                     for (let m in payrollInputs[emp.id]||{}) {
                         if (type==='quarter') {
                             let [y, mo] = m.split('-');
@@ -219,7 +249,7 @@
                 });
                 return empSet.size;
             }
-            return employees.length;
+            return filteredEmployees.length;
         }
         function renderStatBar(data) {
             if (data.length < 2) { document.getElementById('statBar').innerHTML = ''; return; }
@@ -339,8 +369,10 @@
             return total;
         }
         window.onload = function() {
+            renderStoreSelect();
             renderPayoutTable();
             document.getElementById('reportType').onchange = renderPayoutTable;
+            document.getElementById('storeSelect').onchange = renderPayoutTable;
         }
     </script>
     <script>renderFooter();</script>

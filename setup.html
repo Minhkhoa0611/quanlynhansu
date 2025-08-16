@@ -197,17 +197,25 @@
             } catch { return []; }
         }
 
-        // Hiển thị danh sách nhân viên vào select
+        // Hiển thị danh sách nhân viên vào select, lọc theo cửa hàng đang chọn
         function renderEmployeeSelect() {
             const employees = getEmployees();
             const select = document.getElementById('employeeSelect');
+            const storeName = document.getElementById('storeNameInput')?.value || '';
             select.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
-            employees.forEach(emp => {
-                const opt = document.createElement('option');
-                opt.value = emp.id || emp.maNV || emp.name || emp.tenNV || '';
-                opt.textContent = (emp.name || emp.tenNV || 'Không tên');
-                select.appendChild(opt);
-            });
+            employees
+                .filter(emp => {
+                    // Nếu nhân viên không có trường storeName thì cho hiện tất cả
+                    if (!emp.storeName) return true;
+                    // So sánh tên cửa hàng (không phân biệt hoa thường, loại bỏ khoảng trắng)
+                    return (emp.storeName || '').trim().toLowerCase() === storeName.trim().toLowerCase();
+                })
+                .forEach(emp => {
+                    const opt = document.createElement('option');
+                    opt.value = emp.id || emp.maNV || emp.name || emp.tenNV || '';
+                    opt.textContent = (emp.name || emp.tenNV || 'Không tên');
+                    select.appendChild(opt);
+                });
         }
 
         // Hiển thị danh sách cửa hàng vào select (cập nhật động)
@@ -341,6 +349,10 @@
         function onStoreNameChange() {
             const name = document.getElementById('storeNameInput').value;
             localStorage.setItem('storeName', name);
+            renderEmployeeSelect(); // Cập nhật lại danh sách nhân viên theo cửa hàng
+            // Reset chọn nhân viên
+            document.getElementById('employeeSelect').selectedIndex = 0;
+            onEmployeeChange();
             if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
         }
 
@@ -352,8 +364,8 @@
         });
 
         // Khởi tạo giao diện
-        renderEmployeeSelect();
         renderStoreName();
+        renderEmployeeSelect();
         document.getElementById('workDaysStd').disabled = true;
         document.getElementById('salaryPerDay').disabled = true;
         // Ghi chú luôn hiển thị

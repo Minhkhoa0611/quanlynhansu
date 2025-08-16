@@ -101,7 +101,7 @@
             border: 1.8px solid #d1c4e9;
             border-radius: 12px;
             font-size: 1.15em;
-            width: 160px;
+            width: 200px; /* tăng từ 160px lên 200px */
             outline: none;
             background: #f7f5ff;
             transition: border 0.16s, box-shadow 0.16s;
@@ -285,7 +285,7 @@
         }
         @media (max-width: 400px) {
             .amount-input {
-                width: 110px;
+                width: 140px; /* tăng từ 110px lên 140px cho mobile nhỏ */
                 font-size: 1em;
             }
             .account-btn {
@@ -309,17 +309,72 @@
             transform: rotate(-8deg);
             letter-spacing: 1.5px;
         }
+        .bank-popup-overlay {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0; top: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.25);
+            align-items: center;
+            justify-content: center;
+        }
+        .bank-popup {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(106,75,199,0.13);
+            padding: 28px 24px 18px 24px;
+            min-width: 220px;
+            text-align: center;
+            animation: popupFadeIn 0.2s;
+        }
+        .bank-popup-title {
+            font-weight: 700;
+            color: #6a4bc7;
+            margin-bottom: 18px;
+            font-size: 1.1em;
+        }
+        .bank-popup-btn {
+            display: block;
+            width: 100%;
+            margin: 8px 0;
+            padding: 12px 0;
+            border-radius: 10px;
+            border: 1.5px solid #d1c4e9;
+            background: #f7f5ff;
+            color: #6a4bc7;
+            font-weight: 600;
+            font-size: 1.08em;
+            cursor: pointer;
+            transition: background 0.16s, color 0.16s, border 0.16s;
+        }
+        .bank-popup-btn:hover, .bank-popup-btn.selected {
+            background: #6a4bc7;
+            color: #fff;
+            border-color: #6a4bc7;
+        }
+        @keyframes popupFadeIn {
+            from { opacity: 0; transform: scale(0.95);}
+            to { opacity: 1; transform: scale(1);}
+        }
     </style>
     <script>
         // Thay đổi tài khoản hiển thị
         function showAccount(idx) {
-            document.querySelectorAll('.bank-section').forEach((el, i) => {
-                el.style.display = (i === idx) ? 'inline-block' : 'none';
-            });
+            // idx: 0 = KHOA-TPB, 1 = KHOA-VTB, 2 = VY
+            if (idx === 2) {
+                document.getElementById('qr-khoa-tpb').style.display = 'none';
+                document.getElementById('qr-khoa-vtb').style.display = 'none';
+                document.getElementById('qr-vy').style.display = 'flex';
+            } else {
+                // Mặc định chọn TPBank khi nhấn KHOA
+                document.getElementById('qr-khoa-tpb').style.display = 'flex';
+                document.getElementById('qr-khoa-vtb').style.display = 'none';
+                document.getElementById('qr-vy').style.display = 'none';
+            }
+            // Cập nhật nút selected
             document.querySelectorAll('.account-btn').forEach((btn, i) => {
-                btn.classList.toggle('selected', i === idx);
+                btn.classList.toggle('selected', (i === 0 && idx !== 2) || (i === 1 && idx === 2));
             });
-            // Cập nhật QR khi chuyển tài khoản
             updateQR();
         }
 
@@ -491,6 +546,28 @@
             showAccount(0);
             showAmountSuggestions('');
         };
+
+        // Mở popup chọn ngân hàng
+        function openBankPopup() {
+            document.getElementById('bank-popup-overlay').style.display = 'flex';
+        }
+
+        // Đóng popup chọn ngân hàng
+        function closeBankPopup(e) {
+            if (!e || e.target === document.getElementById('bank-popup-overlay')) {
+                document.getElementById('bank-popup-overlay').style.display = 'none';
+            }
+        }
+
+        // Chọn ngân hàng và cập nhật hiển thị
+        function selectBank(bank) {
+            // Ẩn tất cả QR của KHOA
+            document.getElementById('qr-khoa-tpb').style.display = (bank === 'tpb') ? 'flex' : 'none';
+            document.getElementById('qr-khoa-vtb').style.display = (bank === 'vtb') ? 'flex' : 'none';
+            // Đảm bảo QR của VY ẩn nếu đang chọn KHOA
+            document.getElementById('qr-vy').style.display = 'none';
+            document.getElementById('bank-popup-overlay').style.display = 'none';
+        }
     </script>
 </head>
 <body>
@@ -508,19 +585,43 @@
         <div id="amount-suggest-list" class="amount-suggest-list"></div>
         <div id="amount-text" class="amount-text"></div>
         <div class="account-selector">
-            <button class="account-btn selected" onclick="showAccount(0)">TRAN MINH KHOA</button>
-            <button class="account-btn" onclick="showAccount(1)">TRAN HOANG THAO VY</button>
+            <button class="account-btn selected" id="btn-khoa" onclick="openBankPopup()">TRAN MINH KHOA</button>
+            <button class="account-btn" onclick="showAccount(2)">TRAN HOANG THAO VY</button>
         </div>
-        <div class="bank-section">
+        <div class="bank-section" id="qr-khoa-tpb">
             <div>
                 <img src="https://img.vietqr.io/image/tpb-0867544809-compact2.png?accountName=TRAN%20MINH%20KHOA" alt="QR TPBank" width="220">
             </div>
+            <div class="account-info">
+                <span><b>TRAN MINH KHOA</b></span>
+                <span>TPBank - 0867544809</span>
+            </div>
         </div>
-        <div class="bank-section" style="display:none">
-
+        <div class="bank-section" id="qr-khoa-vtb" style="display:none">
+            <div>
+                <img src="https://img.vietqr.io/image/vietinbank-0867544809-compact2.png?accountName=TRAN%20MINH%20KHOA" alt="QR VietinBank" width="220">
+            </div>
+            <div class="account-info">
+                <span><b>TRAN MINH KHOA</b></span>
+                <span>VietinBank - 0867544809</span>
+            </div>
+        </div>
+        <div class="bank-section" id="qr-vy" style="display:none">
             <div>
                 <img src="https://img.vietqr.io/image/tpb-40868442054-compact2.png?accountName=TRAN%20HOANG%20THAO%20VY" alt="QR TPBank" width="220">
             </div>
+            <div class="account-info">
+                <span><b>TRAN HOANG THAO VY</b></span>
+                <span>TPBank - 40868442054</span>
+            </div>
+        </div>
+    </div>
+    <!-- Popup chọn ngân hàng -->
+    <div class="bank-popup-overlay" id="bank-popup-overlay" onclick="closeBankPopup(event)">
+        <div class="bank-popup" onclick="event.stopPropagation()">
+            <div class="bank-popup-title">Chọn ngân hàng cho TRAN MINH KHOA</div>
+            <button class="bank-popup-btn" onclick="selectBank('tpb')">TPBank</button>
+            <button class="bank-popup-btn" onclick="selectBank('vtb')">VietinBank</button>
         </div>
     </div>
     <button id="a2hs-btn">
@@ -551,5 +652,6 @@
     });
     </script>
 </body>
+</html>
 </html>
 </html>

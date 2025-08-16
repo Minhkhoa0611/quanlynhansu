@@ -1,5 +1,5 @@
 if (typeof CODE_VERSION === 'undefined') {
-    var CODE_VERSION = '2.2.2'; // cập nhật version mới nhất
+    var CODE_VERSION = '2.2.3'; // cập nhật version mới nhất
 
 }
 
@@ -655,8 +655,13 @@ function renderMenu(active) {
     function showVersionHistoryPopup() {
         const overlay = document.getElementById('popup-version-history-overlay');
         const content = document.getElementById('popup-version-history-content');
-        // Danh sách lịch sử phiên bản (từ 1.0.0 đến 2.2.2, mỗi bản một cải tiến)
+        // Danh sách lịch sử phiên bản (từ 1.0.0 đến 2.2.3, mỗi bản một cải tiến)
         const history = [
+            {
+                version: '2.2.3',
+                date: '02/9/2025',
+                note: 'Vá lỗi hệ thống, nâng cao ổn định.<br>- Cập nhật tính năng mới: Bảng Lương và Báo Cáo Lương với giao diện và chức năng nâng cấp.<br>- Tối ưu hiệu năng xuất báo cáo lương.'
+            },
             {
                 version: '2.2.2',
                 date: '29/6/2025',
@@ -1285,6 +1290,7 @@ function renderMenu(active) {
         document.getElementById('support-bot-close').onclick = function() {
             overlay.style.display = 'none';
         };
+
         overlay.onkeydown = function(e) {
             if (e.key === 'Escape') overlay.style.display = 'none';
         };
