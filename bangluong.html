@@ -697,6 +697,35 @@
             .salary-extra-form-row { flex-direction: column; gap: 8px 0; padding: 8px 6px; }
             .salary-extra-cell { min-width: 120px; }
         }
+        /* --- Thu nhỏ TỔNG CA/TỔNG LƯƠNG trong bảng lương ca --- */
+        .salary-summary-chip {
+            background: #e3f0ff;
+            border-radius: 6px;
+            padding: 4px 12px 4px 10px;
+            margin-right: 10px;
+            box-shadow: 0 2px 8px #1976d210;
+            font-size: 1.05rem;
+            display: inline-flex;
+            align-items: center;
+            min-width: 0;
+        }
+        .salary-summary-chip:last-child {
+            margin-right: 0;
+        }
+        .salary-summary-chip .salary-summary-value {
+            font-size: 1.18rem;
+            color: #222;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        @media (max-width: 900px) {
+            .salary-summary-chip { font-size: 0.95rem; padding: 3px 8px 3px 7px; }
+            .salary-summary-chip .salary-summary-value { font-size: 1.05rem; }
+        }
+        @media (max-width: 600px) {
+            .salary-summary-chip { font-size: 0.88rem; padding: 2px 5px 2px 5px; }
+            .salary-summary-chip .salary-summary-value { font-size: 0.98rem; }
+        }
     </style>
     <script src="menu.js"></script>
     <script src="data_io.js"></script>
@@ -785,17 +814,21 @@
                 <span class="salary-extra-remark">Nhập doanh thu tháng</span>
             </div>
             <!-- Thêm ô nhập TC/LT (Tăng ca/Làm thêm) -->
-            <div class="salary-extra-cell" id="tcInputCell">
-                <label class="salary-extra-label" for="extraTC">
-                    <span class="icon">⏫</span>TC/LT:
-                </label>
-                <input type="number" min="0" step="0.1" class="salary-extra-input" id="extraTC"
-                    value=""
-                    onchange="saveTCUI()">
-                <span class="salary-extra-note">•</span>
-                <span class="salary-extra-remark">Nhập hệ số tăng ca/làm thêm (ví dụ 1 = 1 ca)</span>
+            <div class="salary-extra-cell" id="tcInputCell" style="flex-direction: row; align-items: flex-end; gap: 8px;">
+                <div style="display: flex; flex-direction: column;">
+                    <label class="salary-extra-label" for="extraTC">
+                        <span class="icon">⏫</span>TC/LT:
+                    </label>
+                    <input type="number" min="0" step="0.1" class="salary-extra-input" id="extraTC"
+                        value=""
+                        onchange="saveTCUI()">
+                </div>
                 <!-- Dropdown chọn ca làm việc cho TC/LT, chỉ hiện với nhân viên lương ca -->
-                <select id="tcShiftSelect" style="margin-top:4px;display:none;" onchange="renderSalaryTable()"></select>
+                <select id="tcShiftSelect"
+                    style="margin-bottom:2px;display:none;height:36px;border-radius:7px;border:1.5px solid #b3d1f7;font-size:15px;padding:6px 10px;background:#fff;color:#1976d2;font-weight:500;box-shadow:0 1px 4px #1976d210;transition:border 0.2s,box-shadow 0.2s;"
+                    onchange="renderSalaryTable()"></select>
+                <span class="salary-extra-note" style="align-self: flex-end;">•</span>
+                <span class="salary-extra-remark" style="align-self: flex-end;">Nhập hệ số tăng ca/làm thêm (ví dụ 1 = 1 ca)</span>
             </div>
         </div>
         <div id="salaryTableWrap" style="overflow-x:auto"></div>
@@ -1005,6 +1038,15 @@
             let html = `<div style="margin-bottom:32px;">`;
             html += `<div style="font-weight:bold;font-size:18px;margin-bottom:8px;color:#1976d2">${emp.name}</div>`;
 
+            // Thêm ghi chú giải thích cách tính lương thực nhận
+            html += `<div style="background:#f7fafd;border-radius:8px;padding:8px 14px 8px 14px;margin-bottom:12px;font-size:14px;color:#1976d2;box-shadow:0 1px 6px #1976d210;">
+                <b>Ghi chú:</b> <span style="color:#d32f2f;font-weight:bold;">Lương thực nhận</span> = Tổng lương (lương ca hoặc lương cơ bản/ngày công)
+                <span style="color:#388e3c;">+ Phụ cấp + Thưởng lễ + Doanh thu (nếu có) + Tăng ca/Làm thêm</span>
+                <span style="color:#d32f2f;">- Tiền ứng - Phạt</span>
+                <br>
+                <span style="color:#888;font-size:13px;">Các khoản cộng/trừ này nhập ở phía trên, tùy loại nhân viên sẽ có thêm mục doanh thu hoặc chọn ca tăng ca.</span>
+            </div>`;
+
             if (emp.salary_type === 'shift') {
                 html += `<table class="salary-detail-table"><thead>
                     <tr>
@@ -1023,15 +1065,15 @@
                         <td>${formatVND(caThanhTien[s])}</td>
                     </tr>`;
                 }
-                // Thêm dòng tổng ca và tổng lương
+                // Thêm dòng tổng ca và tổng lương (đã thu nhỏ)
                 html += `<tr style="background:#fff;">
                     <td colspan="4" style="padding:0;">
-                    <div style="display:flex;justify-content:center;align-items:center;font-size:1.45rem;font-weight:bold;color:#222;">
-                        <span style="background:#e3f0ff;border-radius:8px;padding:8px 24px 8px 18px;margin-right:18px;box-shadow:0 2px 8px #1976d210;">
-                            TỔNG CA <span style="font-size:1.7rem;color:#222;font-weight:bold;margin-left:12px;">${tongCong}</span>
+                    <div style="display:flex;justify-content:center;align-items:center;gap:10px;font-size:1rem;font-weight:bold;color:#222;">
+                        <span class="salary-summary-chip">
+                            TỔNG CA <span class="salary-summary-value">${tongCong}</span>
                         </span>
-                        <span style="background:#e3f0ff;border-radius:8px;padding:8px 24px 8px 18px;box-shadow:0 2px 8px #1976d210;">
-                            TỔNG LƯƠNG <span style="font-size:1.7rem;color:#222;font-weight:bold;margin-left:12px;">${formatVND(tongLuong)}</span>
+                        <span class="salary-summary-chip">
+                            TỔNG LƯƠNG <span class="salary-summary-value">${formatVND(tongLuong)}</span>
                         </span>
                     </div>
                 </td>
@@ -1154,16 +1196,13 @@
                     </tr>
                 </tbody></table>`;
             }
-            // Lương thực nhận cuối cùng
-            html += `<table style="margin-top:18px;width:100%;"><tbody>`;
-            html += `<tr class="salary-final-row">
-                <td colspan="4" style="text-align:center;">
-                    <div style="font-size:2.1rem;font-weight:bold;color:#388e3c;letter-spacing:2px;text-transform:uppercase;">
-                        LƯƠNG THỰC NHẬN: ${formatVND(luongThucNhan)}
-                    </div>
-                </td>
-            </tr>`;
-            html += `</tbody></table>`;
+
+
+            // Thêm thẻ chuyển sang baocaoluong.html
+            html += `<div style="text-align:right;margin-top:18px;">
+                <a href="baocaoluong.html" style="color:#1976d2;font-weight:bold;text-decoration:underline;font-size:1.05rem;">Chuyển sang báo cáo lương</a>
+            </div>`;
+
             document.getElementById('salaryTableWrap').innerHTML = html;
         }
 

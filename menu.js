@@ -660,7 +660,7 @@ function renderMenu(active) {
             {
                 version: '2.2.3',
                 date: '02/9/2025',
-                note: 'Vá lỗi hệ thống, nâng cao ổn định.<br>- Cập nhật tính năng mới: Bảng Lương và Báo Cáo Lương với giao diện và chức năng nâng cấp.<br>- Tối ưu hiệu năng xuất báo cáo lương.'
+                note: 'Vá lỗi hệ thống, nâng cao ổn định.<br>- Cập nhật tính năng mới: Bảng Lương và Báo Cáo Lương với giao diện và chức năng nâng cấp.<br>- Tối ưu hiệu năng xuất báo cáo lương.<br>- Thêm chức năng Kiểm Tra Công thông minh (kiểm tra trùng công).'
             },
             {
                 version: '2.2.2',

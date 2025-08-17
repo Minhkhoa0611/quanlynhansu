@@ -5,32 +5,127 @@
     <title>Báo Cáo Lương Nhân Viên - TimePro HRM</title>
     <link rel="icon" type="image/png" href="iconlogo.png">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7fafd; margin: 0; }
-        .container { max-width: 1200px; margin: 38px auto 30px auto; background: #fff; padding: 32px 28px; border-radius: 18px; box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001; }
-        h2 { color: #1976d2; font-size: 2rem; margin-bottom: 18px; letter-spacing: 1px; }
-        .form-row { margin-bottom: 18px; }
-        .form-row label { display: inline-block; width: 120px; font-weight: 500; color: #1976d2; }
-        select, input[type="month"] { font-size: 16px; padding: 6px 14px; border-radius: 8px; border: 1.5px solid #b3d1f7; background: #f7fbff; color: #1976d2; font-weight: 500; }
-        table { width: 100%; border-collapse: collapse; margin-top: 18px; background: #fafcff; border-radius: 10px; box-shadow: 0 2px 8px #0001; }
-        th, td { border: 1px solid #e3eaf3; padding: 10px 6px; text-align: center; font-size: 15px; }
-        th { background: #e3f0ff; color: #1976d2; font-weight: 600; }
-        .salary-final-row { font-weight: bold; color: #388e3c; font-size: 16px; background: #e3f9e5; }
-        @media (max-width: 900px) { .container { padding: 12px 2vw; } table, th, td { font-size: 13px; } }
-        @media (max-width: 600px) { .container { padding: 6px 1vw; } h2 { font-size: 1.2rem; } }
-
-        /* Nút lưu và copy hình ảnh */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(120deg, #e3f0ff 0%, #f7f7f7 100%);
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 38px auto 30px auto;
+            background: #ffffffee;
+            padding: 38px 32px 32px 32px;
+            border-radius: 22px;
+            box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001;
+        }
+        h2 {
+            color: #1976d2;
+            font-size: 2.3rem;
+            margin-bottom: 22px;
+            letter-spacing: 2px;
+            text-align: center;
+            text-shadow: 0 2px 8px #1976d220;
+        }
+        .form-row {
+            margin-bottom: 22px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 18px 32px;
+            justify-content: center;
+        }
+        .form-row label {
+            font-weight: 600;
+            color: #1976d2;
+            font-size: 1.1rem;
+            min-width: 120px;
+        }
+        select, input[type="month"] {
+            font-size: 1.1rem;
+            padding: 8px 18px;
+            border-radius: 10px;
+            border: 1.5px solid #b3d1f7;
+            background: #f7fbff;
+            color: #1976d2;
+            font-weight: 600;
+            box-shadow: 0 1px 6px #1976d210;
+            transition: border 0.2s;
+        }
+        select:focus, input[type="month"]:focus {
+            border: 2px solid #1976d2;
+            outline: none;
+            background: #e3f0ff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+            background: #fafcff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px #1976d210;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #e3eaf3;
+            padding: 14px 10px;
+            text-align: center;
+            font-size: 1.08rem;
+            transition: background 0.2s;
+        }
+        th {
+            background: linear-gradient(90deg, #e3f0ff 60%, #f7fafd 100%);
+            color: #1976d2;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        tbody tr:hover {
+            background: #e3f0ff55;
+            transition: background 0.2s;
+        }
+        .salary-final-row {
+            font-weight: bold;
+            color: #388e3c;
+            font-size: 1.15rem;
+            background: #e3f9e5;
+        }
+        .salary-total-row {
+            font-weight: bold;
+            color: #d32f2f;
+            font-size: 1.15rem;
+            background: #fffbe6;
+        }
+        .salary-text-row {
+            font-style: italic;
+            color: #1976d2;
+            background: #f7fafd;
+            font-size: 1.08rem;
+        }
+        .table-title {
+            font-size: 1.45rem;
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 14px;
+            text-align: center;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 8px #1976d220;
+        }
+        /* Nút chức năng */
+        .save-img-btn, .copy-img-btn {
+            border: none;
+            padding: 10px 32px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.08rem;
+            font-weight: 700;
+            margin-right: 14px;
+            margin-bottom: 6px;
+            box-shadow: 0 2px 8px #1976d220;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
         .save-img-btn {
             background: linear-gradient(90deg, #1976d2 60%, #43a047 100%);
             color: #fff;
-            border: none;
-            padding: 8px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            box-shadow: 0 2px 8px #1976d220;
-            margin-right: 12px;
-            transition: background 0.2s, box-shadow 0.2s;
         }
         .save-img-btn:hover {
             background: linear-gradient(90deg, #1565c0 60%, #388e3c 100%);
@@ -39,18 +134,43 @@
         .copy-img-btn {
             background: linear-gradient(90deg, #e53935 60%, #ff9800 100%);
             color: #fff;
-            border: none;
-            padding: 8px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            box-shadow: 0 2px 8px #e5393520;
-            transition: background 0.2s, box-shadow 0.2s;
         }
         .copy-img-btn:hover {
             background: linear-gradient(90deg, #b71c1c 60%, #ffb300 100%);
             box-shadow: 0 4px 16px #e5393520;
+        }
+        /* Nút chuyển trang */
+        .switch-link {
+            color: #1976d2;
+            font-weight: bold;
+            text-decoration: underline;
+            font-size: 1.12rem;
+            background: #e3f0ff;
+            border-radius: 8px;
+            padding: 8px 22px;
+            margin-top: 18px;
+            display: inline-block;
+            box-shadow: 0 2px 8px #1976d210;
+            transition: background 0.2s, color 0.2s;
+        }
+        .switch-link:hover {
+            background: #1976d2;
+            color: #fff;
+            text-decoration: none;
+        }
+        /* Responsive */
+        @media (max-width: 900px) {
+            .container { padding: 12px 2vw; }
+            table, th, td { font-size: 0.98rem; }
+            h2 { font-size: 1.3rem; }
+            .table-title { font-size: 1.1rem; }
+        }
+        @media (max-width: 600px) {
+            .container { padding: 6px 1vw; }
+            h2 { font-size: 1.1rem; }
+            .form-row label { font-size: 1rem; }
+            .save-img-btn, .copy-img-btn, .switch-link { font-size: 0.98rem; padding: 8px 10px; }
+            th, td { padding: 8px 4px; }
         }
     </style>
     <script src="menu.js"></script>
@@ -72,10 +192,13 @@
             <input type="month" id="salaryMonth" onchange="renderSalaryReport()">
         </div>
         <div id="salaryReportWrap" style="overflow-x:auto"></div>
-        <!-- Thêm 2 nút chức năng -->
         <div style="margin-top:24px;text-align:right;">
             <button id="btnSaveImage" class="btn save-img-btn" style="margin-right:12px;">Save Image</button>
-            <button id="btnCopyImage" class="btn copy-img-btn">Copy Image</button>
+            <button id="btnCopyImage" class="btn copy-img-btn" style="margin-right:12px;">Copy Image</button>
+            <button id="btnShareImage" class="btn" style="background:linear-gradient(90deg,#4267B2 60%,#0088cc 100%);color:#fff;">Share</button>
+        </div>
+        <div style="margin-top:18px;text-align:right;">
+            <a href="bangluong.html" class="switch-link">Chuyển sang bảng lương</a>
         </div>
     </div>
     <script>
@@ -159,11 +282,13 @@
 
             // Tạo tiêu đề động cho bảng
             let [year, mon] = month.split('-');
-            let title = `<div style="font-size:1.35rem;font-weight:bold;color:#1976d2;margin-bottom:12px;text-align:center;">
-                BẢNG TỔNG HỢP LƯƠNG THÁNG ${mon}/${year} CỬA HÀNG ${store}
-            </div>`;
-
-            let html = title + `<table><thead>
+            // Đưa tiêu đề vào trong bảng, không tạo div ngoài
+            let html = `<table><thead>
+                <tr>
+                    <th colspan="${hideRevenueCol ? 9 : 10}" class="table-title" style="background:#e3f0ff;font-size:1.25rem;text-align:center;">
+                        BẢNG TỔNG HỢP LƯƠNG THÁNG ${mon}/${year} CỬA HÀNG ${store}
+                    </th>
+                </tr>
                 <tr>
                     <th>STT</th>
                     <th>Họ tên</th>
@@ -332,15 +457,15 @@
             html += rowsHtml;
 
             // Dòng tổng tiền
-            html += `<tr>
-                <td colspan="${hideRevenueCol ? 9 : 10}" style="text-align:right;font-weight:bold;color:#d32f2f;background:#fffbe6;">
+            html += `<tr class="salary-total-row">
+                <td colspan="${hideRevenueCol ? 9 : 10}" style="text-align:right;">
                     TỔNG TIỀN: <span style="font-size:1.2rem;color:#388e3c;">${formatVND(tongTien)}</span>
                 </td>
             </tr>`;
 
             // Dòng thành chữ
-            html += `<tr>
-                <td colspan="${hideRevenueCol ? 9 : 10}" style="text-align:left;font-style:italic;color:#1976d2;background:#f7fafd;">
+            html += `<tr class="salary-text-row">
+                <td colspan="${hideRevenueCol ? 9 : 10}" style="text-align:left;">
                     Thành chữ: <span style="font-weight:bold;">${numberToWords(tongTien)}</span>
                 </td>
             </tr>`;
@@ -515,6 +640,149 @@
                         }
                     }, 'image/png');
                 });
+            };
+            // ====== SHARE BUTTON ======
+            document.getElementById('btnShareImage').onclick = function() {
+                // Popup chọn nền tảng share
+                let popup = document.createElement('div');
+                popup.style.position = 'fixed';
+                popup.style.left = '0'; popup.style.top = '0';
+                popup.style.width = '100vw'; popup.style.height = '100vh';
+                popup.style.background = 'rgba(0,0,0,0.25)';
+                popup.style.zIndex = '9999';
+                popup.style.display = 'flex';
+                popup.style.alignItems = 'center';
+                popup.style.justifyContent = 'center';
+
+                let box = document.createElement('div');
+                box.style.background = '#fff';
+                box.style.borderRadius = '12px';
+                box.style.padding = '32px 28px';
+                box.style.boxShadow = '0 4px 24px #1976d280';
+                box.style.textAlign = 'center';
+                box.innerHTML = `
+                    <div style="font-size:1.2rem;font-weight:bold;margin-bottom:18px;color:#1976d2;">Chia sẻ bảng lương</div>
+                    <button id="shareMessenger" style="font-size:1rem;padding:8px 24px;margin:0 12px 12px 0;border-radius:8px;border:none;background:#4267B2;color:#fff;cursor:pointer;">
+                        Messenger
+                    </button>
+                    <button id="shareTelegram" style="font-size:1rem;padding:8px 24px;margin:0 0 12px 0;border-radius:8px;border:none;background:#0088cc;color:#fff;cursor:pointer;">
+                        Telegram
+                    </button>
+                    <button id="shareCancel" style="font-size:1rem;padding:8px 24px;margin:0 0 0 12px;border-radius:8px;border:none;background:#e53935;color:#fff;cursor:pointer;">
+                        Hủy
+                    </button>
+                `;
+                popup.appendChild(box);
+                document.body.appendChild(popup);
+
+                function closePopup() {
+                    if (popup && popup.parentNode) popup.parentNode.removeChild(popup);
+                }
+
+                // Share Messenger
+                document.getElementById('shareMessenger').onclick = function() {
+                    closePopup();
+                    let wrap = getSalaryReportElement();
+                    html2canvas(wrap, {
+                        backgroundColor: '#fff',
+                        scale: 1,
+                        width: wrap.offsetWidth,
+                        height: wrap.offsetHeight,
+                        useCORS: true
+                    }).then(function(canvas) {
+                        canvas.toBlob(function(blob) {
+                            // Tải ảnh về máy, hướng dẫn gửi qua Messenger
+                            let link = document.createElement('a');
+                            link.download = 'bangluong.png';
+                            link.href = URL.createObjectURL(blob);
+                            link.click();
+                            cleanupSalaryReportElement(wrap);
+                            setTimeout(function() {
+                                alert('Ảnh đã được tải về. Vui lòng mở Messenger, chọn người nhận và gửi ảnh vừa tải lên.');
+                            }, 300);
+                        }, 'image/png');
+                    });
+                };
+
+                // Share Telegram
+                document.getElementById('shareTelegram').onclick = function() {
+                    closePopup();
+                    // Popup nhập chat_id và token bot
+                    let tgPopup = document.createElement('div');
+                    tgPopup.style.position = 'fixed';
+                    tgPopup.style.left = '0'; tgPopup.style.top = '0';
+                    tgPopup.style.width = '100vw'; tgPopup.style.height = '100vh';
+                    tgPopup.style.background = 'rgba(0,0,0,0.25)';
+                    tgPopup.style.zIndex = '10000';
+                    tgPopup.style.display = 'flex';
+                    tgPopup.style.alignItems = 'center';
+                    tgPopup.style.justifyContent = 'center';
+
+                    let tgBox = document.createElement('div');
+                    tgBox.style.background = '#fff';
+                    tgBox.style.borderRadius = '12px';
+                    tgBox.style.padding = '32px 28px';
+                    tgBox.style.boxShadow = '0 4px 24px #0088cc80';
+                    tgBox.style.textAlign = 'center';
+                    tgBox.innerHTML = `
+                        <div style="font-size:1.1rem;font-weight:bold;margin-bottom:14px;color:#0088cc;">Gửi ảnh qua Telegram Bot</div>
+                        <input id="tgToken" type="text" placeholder="Bot Token" style="width:90%;margin-bottom:8px;padding:7px 10px;border-radius:7px;border:1px solid #ccc;"><br>
+                        <input id="tgChatId" type="text" placeholder="Chat ID" style="width:90%;margin-bottom:12px;padding:7px 10px;border-radius:7px;border:1px solid #ccc;"><br>
+                        <button id="tgSend" style="font-size:1rem;padding:8px 24px;margin:0 12px 0 0;border-radius:8px;border:none;background:#0088cc;color:#fff;cursor:pointer;">Gửi</button>
+                        <button id="tgCancel" style="font-size:1rem;padding:8px 24px;border-radius:8px;border:none;background:#e53935;color:#fff;cursor:pointer;">Hủy</button>
+                        <div style="font-size:0.95rem;color:#888;margin-top:10px;">(Bạn có thể lấy chat_id bằng cách nhắn /start cho bot và xem chat_id trên @userinfobot)</div>
+                    `;
+                    tgPopup.appendChild(tgBox);
+                    document.body.appendChild(tgPopup);
+
+                    function closeTgPopup() {
+                        if (tgPopup && tgPopup.parentNode) tgPopup.parentNode.removeChild(tgPopup);
+                    }
+
+                    document.getElementById('tgCancel').onclick = closeTgPopup;
+                    document.getElementById('tgSend').onclick = function() {
+                        let token = document.getElementById('tgToken').value.trim();
+                        let chatId = document.getElementById('tgChatId').value.trim();
+                        if (!token || !chatId) {
+                            alert('Vui lòng nhập đầy đủ Bot Token và Chat ID!');
+                            return;
+                        }
+                        let wrap = getSalaryReportElement();
+                        html2canvas(wrap, {
+                            backgroundColor: '#fff',
+                            scale: 1,
+                            width: wrap.offsetWidth,
+                            height: wrap.offsetHeight,
+                            useCORS: true
+                        }).then(function(canvas) {
+                            canvas.toBlob(function(blob) {
+                                let formData = new FormData();
+                                formData.append('chat_id', chatId);
+                                formData.append('caption', 'Bảng lương TimePro HRM');
+                                formData.append('photo', blob, 'bangluong.png');
+                                fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+                                    method: 'POST',
+                                    body: formData
+                                }).then(r => r.json()).then(res => {
+                                    cleanupSalaryReportElement(wrap);
+                                    if (res.ok) {
+                                        alert('Đã gửi ảnh bảng lương tới Telegram!');
+                                        closeTgPopup();
+                                    } else {
+                                        alert('Gửi ảnh thất bại: ' + (res.description || 'Lỗi không xác định'));
+                                    }
+                                }).catch(e => {
+                                    cleanupSalaryReportElement(wrap);
+                                    alert('Gửi ảnh thất bại: ' + e);
+                                });
+                            }, 'image/png');
+                        });
+                    };
+                };
+
+                document.getElementById('shareCancel').onclick = function() {
+                    closePopup();
+                };
             };
         });
     </script>
