@@ -318,7 +318,7 @@ function renderMenu(active) {
                 </svg>
             </span>
             <span style="display:inline-block;transform:skew(8deg,0deg);color:${logoColor};font-family:${logoFont};">
-                TimePro <span style="font-size:0.9em;letter-spacing:1px;">HRM</span>
+                Workforce 365 <span style="font-size:0.9em;letter-spacing:1px;">HRM Pro</span>
                 <span id="app-version-number" style="
                     position: absolute;
                     left: 85%;

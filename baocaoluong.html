@@ -2,7 +2,7 @@
 <html style="zoom:90%;">
 <head>
     <meta charset="utf-8">
-    <title>Báo Cáo Lương Nhân Viên - TimePro HRM</title>
+    <title>Báo Cáo Lương Nhân Viên - Workforce 365 HRM Pro</title>
     <link rel="icon" type="image/png" href="iconlogo.png">
     <style>
         body {
@@ -758,7 +758,7 @@
                             canvas.toBlob(function(blob) {
                                 let formData = new FormData();
                                 formData.append('chat_id', chatId);
-                                formData.append('caption', 'Bảng lương TimePro HRM');
+                                formData.append('caption', 'Bảng lương Workforce 365 HRM Pro');
                                 formData.append('photo', blob, 'bangluong.png');
                                 fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
                                     method: 'POST',
