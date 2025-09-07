@@ -351,8 +351,8 @@ function renderMenu(active) {
                     { id: 'emp', label: 'Danh sách nhân viên', href: 'emp.html' },
                     // { id: 'setup', label: 'Thiết Lập', href: 'setup.html' }, // chuyển vào Cài Đặt
                     { id: 'att', label: 'Chấm công', href: 'att.html' },
-                    { id: 'payroll', label: 'Bảng lương', href: 'payroll.html' },
-                    { id: 'payroll_report', label: 'Lập BC Lương', href: 'payroll_report.html' }
+                    { id: 'payroll', label: 'Bảng lương', href: 'bangluong.html' },
+                    { id: 'payroll_report', label: 'Lập BC Lương', href: 'baocaoluong.html' }
                 ];
                 // Lấy cấu hình menu từ localStorage
                 let menuConfig = [];

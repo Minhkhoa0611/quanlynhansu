@@ -1,0 +1,38 @@
+NGUYÊN LÝ VÀ CÔNG THỨC TÍNH LƯƠNG
+
+1. Lương nhân viên lương ca (salary_type = 'shift'):
+   - Tổng lương ca = Tổng số ca làm * Lương mỗi ca (tính riêng từng loại ca)
+   - Tiền tăng ca/làm thêm (TC/LT) = Hệ số TC/LT * Lương ca đã chọn
+   - Lương thực nhận = Tổng lương ca
+                      + Phụ cấp
+                      + Thưởng lễ
+                      + Tiền tăng ca/làm thêm (TC/LT)
+                      - Tiền ứng
+                      - Phạt
+
+   CÔNG THỨC:
+   Lương thực nhận = Tổng lương ca + Phụ cấp + Thưởng lễ + TC/LT - Tiền ứng - Phạt
+
+2. Lương nhân viên lương cơ bản (salary_type = 'base'):
+   - Lương cơ bản: cố định mỗi tháng
+   - Lương ngày công = (Số công thực tế - Số công chuẩn) * Lương/ngày
+     (Nếu số công thực tế < số công chuẩn thì bị trừ lương, nếu lớn hơn thì được cộng thêm)
+   - Tiền tăng ca/làm thêm (TC/LT) = Hệ số TC/LT * Lương/ngày
+   - Lương thực nhận = Lương cơ bản
+                      + Lương ngày công
+                      + Phụ cấp
+                      + Thưởng lễ
+                      + Doanh thu (nếu có)
+                      + Tiền tăng ca/làm thêm (TC/LT)
+                      - Tiền ứng
+                      - Phạt
+
+   CÔNG THỨC:
+   Lương thực nhận = Lương cơ bản + Lương ngày công + Phụ cấp + Thưởng lễ + Doanh thu + TC/LT - Tiền ứng - Phạt
+
+3. Giải thích các khoản:
+   - Phụ cấp, Thưởng lễ, Tiền ứng, Phạt: nhập thủ công từng tháng
+   - Doanh thu: chỉ áp dụng cho nhân viên lương cơ bản, nhập thủ công
+   - TC/LT (Tăng ca/Làm thêm): nhập hệ số, chọn ca (với lương ca) hoặc tính theo lương/ngày (với lương cơ bản)
+
+4. Đơn vị tiền tệ: Việt Nam Đồng (₫)
