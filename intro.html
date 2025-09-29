@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Time Pro HRM - Intro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #00c3ff 0%, #ffff1c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .intro-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
+        }
+        .intro-logo {
+            width: 180px;
+            height: auto;
+            margin-bottom: 18px;
+            animation: intro-spin 2s cubic-bezier(.68,-0.55,.27,1.55);
+        }
+        .intro-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #ff512f, #dd2476, #1fa2ff, #12d8fa, #a6ffcb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            animation: intro-gradient 2s linear infinite;
+        }
+        @keyframes intro-spin {
+            0% { transform: rotate(-30deg) scale(0.7); opacity: 0; }
+            60% { transform: rotate(10deg) scale(1.1); opacity: 1; }
+            100% { transform: rotate(0deg) scale(1); opacity: 1; }
+        }
+        @keyframes intro-gradient {
+            0% { filter: hue-rotate(0deg);}
+            100% { filter: hue-rotate(360deg);}
+        }
+    </style>
+</head>
+<body>
+    <div class="intro-center">
+        <img class="intro-logo" src="https://www.xaydungmkhome.online/Logo.png" alt="Logo">
+        <div class="intro-title">Time Pro HRM</div>
+    </div>
+    <script>
+        setTimeout(function() {
+            window.location.href = "att.html";
+        }, 5000);
+    </script>
+</body>
+</html>
