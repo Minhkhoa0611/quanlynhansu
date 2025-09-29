@@ -147,7 +147,10 @@
 
     // Phát âm thử tiếng Việt hoặc tiếng Anh ngay khi load trang
     (function trySpeakWelcome() {
+        let spoken = false;
         function speakWelcome() {
+            if (spoken) return; // Đảm bảo chỉ đọc 1 lần
+            spoken = true;
             let utter;
             let voices = window.speechSynthesis.getVoices();
             // Ưu tiên tiếng Việt
@@ -185,6 +188,14 @@
         }
 
         // Đảm bảo voice đã load xong mới đọc
+        function trySpeak() {
+            if (window.speechSynthesis.getVoices().length) {
+                setTimeout(speakWelcome, 300);
+            }
+        }
+        // Luôn kích hoạt load voice
+        window.speechSynthesis.getVoices();
+        // Nếu đã có voice thì đọc luôn, nếu chưa thì chờ event
         if (window.speechSynthesis.getVoices().length) {
             setTimeout(speakWelcome, 300);
         } else {
@@ -192,8 +203,6 @@
                 window.speechSynthesis.onvoiceschanged = null;
                 setTimeout(speakWelcome, 100);
             };
-            // Kích hoạt load voice
-            window.speechSynthesis.getVoices();
         }
     })();
 
