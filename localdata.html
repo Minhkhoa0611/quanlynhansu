@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html style="zoom:90%;">
+<head>
+    <meta charset="utf-8">
+    <title>Quản Lý Dữ Liệu LocalStorage - Workforce 365 HRM Pro</title>
+    <link rel="icon" type="image/png" href="iconlogo.png">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7fafd; margin: 0; }
+        .container { max-width: 1100px; margin: 38px auto 30px auto; background: #fff; padding: 32px 28px; border-radius: 18px; box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001; }
+        h2 { color: #1976d2; font-size: 2rem; margin-bottom: 18px; letter-spacing: 1px; }
+        .key-list { margin-bottom: 24px; }
+        .key-item { background: #e3f0ff; margin-bottom: 10px; border-radius: 8px; padding: 14px 18px; box-shadow: 0 2px 8px #1976d210; }
+        .key-title { font-weight: bold; color: #1976d2; font-size: 1.1rem; margin-bottom: 6px; }
+        textarea { width: 100%; min-height: 80px; font-size: 15px; border-radius: 8px; border: 1.5px solid #b3d1f7; padding: 8px; background: #f7fafd; margin-bottom: 8px; }
+        .btn { background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%); color: #fff; border: none; padding: 7px 20px; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: 500; margin-right: 8px; }
+        .btn:hover { background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%); }
+        .danger { background: #e53935; }
+        .danger:hover { background: #b71c1c; }
+        .success { background: #43a047; }
+        .success:hover { background: #388e3c; }
+        .key-actions { margin-bottom: 8px; }
+        .key-status { color: #d32f2f; font-size: 13px; margin-bottom: 4px; }
+        @media (max-width: 900px) { .container { padding: 12px 2vw; } }
+        @media (max-width: 600px) { .container { padding: 6px 1vw; h2 { font-size: 1.2rem; } } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>QUẢN LÝ DỮ LIỆU LOCALSTORAGE</h2>
+        <div style="margin-bottom:18px;color:#d32f2f;font-size:15px;">
+            Xem, chỉnh sửa, xóa, tải về hoặc copy dữ liệu localStorage của hệ thống.<br>
+            <b>Lưu ý:</b> Sửa dữ liệu không đúng định dạng có thể gây lỗi hệ thống!
+        </div>
+        <div>
+            <button class="btn success" onclick="downloadAll()">Tải toàn bộ localStorage</button>
+            <button class="btn" onclick="copyAll()">Copy toàn bộ localStorage</button>
+            <button class="btn danger" onclick="clearAll()">Xóa toàn bộ localStorage</button>
+        </div>
+        <div class="key-list" id="keyList"></div>
+    </div>
+    <script>
+        // Các key liên quan đến hệ thống
+        const keys = [
+            'employees',
+            'attendanceByMonth',
+            'shiftsByEmp',
+            'shiftsByEmpByMonth',
+            'workFactorByMonth',
+            'holidayDaysByMonth',
+            'salaryExtrasByEmpMonth',
+            'tcByEmpMonth',
+            'revenueByEmpByMonth',
+            'payrollData'
+        ];
+        const keyDescriptions = {
+            employees: 'Danh sách nhân viên',
+            attendanceByMonth: 'Chấm công theo tháng',
+            shiftsByEmp: 'Thiết lập ca làm mặc định từng nhân viên',
+            shiftsByEmpByMonth: 'Thiết lập ca làm từng tháng',
+            workFactorByMonth: 'Hệ số công từng ngày/ca',
+            holidayDaysByMonth: 'Ngày lễ từng tháng',
+            salaryExtrasByEmpMonth: 'Các khoản phụ cấp, thưởng, ứng, phạt từng nhân viên/tháng',
+            tcByEmpMonth: 'Hệ số tăng ca/làm thêm từng nhân viên/tháng',
+            revenueByEmpByMonth: 'Doanh thu từng nhân viên/tháng',
+            payrollData: 'Dữ liệu bảng lương đã xuất'
+        };
+        function renderKeys() {
+            const wrap = document.getElementById('keyList');
+            wrap.innerHTML = '';
+            keys.forEach(key => {
+                let val = localStorage.getItem(key);
+                // Nếu đã xóa thì val sẽ là null, chuyển thành chuỗi rỗng
+                if (val === null) val = '';
+                let pretty = '';
+                let error = '';
+                try {
+                    pretty = JSON.stringify(JSON.parse(val), null, 2);
+                } catch (e) {
+                    pretty = val || '';
+                    error = val ? 'Không phải JSON hợp lệ!' : '';
+                }
+                wrap.innerHTML += `
+                    <div class="key-item" id="item_${key}">
+                        <div class="key-title">${key}</div>
+                        <div style="color:#888;font-size:14px;margin-bottom:4px;">
+                            ${keyDescriptions[key] || ''}
+                        </div>
+                        ${error ? `<div class="key-status">${error}</div>` : ''}
+                        <div class="key-actions">
+                            <button class="btn success" onclick="saveKey('${key}')">Lưu</button>
+                            <button class="btn" onclick="downloadKey('${key}')">Tải về</button>
+                            <button class="btn" onclick="copyKey('${key}')">Copy</button>
+                            <button class="btn danger" onclick="deleteKey('${key}')">Xóa</button>
+                        </div>
+                        <textarea id="ta_${key}">${pretty}</textarea>
+                    </div>
+                `;
+            });
+        }
+        function saveKey(key) {
+            const ta = document.getElementById('ta_' + key);
+            let val = ta.value;
+            try {
+                // Nếu là JSON, parse lại để kiểm tra
+                let obj = JSON.parse(val);
+                localStorage.setItem(key, JSON.stringify(obj));
+                alert('Đã lưu dữ liệu cho key: ' + key);
+            } catch (e) {
+                // Nếu không phải JSON, lưu thẳng
+                localStorage.setItem(key, val);
+                alert('Đã lưu dữ liệu (không phải JSON) cho key: ' + key);
+            }
+            renderKeys();
+        }
+        function deleteKey(key) {
+            if (confirm('Bạn có chắc muốn xóa key này?')) {
+                localStorage.removeItem(key);
+                renderKeys();
+            }
+        }
+        function downloadKey(key) {
+            let val = localStorage.getItem(key) || '';
+            let blob = new Blob([val], {type: 'application/json'});
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = key + '.json';
+            link.click();
+        }
+        function copyKey(key) {
+            let val = localStorage.getItem(key) || '';
+            navigator.clipboard.writeText(val).then(() => {
+                alert('Đã copy dữ liệu key: ' + key);
+            });
+        }
+        function downloadAll() {
+            let obj = {};
+            keys.forEach(k => obj[k] = localStorage.getItem(k));
+            let blob = new Blob([JSON.stringify(obj, null, 2)], {type: 'application/json'});
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'localstorage_all.json';
+            link.click();
+        }
+        function copyAll() {
+            let obj = {};
+            keys.forEach(k => obj[k] = localStorage.getItem(k));
+            navigator.clipboard.writeText(JSON.stringify(obj, null, 2)).then(() => {
+                alert('Đã copy toàn bộ localStorage!');
+            });
+        }
+        function clearAll() {
+            if (confirm('Bạn có chắc muốn xóa toàn bộ dữ liệu localStorage?')) {
+                keys.forEach(k => localStorage.removeItem(k));
+                renderKeys();
+            }
+        }
+        renderKeys();
+    </script>
+</body>
+</html>

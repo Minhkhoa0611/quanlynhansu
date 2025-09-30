@@ -392,6 +392,7 @@ function renderMenu(active) {
                 <button type="button" class="menu-payroll-payout-report-btn" onclick="location.href='payroll_payout_report.html'" style="color:#1976d2;">📑 Báo Cáo Chi Trả Lương</button>
                 <!-- Thêm menu Bảng Lương -->
                 <button type="button" class="menu-bangluong-btn" onclick="location.href='bangluong.html'" style="color:#1976d2;">📝 Bảng Lương</button>
+                <button type="button" class="menu-quanlylocal-btn" onclick="location.href='localdata.html'" style="color:#1976d2;">📰 Local Data</button>
 
 
                 <button type="button" class="menu-ckbank" onclick="location.href='BankQR/BankQR.html'" style="color:#2563eb;">🏦BANK</button>
@@ -915,8 +916,8 @@ function renderMenu(active) {
             { id: 'emp', label: 'Danh sách nhân viên', href: 'emp.html' },
             { id: 'att', label: 'Chấm công', href: 'att.html' },
             { id: 'attendance_type', label: 'Quản Lý Hình Thức Chấm Công', href: 'attendance_type.html' }, // TÍNH NĂNG MỚI
-            { id: 'payroll', label: 'Bảng lương', href: 'payroll.html' },
-            { id: 'payroll_report', label: 'Lập BC Lương', href: 'payroll_report.html' },
+            { id: 'payroll', label: 'Bảng lương', href: 'bangluong.html' },
+            { id: 'payroll_report', label: 'Lập BC Lương', href: 'baocaoluong.html' },
             { id: 'payroll_payout_report', label: 'Báo Cáo Chi Trả Lương', href: 'payroll_payout_report.html' }
         ];
         // Lấy cấu hình menu từ localStorage (nếu có)

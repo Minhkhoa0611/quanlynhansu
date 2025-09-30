@@ -10,9 +10,58 @@
         return arr[chuc] + " mươi" + (donvi ? " " + arr[donvi] : "");
     }
 
+    // Kiểm tra trạng thái mute
+    function isSpeechMuted() {
+        return localStorage.getItem('att_speech_muted') === '1';
+    }
+
+    // Tạo nút icon bật/tắt âm thanh ở góc phải
+    function createSpeechToggleButton() {
+        if (document.getElementById('attSpeechToggleBtn')) return;
+        const btn = document.createElement('button');
+        btn.id = 'attSpeechToggleBtn';
+        btn.title = 'Bật/Tắt âm thanh';
+        btn.style.position = 'fixed';
+        btn.style.top = '151px'; // ~4cm
+        btn.style.right = '16px';
+        btn.style.zIndex = '9999';
+        btn.style.width = '40px';
+        btn.style.height = '40px';
+        btn.style.borderRadius = '50%';
+        btn.style.border = 'none';
+        btn.style.background = '#fff';
+        btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        btn.style.cursor = 'pointer';
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.style.fontSize = '22px';
+        btn.style.transition = 'background 0.2s';
+        // Nếu là H'Farm thì luôn hiện loa tắt và disable
+        if (isShopHFarm()) {
+            btn.innerHTML = '<span style="color:#d00">&#128263;</span>';
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.style.cursor = 'not-allowed';
+        } else {
+            btn.innerHTML = isSpeechMuted()
+                ? '<span style="color:#d00">&#128263;</span>'
+                : '<span style="color:#0a0">&#128266;</span>'; // loa mở
+
+            btn.onclick = function() {
+                const muted = isSpeechMuted();
+                localStorage.setItem('att_speech_muted', muted ? '0' : '1');
+                btn.innerHTML = !muted
+                    ? '<span style="color:#d00">&#128263;</span>'
+                    : '<span style="color:#0a0">&#128266;</span>';
+            };
+        }
+        document.body.appendChild(btn);
+    }
+
     // Phát âm thanh
     function speakAttendance(empName, order, hour, minute) {
-        if (!window.speechSynthesis) return;
+        if (!window.speechSynthesis || isSpeechMuted()) return;
         // Lấy ngày/tháng/năm hiện tại
         const now = new Date();
         const day = now.getDate();
@@ -149,20 +198,28 @@
     (function trySpeakWelcome() {
         let spoken = false;
         function speakWelcome() {
-            if (spoken) return; // Đảm bảo chỉ đọc 1 lần
+            if (spoken || isSpeechMuted()) return; // Đảm bảo chỉ đọc 1 lần và không đọc nếu mute
             spoken = true;
             let utter;
             let voices = window.speechSynthesis.getVoices();
-            // Ưu tiên tiếng Việt
+            // Ưu tiên tiếng Việt giọng nữ
             let viVoices = voices.filter(v =>
-                (v.lang && v.lang.toLowerCase().startsWith('vi')) ||
-                (v.name && v.name.toLowerCase().includes('viet'))
+                (v.lang && v.lang.toLowerCase().startsWith('vi')) &&
+                (v.gender === 'female' || (v.name && v.name.toLowerCase().includes('female')))
             );
+            if (!viVoices.length) {
+                // Nếu không có thuộc tính gender, lấy mọi giọng Việt
+                viVoices = voices.filter(v =>
+                    (v.lang && v.lang.toLowerCase().startsWith('vi')) ||
+                    (v.name && v.name.toLowerCase().includes('viet'))
+                );
+            }
             let viVoice = viVoices.find(v => v.name.toLowerCase().includes('google')) ||
                           viVoices.find(v => v.name.toLowerCase().includes('viet')) ||
                           viVoices[0];
-            let msgVi = "Xin chào. Bạn đang sử dụng hệ thống chấm công của Minh Khoa Đẹp Trai He He He He He Ha Ha Ha";
-            let msgEn = "Welcome to the MK GROUP attendance system.";
+            // Lời chào hay hơn, thân thiện hơn, bỏ "Minh Khoa"
+            let msgVi = "Xin chào bạn! Chúc bạn một ngày làm việc thật hiệu quả và nhiều niềm vui cùng hệ thống chấm công. Nếu cần hỗ trợ, hãy liên hệ ngay nhé!";
+            let msgEn = "Hello! Wishing you a productive and joyful day with the attendance system. If you need any help, just let us know!";
             if (viVoice) {
                 utter = new SpeechSynthesisUtterance(msgVi);
                 utter.lang = 'vi-VN';
@@ -170,14 +227,9 @@
             } else {
                 // Không có tiếng Việt, dùng tiếng Anh nữ
                 let enVoices = voices.filter(v =>
-                    v.lang && v.lang.toLowerCase().startsWith('en') && v.gender === 'female'
+                    v.lang && v.lang.toLowerCase().startsWith('en') &&
+                    (v.gender === 'female' || (v.name && v.name.toLowerCase().includes('female')))
                 );
-                if (!enVoices.length) {
-                    enVoices = voices.filter(v =>
-                        v.lang && v.lang.toLowerCase().startsWith('en') &&
-                        (v.name && v.name.toLowerCase().includes('female'))
-                    );
-                }
                 let enVoice = enVoices[0] || voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
                 utter = new SpeechSynthesisUtterance(msgEn);
                 utter.lang = enVoice?.lang || 'en-US';
@@ -205,5 +257,46 @@
             };
         }
     })();
+
+    // Tự động tắt âm nếu tên cửa hàng là H'Farm
+    function getCurrentStoreName() {
+        let el = document.getElementById('storeNameInput');
+        if (el && el.value) return el.value.trim();
+        return (localStorage.getItem('storeName') || '').trim();
+    }
+    function autoMuteIfShopIsHFarmOrOpenIfLepShop() {
+        try {
+            const storeName = getCurrentStoreName().toLowerCase();
+            if (storeName === "h'farm" || storeName === "hfarm") {
+                localStorage.setItem('att_speech_muted', '1');
+            } else if ((storeName === "lepshop" || storeName === "hệ thống") && localStorage.getItem('att_speech_muted') === null) {
+                // Chỉ tự động mở nếu chưa từng có trạng thái mute
+                localStorage.setItem('att_speech_muted', '0');
+            }
+        } catch {}
+    }
+    function isShopHFarm() {
+        try {
+            const storeName = getCurrentStoreName();
+            return storeName.toLowerCase() === "h'farm" || storeName.toLowerCase() === "hfarm";
+        } catch { return false; }
+    }
+    function autoMuteIfShopIsHFarm() {
+        if (isShopHFarm()) {
+            localStorage.setItem('att_speech_muted', '1');
+        }
+    }
+
+    // Tạo nút khi load trang
+    window.addEventListener('DOMContentLoaded', function() {
+        autoMuteIfShopIsHFarmOrOpenIfLepShop();
+        createSpeechToggleButton();
+    });
+
+    // Nếu trang không dùng DOMContentLoaded thì fallback sau 1s
+    setTimeout(function() {
+        autoMuteIfShopIsHFarmOrOpenIfLepShop();
+        createSpeechToggleButton();
+    }, 1000);
 
 })();
