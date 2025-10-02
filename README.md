@@ -92,22 +92,6 @@
       </td>
     </tr>
     <tr>
-      <td>🤖 Android (APK)</td>
-      <td>
-        <a href="#" onclick="alert('CHƯA PHÁT HÀNH'); return false;">
-          <img src="https://img.shields.io/badge/Download-43a047?style=for-the-badge&logo=android&logoColor=white" alt="Download Android">
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <td>🍏 iOS</td>
-      <td>
-        <a href="#" onclick="alert('CHƯA PHÁT HÀNH'); return false;">
-          <img src="https://img.shields.io/badge/Sắp_ra_mắt-888?style=for-the-badge&logo=apple&logoColor=white" alt="Sắp ra mắt" />
-        </a>
-      </td>
-    </tr>
-    <tr>
       <td>🪟 Windows</td>
       <td>
         <a href="#" onclick="alert('CHƯA PHÁT HÀNH'); return false;">
@@ -120,14 +104,6 @@
       <td>
         <a href="#" onclick="alert('CHƯA PHÁT HÀNH'); return false;">
           <img src="https://img.shields.io/badge/Download-1976d2?style=for-the-badge&logo=apple&logoColor=white" alt="Download MacOS">
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <td>🐧 Linux</td>
-      <td>
-        <a href="#" onclick="alert('CHƯA PHÁT HÀNH'); return false;">
-          <img src="https://img.shields.io/badge/Download-1976d2?style=for-the-badge&logo=linux&logoColor=white" alt="Download Linux">
         </a>
       </td>
     </tr>
@@ -159,32 +135,3 @@
 Chúng tôi luôn đặt **chất lượng**, **bảo mật** và **sự hài lòng của khách hàng** lên hàng đầu.
 
 > 🏆 *MK SOF - Đồng hành cùng doanh nghiệp Việt trên hành trình chuyển đổi số!*
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <td>🐧 Linux</td>
-      <td>
-        <a href="#" onclick="alert('CHƯA PHÁT HÀNH'); return false;">
-          <img src="https://img.shields.io/badge/Download-1976d2?style=for-the-badge&logo=linux&logoColor=white" alt="Download Linux">
-        </a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-> 📢 **Lưu ý:** Một số phiên bản có thể đang trong quá trình phát triển hoặc thử nghiệm.
-
----
-
-## 👨‍💻 Đội ngũ phát triển
-
-**MK SOF** là tập hợp các kỹ sư phần mềm trẻ, sáng tạo và giàu kinh nghiệm trong lĩnh vực giải pháp quản lý doanh nghiệp.  
-Chúng tôi luôn đặt **chất lượng**, **bảo mật** và **sự hài lòng của khách hàng** lên hàng đầu.
-
-> 🏆 *MK SOF - Đồng hành cùng doanh nghiệp Việt trên hành trình chuyển đổi số!*
-    </tr>
-  </tbody>
-</table>
-
-> 📢 **Lưu ý:** Một số phiên bản có thể đang trong quá trình phát triển hoặc thử nghiệm.
