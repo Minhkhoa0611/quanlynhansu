@@ -158,19 +158,62 @@
             color: #fff;
             text-decoration: none;
         }
-        /* Responsive */
+        /* Ẩn/hiện cột - panel dọc bên trái */
+        .col-toggle-panel {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            z-index: 1001;
+            background: #e3f0ff;
+            border-radius: 0 14px 14px 0;
+            box-shadow: 2px 4px 16px #1976d220;
+            padding: 18px 16px 18px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 140px;
+            border-right: 2px solid #1976d2;
+            transition: left 0.2s;
+        }
+        .col-toggle-panel label {
+            font-weight: 500;
+            color: #1976d2;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .col-toggle-panel input[type="checkbox"] {
+            accent-color: #1976d2;
+            width: 18px;
+            height: 18px;
+            margin-right: 4px;
+        }
+        .col-toggle-panel-title {
+            font-weight: bold;
+            color: #1976d2;
+            font-size: 1.08rem;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
         @media (max-width: 900px) {
-            .container { padding: 12px 2vw; }
-            table, th, td { font-size: 0.98rem; }
-            h2 { font-size: 1.3rem; }
-            .table-title { font-size: 1.1rem; }
+            .col-toggle-panel { min-width: 100px; padding: 10px 6px 10px 2px; }
+            .col-toggle-panel label { font-size: 0.95rem; }
         }
         @media (max-width: 600px) {
-            .container { padding: 6px 1vw; }
-            h2 { font-size: 1.1rem; }
-            .form-row label { font-size: 1rem; }
-            .save-img-btn, .copy-img-btn, .switch-link { font-size: 0.98rem; padding: 8px 10px; }
-            th, td { padding: 8px 4px; }
+            .col-toggle-panel { min-width: 70px; padding: 6px 2px 6px 0; }
+            .col-toggle-panel label { font-size: 0.88rem; }
+        }
+        /* Đẩy nội dung sang phải để không bị panel che */
+        body.with-col-toggle-panel .container {
+            margin-left: 160px;
+        }
+        @media (max-width: 900px) {
+            body.with-col-toggle-panel .container { margin-left: 110px; }
+        }
+        @media (max-width: 600px) {
+            body.with-col-toggle-panel .container { margin-left: 75px; }
         }
     </style>
     <script src="menu.js"></script>
@@ -179,12 +222,39 @@
 <body>
     <script>
         if (typeof renderMenu === 'function') renderMenu();
+        // Thêm class để đẩy nội dung sang phải
+        document.body.classList.add('with-col-toggle-panel');
     </script>
+    <!-- Panel ẩn/hiện cột bên trái -->
+    <div class="col-toggle-panel" id="colTogglePanel">
+        <div class="col-toggle-panel-title">Ẩn/Hiện cột</div>
+        <label>
+            <input type="checkbox" id="toggleColNgayCong" checked> Ngày Công
+        </label>
+        <label>
+            <input type="checkbox" id="toggleColTCLT" checked> TC/LT
+        </label>
+        <label>
+            <input type="checkbox" id="toggleColPhuCap" checked> Phụ cấp
+        </label>
+        <label>
+            <input type="checkbox" id="toggleColThuongLe" checked> Thưởng lễ
+        </label>
+        <label id="toggleColDoanhThuWrap">
+            <input type="checkbox" id="toggleColDoanhThu" checked> Doanh thu
+        </label>
+        <label>
+            <input type="checkbox" id="toggleColPhat" checked> Phạt
+        </label>
+        <label>
+            <input type="checkbox" id="toggleColTienUng" checked> Tiền ứng
+        </label>
+    </div>
     <div class="container">
         <h2>BÁO CÁO LƯƠNG NHÂN VIÊN</h2>
         <div class="form-row">
             <label>Chọn cửa hàng:</label>
-            <select id="storeSelect" onchange="renderSalaryReport()">
+            <select id="storeSelect" onchange="onStoreChange();renderSalaryReport()">
                 <option value="LepShop">LepShop</option>
                 <option value="H'Farm">H'Farm</option>
             </select>
@@ -261,7 +331,46 @@
             return salaryExtrasByEmpMonth[month][empId];
         }
 
+        function getColToggles() {
+            // Đọc trạng thái từ checkbox, KHÔNG lưu vào localStorage ở đây
+            const keys = [
+                'NgayCong', 'TCLT', 'PhuCap', 'ThuongLe', 'DoanhThu', 'Phat', 'TienUng'
+            ];
+            let toggles = {};
+            for (let k of keys) {
+                let el = document.getElementById('toggleCol' + k);
+                toggles[k] = el ? el.checked : true;
+            }
+            return toggles;
+        }
+        function setColTogglesFromStorage() {
+            let toggles = {};
+            try {
+                toggles = JSON.parse(localStorage.getItem('salaryReportColToggles') || '{}');
+            } catch {}
+            const keys = [
+                'NgayCong', 'TCLT', 'PhuCap', 'ThuongLe', 'DoanhThu', 'Phat', 'TienUng'
+            ];
+            for (let k of keys) {
+                let el = document.getElementById('toggleCol' + k);
+                if (el && typeof toggles[k] !== 'undefined') el.checked = toggles[k];
+            }
+        }
+        function saveColTogglesToStorage() {
+            const keys = [
+                'NgayCong', 'TCLT', 'PhuCap', 'ThuongLe', 'DoanhThu', 'Phat', 'TienUng'
+            ];
+            let toggles = {};
+            for (let k of keys) {
+                let el = document.getElementById('toggleCol' + k);
+                toggles[k] = el ? el.checked : true;
+            }
+            localStorage.setItem('salaryReportColToggles', JSON.stringify(toggles));
+        }
+
         function renderSalaryReport() {
+            // Không gọi setColTogglesFromStorage ở đây, chỉ gọi ở init
+            const toggles = getColToggles();
             // Nạp lại dữ liệu mới nhất
             employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
             attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
@@ -279,26 +388,37 @@
 
             // Ẩn cột doanh thu nếu là LepShop
             const hideRevenueCol = (store === 'LepShop');
+            document.getElementById('toggleColDoanhThuWrap').style.display = hideRevenueCol ? 'none' : '';
 
             // Tạo tiêu đề động cho bảng
             let [year, mon] = month.split('-');
             // Đưa tiêu đề vào trong bảng, không tạo div ngoài
             let html = `<table><thead>
                 <tr>
-                    <th colspan="${hideRevenueCol ? 9 : 10}" class="table-title" style="background:#e3f0ff;font-size:1.25rem;text-align:center;">
+                    <th colspan="${
+                        2 + // STT, Họ tên
+                        (toggles.NgayCong ? 1 : 0) +
+                        (toggles.TCLT ? 1 : 0) +
+                        (toggles.PhuCap ? 1 : 0) +
+                        (toggles.ThuongLe ? 1 : 0) +
+                        ((!hideRevenueCol && toggles.DoanhThu) ? 1 : 0) +
+                        (toggles.Phat ? 1 : 0) +
+                        (toggles.TienUng ? 1 : 0) +
+                        1 // Tổng lương
+                    }" class="table-title" style="background:#e3f0ff;font-size:1.25rem;text-align:center;">
                         BẢNG TỔNG HỢP LƯƠNG THÁNG ${mon}/${year} CỬA HÀNG ${store}
                     </th>
                 </tr>
                 <tr>
                     <th>STT</th>
                     <th>Họ tên</th>
-                    <th>Ngày Công</th>
-                    <th>TC/LT</th>
-                    <th>Phụ cấp</th>
-                    <th>Thưởng lễ</th>`;
-            if (!hideRevenueCol) html += `<th>Doanh thu</th>`;
-            html += `<th>Phạt</th>
-                    <th>Tiền ứng</th>
+                    ${toggles.NgayCong ? '<th>Ngày Công</th>' : ''}
+                    ${toggles.TCLT ? '<th>TC/LT</th>' : ''}
+                    ${toggles.PhuCap ? '<th>Phụ cấp</th>' : ''}
+                    ${toggles.ThuongLe ? '<th>Thưởng lễ</th>' : ''}
+                    ${(!hideRevenueCol && toggles.DoanhThu) ? '<th>Doanh thu</th>' : ''}
+                    ${toggles.Phat ? '<th>Phạt</th>' : ''}
+                    ${toggles.TienUng ? '<th>Tiền ứng</th>' : ''}
                     <th>Tổng lương</th>
                 </tr>
             </thead><tbody>`;
@@ -330,9 +450,24 @@
                         }
                     }
                 } else {
-                    // lương cơ bản: ngày công là số ngày có chấm công
+                    // Ngày công thực tế: tổng số ca (có thể là nửa ca)
                     for(let d=1; d<=days; ++d) {
-                        if (empAtt[d]) tongCong += 1;
+                        if (empAtt[d]) {
+                            // Nếu là mảng (nhiều ca/ngày), cộng tổng số ca (0.5 hoặc 1)
+                            if (Array.isArray(empAtt[d])) {
+                                let sum = 0;
+                                for (let s of empAtt[d]) {
+                                    let shift = shifts[s] || {};
+                                    let shiftVal = shift.half ? 0.5 : 1;
+                                    let factor = getWorkFactor(month, emp.id, `${d}_${s}`);
+                                    sum += shiftVal * factor;
+                                }
+                                tongCong += sum;
+                            } else {
+                                // Nếu chỉ là 1 ca/ngày
+                                tongCong += 1;
+                            }
+                        }
                     }
                 }
 
@@ -385,15 +520,13 @@
                 rowsHtml += `<tr>
                     <td>${idx+1}</td>
                     <td style="text-align:left;">${emp.name}</td>
-                    <td>${tongCong}</td>
-                    <td>${hesoTC ? hesoTC : ''}</td>
-                    <td>${formatVND(extras.allowance)}</td>
-                    <td>${formatVND(extras.bonus)}</td>`;
-                if (!hideRevenueCol) {
-                    rowsHtml += `<td>${emp.salary_type === 'base' ? formatVND(revenue) : ''}</td>`;
-                }
-                rowsHtml += `<td>- ${formatVND(extras.penalty)}</td>
-                    <td>- ${formatVND(extras.advance)}</td>
+                    ${toggles.NgayCong ? `<td>${tongCong}</td>` : ''}
+                    ${toggles.TCLT ? `<td>${hesoTC ? hesoTC : ''}</td>` : ''}
+                    ${toggles.PhuCap ? `<td>${formatVND(extras.allowance)}</td>` : ''}
+                    ${toggles.ThuongLe ? `<td>${formatVND(extras.bonus)}</td>` : ''}
+                    ${(!hideRevenueCol && toggles.DoanhThu) ? `<td>${emp.salary_type === 'base' ? formatVND(revenue) : ''}</td>` : ''}
+                    ${toggles.Phat ? `<td>- ${formatVND(extras.penalty)}</td>` : ''}
+                    ${toggles.TienUng ? `<td>- ${formatVND(extras.advance)}</td>` : ''}
                     <td class="salary-final-row">${formatVND(tongLuong)}</td>
                 </tr>`;
             });
@@ -458,14 +591,34 @@
 
             // Dòng tổng tiền
             html += `<tr class="salary-total-row">
-                <td colspan="${hideRevenueCol ? 9 : 10}" style="text-align:right;">
+                <td colspan="${
+                    2 +
+                    (toggles.NgayCong ? 1 : 0) +
+                    (toggles.TCLT ? 1 : 0) +
+                    (toggles.PhuCap ? 1 : 0) +
+                    (toggles.ThuongLe ? 1 : 0) +
+                    ((!hideRevenueCol && toggles.DoanhThu) ? 1 : 0) +
+                    (toggles.Phat ? 1 : 0) +
+                    (toggles.TienUng ? 1 : 0) +
+                    1
+                }" style="text-align:right;">
                     TỔNG TIỀN: <span style="font-size:1.2rem;color:#388e3c;">${formatVND(tongTien)}</span>
                 </td>
             </tr>`;
 
             // Dòng thành chữ
             html += `<tr class="salary-text-row">
-                <td colspan="${hideRevenueCol ? 9 : 10}" style="text-align:left;">
+                <td colspan="${
+                    2 +
+                    (toggles.NgayCong ? 1 : 0) +
+                    (toggles.TCLT ? 1 : 0) +
+                    (toggles.PhuCap ? 1 : 0) +
+                    (toggles.ThuongLe ? 1 : 0) +
+                    ((!hideRevenueCol && toggles.DoanhThu) ? 1 : 0) +
+                    (toggles.Phat ? 1 : 0) +
+                    (toggles.TienUng ? 1 : 0) +
+                    1
+                }" style="text-align:left;">
                     Thành chữ: <span style="font-weight:bold;">${numberToWords(tongTien)}</span>
                 </td>
             </tr>`;
@@ -474,12 +627,36 @@
             document.getElementById('salaryReportWrap').innerHTML = html;
         }
 
+        // Gắn sự kiện onchange cho các checkbox để vừa render vừa lưu trạng thái
+        function attachColToggleEvents() {
+            const keys = [
+                'NgayCong', 'TCLT', 'PhuCap', 'ThuongLe', 'DoanhThu', 'Phat', 'TienUng'
+            ];
+            for (let k of keys) {
+                let el = document.getElementById('toggleCol' + k);
+                if (el) {
+                    el.onchange = function() {
+                        saveColTogglesToStorage();
+                        renderSalaryReport();
+                    };
+                }
+            }
+        }
+
         // ====== KHỞI TẠO ======
         (function(){
             const now = new Date();
             const ym = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
             const salaryMonthInput = document.getElementById('salaryMonth');
             if (salaryMonthInput.value !== ym) salaryMonthInput.value = ym;
+            // Gán lại lựa chọn cửa hàng nếu có lưu trước đó
+            const storeSelect = document.getElementById('storeSelect');
+            const lastStore = localStorage.getItem('salaryReportStore');
+            if (lastStore && Array.from(storeSelect.options).some(opt => opt.value === lastStore)) {
+                storeSelect.value = lastStore;
+            }
+            setColTogglesFromStorage();
+            attachColToggleEvents();
             renderSalaryReport();
         })();
     </script>

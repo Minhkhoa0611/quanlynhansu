@@ -724,7 +724,7 @@
         }
         @media (max-width: 600px) {
             .salary-summary-chip { font-size: 0.88rem; padding: 2px 5px 2px 5px; }
-            .salary-summary-chip .salary-summary-value { font-size: 0.98rem; }
+            .salary-summary_chip .salary-summary-value { font-size: 0.98rem; }
         }
     </style>
     <script src="menu.js"></script>
@@ -1171,6 +1171,26 @@
                         <td style="text-align:right;">${formatVND(tienTC)}</td>
                     </tr>
                     <tr>
+                        <td style="text-align:left;font-weight:bold;">Ngày Công thực tế</td>
+                        <td style="text-align:right;font-weight:bold;">
+                            ${tongCong}
+                            <span style="color:#888;font-weight:normal;">
+                                (Quy ra tiền: ${
+                                    (() => {
+                                        let quyRaTien = 0;
+                                        if (tongCong >= workDaysStdVal) {
+                                            quyRaTien = baseSalary + (tongCong - workDaysStdVal) * salaryDay;
+                                        } else {
+                                            quyRaTien = baseSalary - (workDaysStdVal - tongCong) * salaryDay;
+                                        }
+                                        if (quyRaTien < 0) quyRaTien = 0;
+                                        return formatVND(quyRaTien);
+                                    })()
+                                })
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
                         <td style="text-align:left;">Phụ cấp</td>
                         <td style="text-align:right;">${formatVND(extras.allowance)}</td>
                     </tr>
@@ -1185,10 +1205,6 @@
                     <tr>
                         <td style="text-align:left;">Tiền ứng</td>
                         <td style="text-align:right;">- ${formatVND(extras.advance)}</td>
-                    </tr>
-                    <tr>
-                        <td style="text-align:left;">Doanh thu tháng</td>
-                        <td style="text-align:right;">${formatVND(revenue)}</td>
                     </tr>
                     <tr class="salary-final-row">
                         <td style="text-align:left;font-weight:bold;">LƯƠNG THỰC NHẬN</td>
