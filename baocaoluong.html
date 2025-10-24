@@ -254,7 +254,7 @@
         <h2>BÁO CÁO LƯƠNG NHÂN VIÊN</h2>
         <div class="form-row">
             <label>Chọn cửa hàng:</label>
-            <select id="storeSelect" onchange="onStoreChange();renderSalaryReport()">
+            <select id="storeSelect">
                 <option value="LepShop">LepShop</option>
                 <option value="H'Farm">H'Farm</option>
             </select>
@@ -642,6 +642,12 @@
                 }
             }
         }
+
+        // Sự kiện chọn cửa hàng: lưu localStorage và render ngay
+        document.getElementById('storeSelect').addEventListener('change', function() {
+            localStorage.setItem('salaryReportStore', this.value);
+            renderSalaryReport();
+        });
 
         // ====== KHỞI TẠO ======
         (function(){

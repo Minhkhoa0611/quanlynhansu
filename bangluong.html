@@ -1155,27 +1155,31 @@
                 html += `<table class="salary-detail-table" style="margin-bottom:0;width:100%;"><thead>
                     <tr>
                         <th style="text-align:left;">Khoản mục</th>
+                        <th style="text-align:right;">Số lượng</th>
                         <th style="text-align:right;">Số tiền</th>
                     </tr>
                 </thead><tbody>
                     <tr>
                         <td style="text-align:left;">Lương cơ bản (${workDaysStdVal} công)</td>
+                        <td style="text-align:right;">${workDaysStdVal}</td>
                         <td style="text-align:right;">${formatVND(baseSalary)}</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left;">Lương ngày công (${tongCong} công)</td>
+                        <td style="text-align:left;">Lương ngày công</td>
+                        <td style="text-align:right;">${tongCong}</td>
                         <td style="text-align:right;">${formatVND(luongNgayCong)}</td>
                     </tr>
                     <tr>
                         <td style="text-align:left;">TC/LT (Tăng ca/Làm thêm)</td>
+                        <td style="text-align:right;">${hesoTC ? hesoTC : ''}</td>
                         <td style="text-align:right;">${formatVND(tienTC)}</td>
                     </tr>
                     <tr>
                         <td style="text-align:left;font-weight:bold;">Ngày Công thực tế</td>
+                        <td style="text-align:right;font-weight:bold;">${tongCong}</td>
                         <td style="text-align:right;font-weight:bold;">
-                            ${tongCong}
-                            <span style="color:#888;font-weight:normal;">
-                                (Quy ra tiền: ${
+                            <span style="color:#1976d2;font-weight:bold;">
+                                Quy ra tiền: ${
                                     (() => {
                                         let quyRaTien = 0;
                                         if (tongCong >= workDaysStdVal) {
@@ -1186,28 +1190,33 @@
                                         if (quyRaTien < 0) quyRaTien = 0;
                                         return formatVND(quyRaTien);
                                     })()
-                                })
+                                }
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <td style="text-align:left;">Phụ cấp</td>
+                        <td style="text-align:right;"></td>
                         <td style="text-align:right;">${formatVND(extras.allowance)}</td>
                     </tr>
                     <tr>
                         <td style="text-align:left;">Thưởng lễ</td>
+                        <td style="text-align:right;"></td>
                         <td style="text-align:right;">${formatVND(extras.bonus)}</td>
                     </tr>
                     <tr>
                         <td style="text-align:left;">Phạt</td>
+                        <td style="text-align:right;"></td>
                         <td style="text-align:right;">- ${formatVND(extras.penalty)}</td>
                     </tr>
                     <tr>
                         <td style="text-align:left;">Tiền ứng</td>
+                        <td style="text-align:right;"></td>
                         <td style="text-align:right;">- ${formatVND(extras.advance)}</td>
                     </tr>
                     <tr class="salary-final-row">
                         <td style="text-align:left;font-weight:bold;">LƯƠNG THỰC NHẬN</td>
+                        <td></td>
                         <td style="text-align:right;font-weight:bold;font-size:1.2rem;">${formatVND(luongThucNhan)}</td>
                     </tr>
                 </tbody></table>`;
