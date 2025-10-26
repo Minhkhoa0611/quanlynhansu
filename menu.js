@@ -1,5 +1,5 @@
 if (typeof CODE_VERSION === 'undefined') {
-    var CODE_VERSION = '2.2.3'; // cập nhật version mới nhất
+    var CODE_VERSION = '2.2.6'; // cập nhật version mới nhất
 
 }
 
