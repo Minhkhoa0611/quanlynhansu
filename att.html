@@ -1061,6 +1061,8 @@
             if (!workFactorByMonth[month][empId]) workFactorByMonth[month][empId] = {};
             workFactorByMonth[month][empId][dayShift] = value;
             localStorage.setItem('workFactorByMonth', JSON.stringify(workFactorByMonth));
+            // Gọi autoSendDataToTelegramBot để đảm bảo thay đổi hệ số công được gửi lên bot
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
             renderAttendance();
         }
         function renderAttendance() {
@@ -1354,6 +1356,7 @@
             document.getElementById('qrModal').style.display = '';
             if (!qrScanner) {
                 qrScanner = new Html5Qrcode("qr-reader");
+           
             }
             qrScanner.start(
                 { facingMode: "environment" },
