@@ -60,6 +60,18 @@ function renderFooter() {
     subSloganDiv.innerHTML = 'Chất lượng - Sáng tạo - Đồng hành phát triển bền vững';
     footer.appendChild(subSloganDiv);
 
+    // Thông báo ngừng cập nhật
+    const stopUpdateDiv = document.createElement('div');
+    stopUpdateDiv.style.margin = '18px 0 0 0';
+    stopUpdateDiv.style.fontSize = '1.01rem';
+    stopUpdateDiv.style.fontWeight = '600';
+    stopUpdateDiv.style.color = '#ffd600';
+    stopUpdateDiv.style.background = 'rgba(25, 118, 210, 0.10)';
+    stopUpdateDiv.style.borderRadius = '8px';
+    stopUpdateDiv.style.padding = '7px 12px';
+    stopUpdateDiv.innerHTML = '🔔 Từ ngày 01/01/2026: Ngừng cập nhật tính năng mới, chỉ duy trì cập nhật bản vá lỗi.';
+    footer.appendChild(stopUpdateDiv);
+
     // Copyright
     const copyrightDiv = document.createElement('div');
     copyrightDiv.style.marginTop = '12px';
@@ -71,18 +83,3 @@ function renderFooter() {
     // Thêm vào cuối body
     document.body.appendChild(footer);
 }
-    subSloganDiv.style.fontStyle = 'italic';
-    subSloganDiv.style.color = '#fffde7';
-    subSloganDiv.innerHTML = 'Chất lượng - Sáng tạo - Đồng hành phát triển bền vững';
-    footer.appendChild(subSloganDiv);
-
-    // Copyright
-    const copyrightDiv = document.createElement('div');
-    copyrightDiv.style.marginTop = '12px';
-    copyrightDiv.style.fontSize = '0.98rem';
-    copyrightDiv.style.opacity = '0.75';
-    copyrightDiv.innerHTML = `&copy; ${new Date().getFullYear()} <b>MK SOF TECH GROUP</b>. All rights reserved.`;
-    footer.appendChild(copyrightDiv);
-
-    // Thêm vào cuối body
-    document.body.appendChild(footer);

@@ -1,5 +1,5 @@
 if (typeof CODE_VERSION === 'undefined') {
-    var CODE_VERSION = '2.2.6'; // cập nhật version mới nhất
+    var CODE_VERSION = '2.2.6(Final)'; // cập nhật version mới nhất
 
 }
 
@@ -388,11 +388,7 @@ function renderMenu(active) {
                 <button type="button" class="menu-setting-btn" onclick="showMenuSettingPopup()" style="color:#1976d2;">⚙️ Cài đặt menu</button>
                 <button type="button" class="menu-setup-btn" onclick="location.href='setup.html'" style="color:#1976d2;">🔧 Thiết Lập</button>
                 <button type="button" class="menu-work-schedule-btn" onclick="location.href='work_schedule.html'" style="color:#1976d2;">📅 Lịch làm việc</button>
-                <button type="button" class="menu-payroll-full-btn" onclick="location.href='payroll_full.html'" style="color:#1976d2;">📊 Bảng lương chi tiết</button>
-                <button type="button" class="menu-payroll-payout-report-btn" onclick="location.href='payroll_payout_report.html'" style="color:#1976d2;">📑 Báo Cáo Chi Trả Lương</button>
-                <!-- Thêm menu Bảng Lương -->
-                <button type="button" class="menu-bangluong-btn" onclick="location.href='bangluong.html'" style="color:#1976d2;">📝 Bảng Lương</button>
-                <button type="button" class="menu-quanlylocal-btn" onclick="location.href='localdata.html'" style="color:#1976d2;">📰 Local Data</button>
+                <!-- Đã loại bỏ các menu: Bảng lương chi tiết, Báo Cáo Chi Trả Lương, Bảng Lương, Local Data theo yêu cầu -->
 
 
                 <button type="button" class="menu-ckbank" onclick="location.href='BankQR/BankQR.html'" style="color:#2563eb;">🏦BANK</button>
@@ -660,8 +656,13 @@ function renderMenu(active) {
     function showVersionHistoryPopup() {
         const overlay = document.getElementById('popup-version-history-overlay');
         const content = document.getElementById('popup-version-history-content');
-        // Danh sách lịch sử phiên bản (từ 1.0.0 đến 2.2.3, mỗi bản một cải tiến)
+        // Danh sách lịch sử phiên bản (bản cuối cùng cập nhật theo yêu cầu)
         const history = [
+            {
+                version: '2.2.6 (Final)',
+                date: '01/01/2026',
+                note: 'Vá lỗi hoàn thiện hệ thống - <b>Tạm dừng cập nhật tính năng từ ngày 01/01/2026</b>'
+            },
             {
                 version: '2.2.3',
                 date: '02/9/2025',
