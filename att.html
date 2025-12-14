@@ -1063,6 +1063,8 @@
             localStorage.setItem('workFactorByMonth', JSON.stringify(workFactorByMonth));
             // Gọi autoSendDataToTelegramBot để đảm bảo thay đổi hệ số công được gửi lên bot
             if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+            // Nạp lại workFactorByMonth từ localStorage để đảm bảo giá trị mới nhập được hiển thị
+            workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
             renderAttendance();
         }
         function renderAttendance() {
@@ -1709,4 +1711,5 @@ function toggleCCPassword() {
 <script src="att_duplicate_checker.js"></script>
 <script src="logo-watermark.js"></script>
 <script src="att_speech.js"></script>
+<script src="countdown.js"></script>
 </html>

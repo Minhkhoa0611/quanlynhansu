@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gửi File lên Github (Web tĩnh)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #e3f0ff 0%, #f9f9f9 100%);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 48px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px #0002;
+            padding: 36px 32px 32px 32px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #1976d2;
+            letter-spacing: 1px;
+        }
+        form {
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        input[type="file"] {
+            flex: 1;
+            padding: 8px 0;
+        }
+        button[type="submit"] {
+            background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 22px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 2px 8px #1976d230;
+        }
+        button[type="submit"]:hover {
+            background: linear-gradient(90deg, #125ea2 60%, #1976d2 100%);
+        }
+        .progress-container {
+            width: 100%;
+            background: #e3eaf6;
+            border-radius: 8px;
+            margin: 18px 0 0 0;
+            height: 22px;
+            display: none;
+            box-shadow: 0 1px 4px #1976d210;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
+            border-radius: 8px;
+            width: 0%;
+            color: #fff;
+            text-align: center;
+            font-size: 13px;
+            line-height: 22px;
+            font-weight: 500;
+            transition: width 0.2s;
+            box-shadow: 0 1px 4px #1976d220;
+        }
+        h3 {
+            margin-top: 36px;
+            color: #333;
+            font-size: 19px;
+            letter-spacing: 0.5px;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f7faff;
+            margin-bottom: 14px;
+            border-radius: 8px;
+            padding: 14px 18px;
+            box-shadow: 0 1px 4px #1976d210;
+            transition: box-shadow 0.2s;
+        }
+        .file-item:hover {
+            box-shadow: 0 4px 16px #1976d220;
+        }
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .file-info strong {
+            font-size: 16px;
+            color: #1976d2;
+            word-break: break-all;
+        }
+        .file-id {
+            color: #888;
+            font-size: 12px;
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+        .file-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 18px;
+        }
+        .file-actions a, .file-actions button {
+            text-decoration: none;
+            border: none;
+            background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
+            color: #fff;
+            padding: 7px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 4px #1976d220;
+            outline: none;
+        }
+        .file-actions a:hover, .file-actions button:hover {
+            background: linear-gradient(90deg, #125ea2 60%, #1976d2 100%);
+            box-shadow: 0 2px 8px #1976d230;
+        }
+        .popup-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(30,40,60,0.18);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .popup-message {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px #0003;
+            padding: 28px 32px 18px 32px;
+            min-width: 260px;
+            max-width: 90vw;
+            text-align: center;
+            font-size: 16px;
+            color: #222;
+            position: relative;
+            animation: popupShow 0.18s;
+        }
+        .popup-message.success { color: #1976d2; }
+        .popup-message.error { color: #d32f2f; }
+        .popup-message .popup-close {
+            position: absolute;
+            top: 8px; right: 12px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #888;
+            cursor: pointer;
+        }
+        .popup-message .popup-close:hover { color: #1976d2; }
+        .popup-message .popup-ok {
+            margin-top: 18px;
+            background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 7px 22px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .popup-message .popup-ok:hover {
+            background: linear-gradient(90deg, #125ea2 60%, #1976d2 100%);
+        }
+        @keyframes popupShow {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @media (max-width: 600px) {
+            .container { padding: 16px 4vw; }
+            .file-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .file-actions { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Gửi file lên Github</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Gửi file</button>
+    </form>
+    <div style="color:#d32f2f;font-size:13px;margin-bottom:10px;">
+        * Dung lượng tối đa khi gửi file: 100MB/file (giới hạn của Github API, không gửi được file lớn hơn 100MB)
+    </div>
+    <div id="githubUsageInfo" style="color:#1976d2;font-size:13px;margin-bottom:4px;">
+        <!-- Thông tin dung lượng Github sẽ được cập nhật ở đây -->
+        Đang kiểm tra dung lượng Github...
+    </div>
+    <div id="githubUsageBar" style="width:100%;height:14px;background:#e3eaf6;border-radius:7px;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 4px #1976d210;display:none;">
+        <div id="githubUsageBarFill" style="height:100%;width:0%;background:linear-gradient(90deg,#1976d2 60%,#42a5f5 100%);transition:width 0.4s;"></div>
+    </div>
+    <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar">0%</div>
+    </div>
+    <h3>Danh sách file đã gửi:</h3>
+    <ul id="fileList" class="file-list"></ul>
+</div>
+<!-- Popup -->
+<div class="popup-overlay" id="popupOverlay">
+    <div class="popup-message" id="popupMessage">
+        <button class="popup-close" onclick="hidePopup()">&times;</button>
+        <div id="popupText"></div>
+        <button class="popup-ok" onclick="hidePopup()">OK</button>
+    </div>
+</div>
+<script>
+    // Popup functions
+    function showPopup(message, type = '') {
+        const overlay = document.getElementById('popupOverlay');
+        const msg = document.getElementById('popupMessage');
+        const text = document.getElementById('popupText');
+        text.innerHTML = message;
+        msg.className = 'popup-message' + (type ? ' ' + type : '');
+        overlay.style.display = 'flex';
+        // Focus OK for accessibility
+        setTimeout(() => {
+            document.querySelector('.popup-ok').focus();
+        }, 100);
+    }
+    function hidePopup() {
+        document.getElementById('popupOverlay').style.display = 'none';
+    }
+
+    // Github config
+    const GITHUB_TOKEN = "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";
+    const GITHUB_REPO = "nanonakhai/luutru"; // <-- Đã đổi sang repo mới
+    const GITHUB_BRANCH = "main"; // hoặc "master"
+    const GITHUB_UPLOAD_PATH = "uploads/";
+
+    // Dung lượng tối đa Github repo (5GB)
+    const GITHUB_MAX_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
+
+    // Hiển thị dung lượng Github đã dùng và còn lại
+    async function updateGithubUsageInfo() {
+        const infoDiv = document.getElementById('githubUsageInfo');
+        const barDiv = document.getElementById('githubUsageBar');
+        const barFill = document.getElementById('githubUsageBarFill');
+        infoDiv.textContent = "Đang kiểm tra dung lượng Github...";
+        barDiv.style.display = "none";
+        try {
+            // Lấy danh sách file trong thư mục uploads/
+            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_UPLOAD_PATH}?ref=${GITHUB_BRANCH}`;
+            const res = await fetch(apiUrl, {
+                headers: {
+                    Authorization: `token ${GITHUB_TOKEN}`,
+                    Accept: "application/vnd.github.v3+json"
+                }
+            });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            // Tính tổng size các file (bỏ qua .gitkeep)
+            let usedBytes = 0;
+            data.forEach(item => {
+                if (item.type === "file" && item.name !== ".gitkeep" && typeof item.size === "number") {
+                    usedBytes += item.size;
+                }
+            });
+            // Đảm bảo usedBytes không vượt quá maxBytes
+            const maxBytes = GITHUB_MAX_SIZE;
+            const remainBytes = maxBytes > usedBytes ? (maxBytes - usedBytes) : 0;
+
+            function formatBytes(bytes) {
+                if (bytes >= 1024*1024*1024) return (bytes/1024/1024/1024).toFixed(2) + " GB";
+                if (bytes >= 1024*1024) return (bytes/1024/1024).toFixed(2) + " MB";
+                if (bytes >= 1024) return (bytes/1024).toFixed(2) + " KB";
+                return bytes + " B";
+            }
+
+            infoDiv.innerHTML = `
+                <span style="color:#1976d2;">
+                    Đã sử dụng: <b>${formatBytes(usedBytes)}</b> &nbsp; | &nbsp;
+                    Còn lại: <b>${formatBytes(remainBytes)}</b> &nbsp; | &nbsp;
+                    Tổng dung lượng mặc định: <b>${formatBytes(maxBytes)}</b>
+                </span>
+            `;
+
+            // Biểu đồ thanh
+            let percent = maxBytes > 0 ? Math.min(100, (usedBytes / maxBytes) * 100) : 0;
+            barFill.style.width = percent + "%";
+            barDiv.style.display = "block";
+        } catch {
+            infoDiv.textContent = "Không thể lấy thông tin dung lượng Github!";
+            barDiv.style.display = "none";
+        }
+    }
+
+    // Lưu và lấy danh sách file từ localStorage (hoặc có thể lấy từ Github nếu muốn đồng bộ)
+    function saveFileInfo(fileInfo) {
+        let files = JSON.parse(localStorage.getItem('sentFiles') || '[]');
+        files.push(fileInfo);
+        localStorage.setItem('sentFiles', JSON.stringify(files));
+    }
+    // Xóa các hàm liên quan đến xóa file (không còn dùng nữa)
+    // function deleteFile(fileId) { ... }
+    // window.deleteFile = deleteFile;
+    // function deleteFileById(fileId) { ... }
+
+    // Lấy danh sách file thực tế từ Github repo
+    async function fetchGithubFiles() {
+        const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_UPLOAD_PATH}?ref=${GITHUB_BRANCH}`;
+        try {
+            const res = await fetch(apiUrl, {
+                headers: {
+                    Authorization: `token ${GITHUB_TOKEN}`,
+                    Accept: "application/vnd.github.v3+json"
+                }
+            });
+            if (res.status === 404) {
+                await createGithubFolderIfNotExist();
+                const retryRes = await fetch(apiUrl, {
+                    headers: {
+                        Authorization: `token ${GITHUB_TOKEN}`,
+                        Accept: "application/vnd.github.v3+json"
+                    }
+                });
+                if (!retryRes.ok) return [];
+                const data = await retryRes.json();
+                return data.filter(item => item.type === "file").map(item => ({
+                    file_name: item.name,
+                    file_id: item.sha,
+                    github_url: item.download_url
+                }));
+            }
+            if (!res.ok) throw new Error("Không lấy được danh sách file từ Github");
+            const data = await res.json();
+            return data.filter(item => item.type === "file").map(item => ({
+                file_name: item.name,
+                file_id: item.sha,
+                github_url: item.download_url
+            }));
+        } catch (e) {
+            return [];
+        }
+    }
+
+    // Gộp danh sách file từ localStorage và Github, ưu tiên file mới upload (localStorage)
+    async function loadFiles() {
+        const ul = document.getElementById('fileList');
+        ul.innerHTML = '<li style="color:#888;padding:10px;">Đang tải danh sách file...</li>';
+        let localFiles = JSON.parse(localStorage.getItem('sentFiles') || '[]');
+        let githubFiles = await fetchGithubFiles();
+
+        // Ẩn file .gitkeep khỏi danh sách
+        githubFiles = githubFiles.filter(f => f.file_name !== '.gitkeep');
+
+        // Lấy size từng file từ Github (nếu chưa có)
+        // Map tên file -> size
+        let fileSizeMap = {};
+        try {
+            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_UPLOAD_PATH}?ref=${GITHUB_BRANCH}`;
+            const res = await fetch(apiUrl, {
+                headers: {
+                    Authorization: `token ${GITHUB_TOKEN}`,
+                    Accept: "application/vnd.github.v3+json"
+                }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                data.forEach(item => {
+                    if (item.type === "file" && item.name !== ".gitkeep" && typeof item.size === "number") {
+                        fileSizeMap[item.name] = item.size;
+                    }
+                });
+            }
+        } catch {}
+
+        const fileMap = {};
+        githubFiles.forEach(f => {
+            fileMap[f.file_name] = { ...f, size: fileSizeMap[f.file_name] };
+        });
+        localFiles.forEach(f => {
+            if (!fileMap[f.file_name]) {
+                fileMap[f.file_name] = { ...f, size: fileSizeMap[f.file_name] };
+            } else {
+                if (!fileMap[f.file_name].github_url && f.github_url) {
+                    fileMap[f.file_name].github_url = f.github_url;
+                }
+                if (!fileMap[f.file_name].size && fileSizeMap[f.file_name]) {
+                    fileMap[f.file_name].size = fileSizeMap[f.file_name];
+                }
+            }
+        });
+        const files = Object.values(fileMap);
+
+        function formatBytes(bytes) {
+            if (!bytes && bytes !== 0) return '';
+            if (bytes >= 1024*1024*1024) return (bytes/1024/1024/1024).toFixed(2) + " GB";
+            if (bytes >= 1024*1024) return (bytes/1024/1024).toFixed(2) + " MB";
+            if (bytes >= 1024) return (bytes/1024).toFixed(2) + " KB";
+            return bytes + " B";
+        }
+
+        ul.innerHTML = '';
+        if (!files || files.length === 0) {
+            ul.innerHTML = '<li style="color:#888;padding:10px;">Chưa có file nào.</li>';
+            return;
+        }
+        files.forEach((f, idx) => {
+            const idShow = f.file_id || '';
+            const shortId = idShow ? idShow.substring(0, 10) + '...' : '';
+            const fileSizeStr = f.size !== undefined ? ` (${formatBytes(f.size)})` : '';
+            const li = document.createElement('li');
+            li.className = 'file-item';
+            li.innerHTML = `
+                <div class="file-info">
+                    <strong title="${f.file_name}">${f.file_name}</strong>
+                    <div class="file-id">ID: <span title="${idShow}">${shortId}</span>${fileSizeStr}</div>
+                </div>
+                <div class="file-actions">
+                    <button onclick="downloadFile('${idShow}', '${f.file_name}', '${f.github_url || ""}')">Tải về</button>
+                    <!-- Đã ẩn nút Xóa -->
+                </div>
+            `;
+            ul.appendChild(li);
+        });
+    }
+
+    // Tải file từ Github (luôn tải về, không mở tab mới/raw)
+    async function downloadFile(fileId, fileName, githubUrl) {
+        if (!githubUrl) {
+            showPopup('Không tìm thấy link tải file!', 'error');
+            return;
+        }
+        try {
+            const res = await fetch(githubUrl);
+            if (!res.ok) {
+                showPopup('Không thể tải file!', 'error');
+                return;
+            }
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }, 100);
+        } catch (e) {
+            showPopup('Không thể tải file!', 'error');
+        }
+    }
+    window.downloadFile = downloadFile;
+
+    /*
+    Github API giới hạn:
+    - 1 file upload qua API: tối đa 100MB (104857600 bytes)
+    - Tổng dung lượng repo miễn phí: 1GB (khuyến nghị không vượt quá)
+    - Nếu dùng Git LFS: có thể lớn hơn, nhưng không upload qua API này.
+    */
+    // Giới hạn dung lượng 100MB (Github API)
+    const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+
+    document.getElementById('uploadForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const fileInput = this.file;
+        if (!fileInput.files.length) {
+            showPopup('Vui lòng chọn file!', 'error');
+            return;
+        }
+        const file = fileInput.files[0];
+        if (file.size > MAX_FILE_SIZE) {
+            showPopup('File vượt quá dung lượng tối đa 50MB. Vui lòng chọn file nhỏ hơn!', 'error');
+            return;
+        }
+
+        // Hiển thị progress bar
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
+
+        // Đọc file thành base64
+        const reader = new FileReader();
+        reader.onload = async function() {
+            const base64Content = reader.result.split(',')[1];
+            // Gửi lên Github qua API
+            try {
+                // Kiểm tra file đã tồn tại chưa (nếu có thì lấy sha để update, nếu không thì tạo mới)
+                let sha = null;
+                let githubUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_UPLOAD_PATH}${encodeURIComponent(file.name)}`;
+                let apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_UPLOAD_PATH}${encodeURIComponent(file.name)}`;
+                try {
+                    const checkRes = await fetch(apiUrl, {
+                        headers: {
+                            Authorization: `token ${GITHUB_TOKEN}`,
+                            Accept: "application/vnd.github.v3+json"
+                        }
+                    });
+                    if (checkRes.status === 404) {
+                        // Nếu thư mục uploads/ chưa tồn tại, tự tạo
+                        await createGithubFolderIfNotExist();
+                        // Sau đó thử lại lấy file
+                        const checkRes2 = await fetch(apiUrl, {
+                            headers: {
+                                Authorization: `token ${GITHUB_TOKEN}`,
+                                Accept: "application/vnd.github.v3+json"
+                            }
+                        });
+                        if (checkRes2.ok) {
+                            const checkData = await checkRes2.json();
+                            sha = checkData.sha;
+                        }
+                    } else if (checkRes.ok) {
+                        const checkData = await checkRes.json();
+                        sha = checkData.sha;
+                    }
+                } catch {}
+                // Gửi file lên
+                const res = await fetch(apiUrl, {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `token ${GITHUB_TOKEN}`,
+                        Accept: "application/vnd.github.v3+json"
+                    },
+                    body: JSON.stringify({
+                        message: `Upload file ${file.name}`,
+                        content: base64Content,
+                        branch: GITHUB_BRANCH,
+                        ...(sha ? { sha } : {})
+                    })
+                });
+
+                progressContainer.style.display = 'none';
+
+                if (res.status === 404) {
+                    showPopup('Không thể upload file. Hãy kiểm tra lại quyền truy cập hoặc repo/thư mục uploads/ đã tồn tại trên Github.', 'error');
+                    return;
+                }
+
+                if (res.ok) {
+                    showPopup('Gửi file thành công!', 'success');
+                    const fileId = Math.random().toString(36).substring(2, 12) + Date.now(); // Tạo id ngắn duy nhất
+                    const fileInfo = {
+                        file_name: file.name,
+                        file_id: fileId,
+                        github_url: githubUrl
+                    };
+                    saveFileInfo(fileInfo);
+                    loadFiles();
+                    updateGithubUsageInfo(); // <--- Thêm dòng này
+                } else {
+                    const errData = await res.json();
+                    showPopup('Gửi file thất bại: ' + (errData.message || 'Lỗi không xác định'), 'error');
+                }
+            } catch (err) {
+                progressContainer.style.display = 'none';
+                showPopup('Lỗi khi upload file lên Github!', 'error');
+            }
+        };
+        reader.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                progressBar.style.width = percent + '%';
+                progressBar.textContent = percent + '%';
+            }
+        };
+        reader.onerror = function() {
+            progressContainer.style.display = 'none';
+            showPopup('Không thể đọc file!', 'error');
+        };
+        reader.readAsDataURL(file);
+    };
+
+    loadFiles();
+    // Gọi khi load trang
+    updateGithubUsageInfo();
+</script>
+</body>
+</html>
