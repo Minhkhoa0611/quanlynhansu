@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch & Chấm Công</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>Lịch & Chấm Công</h2>
+    <div class="calendar-controls">
+        <select id="jumpMonth"></select>
+        <select id="jumpYear"></select>
+        <button id="jumpBtn">Đến tháng</button>
+    </div>
+    <div id="all-calendars"></div>
+
+    <!-- Popup Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span id="closeBtn" class="close">&times;</span>
+            <h3 id="modal-date"></h3>
+            <label>
+                <input type="checkbox" id="workShift"> Làm Ca
+            </label>
+            <br>
+            <label>
+                <input type="checkbox" id="overtime"> Tăng Ca
+            </label>
+            <br>
+            <button id="saveBtn">Lưu</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

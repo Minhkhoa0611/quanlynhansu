@@ -395,6 +395,8 @@ function renderMenu(active) {
                 <button type="button" class="menu-qrscanner" onclick="location.href='QRSCANNER/qr-scanner.html'" style="color:#2563eb;">📷 QR-Scanner</button>
                 <button type="button" class="menu-admin" onclick="location.href='Admin.html'" style="color:#2563eb;">🔐ADMIN</button>
                 <button type="button" class="menu-hfarm-product" onclick="window.open('https://minhkhoa0611.github.io/H-FARM/danhsachsanpham.html','_blank')" style="color:#2e7d32;">🌱 Quản Lý Sản Phẩm H'Farm</button>
+                <button type="button" class="menu-ckbank" onclick="location.href='Chấm Công MentKhoa/chamcongmentKHOA.html'" style="color:#2563eb;">Lịch</button>
+
                 <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ Giới thiệu</button>
             </div>
         </div>
