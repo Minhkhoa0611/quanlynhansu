@@ -183,6 +183,26 @@ h2 {
     border: 2px solid #fff;
     box-shadow: 0 1px 4px rgba(44,62,80,0.10);
 }
+.day.has-offday::after {
+    content: '';
+    display: block;
+    width: 12px;
+    height: 12px;
+    background: #ff3b3b;
+    border-radius: 50%;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.10);
+}
+.day.empty {
+    background: none;
+    box-shadow: none;
+    cursor: default;
+    border: none;
+    pointer-events: none;
+}
 
 /* Ngày tháng trước */
 .day.other-month {

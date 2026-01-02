@@ -5,6 +5,7 @@ const saveBtn = document.getElementById('saveBtn');
 const modalDate = document.getElementById('modal-date');
 const workShift = document.getElementById('workShift');
 const overtime = document.getElementById('overtime');
+const offDay = document.getElementById('offDay');
 const jumpMonth = document.getElementById('jumpMonth');
 const jumpYear = document.getElementById('jumpYear');
 const jumpBtn = document.getElementById('jumpBtn');
@@ -97,25 +98,13 @@ function renderCalendar(year, month, calendarEl) {
     firstDay = (firstDay === 0) ? 6 : firstDay - 1;
 
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const prevMonth = month === 0 ? 11 : month - 1;
-    const prevYear = month === 0 ? year - 1 : year;
-    const daysInPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
     const data = getAttendanceData();
 
-    // Ngày tháng trước (làm mờ)
-    for (let i = firstDay - 1; i >= 0; i--) {
-        const d = daysInPrevMonth - i;
-        const dateStr = `${prevYear}-${String(prevMonth+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const dayDiv = document.createElement('div');
-        dayDiv.className = 'day other-month';
-        dayDiv.textContent = d;
-        if (data[dateStr]?.workShift) dayDiv.classList.add('has-attendance');
-        if (data[dateStr]?.overtime) dayDiv.classList.add('has-overtime');
-        dayDiv.onclick = () => {
-            renderAllCalendars(prevYear);
-            openModal(dateStr, prevYear, prevMonth);
-        };
-        calendarEl.appendChild(dayDiv);
+    // Thêm các ô trống đầu tháng để căn chỉnh đúng thứ
+    for (let i = 0; i < firstDay; i++) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'day empty';
+        calendarEl.appendChild(emptyDiv);
     }
 
     // Ngày tháng hiện tại
@@ -128,6 +117,7 @@ function renderCalendar(year, month, calendarEl) {
 
         if (data[dateStr]?.workShift) dayDiv.classList.add('has-attendance');
         if (data[dateStr]?.overtime) dayDiv.classList.add('has-overtime');
+        if (data[dateStr]?.offDay) dayDiv.classList.add('has-offday');
         if (
             d === today.getDate() &&
             month === today.getMonth() &&
@@ -147,29 +137,64 @@ function openModal(dateStr, year, month) {
     const data = getAttendanceData()[dateStr] || {};
     workShift.checked = !!data.workShift;
     overtime.checked = !!data.overtime;
+    offDay.checked = !!data.offDay;
+    // Nếu không có gì được chọn thì reset hết checkbox
+    if (!data.workShift && !data.overtime && !data.offDay) {
+        workShift.checked = false;
+        overtime.checked = false;
+        offDay.checked = false;
+    }
     modal.style.display = 'flex';
 }
 
 function closeModal() {
     modal.style.display = 'none';
+    // Reset các checkbox để lần sau mở modal luôn sạch sẽ
+    workShift.checked = false;
+    overtime.checked = false;
+    offDay.checked = false;
 }
 
-closeBtn.onclick = closeModal;
-window.onclick = function(event) {
-    if (event.target == modal) closeModal();
+offDay.onchange = function() {
+    if (offDay.checked) {
+        workShift.checked = false;
+        overtime.checked = false;
+    }
+};
+workShift.onchange = overtime.onchange = function() {
+    if (workShift.checked || overtime.checked) {
+        offDay.checked = false;
+    }
 };
 
 saveBtn.onclick = function() {
     const data = getAttendanceData();
-    data[selectedDate] = {
-        workShift: workShift.checked,
-        overtime: overtime.checked
-    };
+    const work = workShift.checked;
+    const ot = overtime.checked;
+    const off = offDay.checked;
+
+    if (!work && !ot && !off) {
+        // Nếu không chọn gì, xóa ngày khỏi dữ liệu
+        delete data[selectedDate];
+    } else {
+        data[selectedDate] = {
+            workShift: work,
+            overtime: ot,
+            offDay: off
+        };
+    }
     setAttendanceData(data);
-    closeModal();
-    // render lại tất cả lịch để cập nhật trạng thái
-    const year = Number(selectedDate.split('-')[0]);
-    renderAllCalendars(year);
+
+    closeModal(); // Đảm bảo gọi hàm này trước khi render lại lịch
+
+    // render lại toàn bộ lịch của năm đang thao tác để cập nhật trạng thái
+    const [year, month] = selectedDate.split('-');
+    renderAllCalendars(Number(year));
+    // Sau khi render lại, cuộn về đúng tháng vừa thao tác
+    const calendarBox = document.getElementById(`calendar-${year}-${Number(month)-1}`);
+    if (calendarBox) {
+        calendarBox.scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
 };
 
 // Thêm sự kiện cho nút nhảy đến tháng
