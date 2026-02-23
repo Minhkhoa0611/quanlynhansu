@@ -35,7 +35,8 @@ function fillJumpSelects(year) {
         jumpMonth.appendChild(opt);
     }
     jumpYear.innerHTML = '';
-    for (let y = year - 5; y <= year + 5; y++) {
+    // Chỉ cho phép chọn từ 2025 trở đi
+    for (let y = 2025; y <= year + 5; y++) {
         const opt = document.createElement('option');
         opt.value = y;
         opt.textContent = y;
@@ -47,23 +48,10 @@ function fillJumpSelects(year) {
 function renderAllCalendars(year) {
     allCalendarsEl.innerHTML = '';
 
-    // Thêm tháng 12 của năm trước
-    const prevYear = year - 1;
-    const calendarBoxPrev = document.createElement('div');
-    calendarBoxPrev.className = 'calendar-box';
-    calendarBoxPrev.id = `calendar-${prevYear}-11`;
+    // Không render tháng 12 của năm trước nữa
 
-    const titlePrev = document.createElement('div');
-    titlePrev.className = 'calendar-title';
-    titlePrev.textContent = `Tháng 12 / ${prevYear}`;
-    calendarBoxPrev.appendChild(titlePrev);
-
-    const calendarElPrev = document.createElement('div');
-    calendarElPrev.className = 'calendar';
-    renderCalendar(prevYear, 11, calendarElPrev);
-    calendarBoxPrev.appendChild(calendarElPrev);
-
-    allCalendarsEl.appendChild(calendarBoxPrev);
+    // Chỉ render các năm từ 2025 trở đi
+    if (year < 2025) return;
 
     // 12 tháng của năm hiện tại
     for (let month = 0; month < 12; month++) {
@@ -211,7 +199,8 @@ jumpBtn.onclick = function() {
 
 // Init: Hiển thị lịch của năm hiện tại và fill selects
 const now = new Date();
-fillJumpSelects(now.getFullYear());
-renderAllCalendars(now.getFullYear());
+const initialYear = now.getFullYear() < 2025 ? 2025 : now.getFullYear();
+fillJumpSelects(initialYear);
+renderAllCalendars(initialYear);
 jumpMonth.value = now.getMonth();
-jumpYear.value = now.getFullYear();
+jumpYear.value = initialYear;

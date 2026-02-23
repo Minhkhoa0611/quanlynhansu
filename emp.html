@@ -227,8 +227,61 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
 <body>
-    <script>renderMenu('emp');</script>
-    <div class="container">
+    <script>
+    // --- LOGIN ADMIN ---
+    function showLoginModal() {
+        const modal = document.createElement('div');
+        modal.id = 'adminLoginModal';
+        modal.style = 'position:fixed;z-index:9999;left:0;top:0;width:100vw;height:100vh;background:#0007;display:flex;align-items:center;justify-content:center;';
+        modal.innerHTML = `
+            <div style="background:linear-gradient(120deg,#e3f0ff 60%,#f7f7f7 100%);padding:38px 32px 28px 32px;border-radius:18px;box-shadow:0 8px 32px #1976d230,0 2px 8px #1976d210;max-width:370px;width:96%;text-align:center;position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-38px;right:-38px;width:110px;height:110px;background:radial-gradient(circle,#1976d2 60%,#2196f3 100%);opacity:0.13;border-radius:50%;z-index:0;"></div>
+                <div style="position:absolute;bottom:-38px;left:-38px;width:110px;height:110px;background:radial-gradient(circle,#43e97b 60%,#38f9d7 100%);opacity:0.13;border-radius:50%;z-index:0;"></div>
+                <div style="position:relative;z-index:1;">
+                    <svg width="54" height="54" viewBox="0 0 54 54" style="margin-bottom:10px;"><circle cx="27" cy="27" r="27" fill="#1976d2" opacity="0.13"/><path d="M27 13a7 7 0 1 1 0 14a7 7 0 0 1 0-14zm0 18c6.08 0 18 3.06 18 9.14V43H9v-2.86C9 34.06 20.92 31 27 31z" fill="#1976d2"/></svg>
+                    <h2 style='color:#1976d2;margin-bottom:18px;font-size:2.1rem;font-weight:700;letter-spacing:1px;'>Đăng nhập Admin</h2>
+                    <form id='adminLoginForm' autocomplete='off' style="margin-bottom:0;">
+                        <div style="margin-bottom:18px;">
+                            <input id='adminUser' type='text' placeholder='Tài khoản' required autofocus style='width:92%;margin-bottom:12px;padding:12px 14px;font-size:1.13rem;border-radius:8px;border:1.5px solid #b3d1f7;outline:none;transition:border 0.2s;background:#f7fbff;box-shadow:0 1.5px 0 #fff3 inset;'>
+                            <input id='adminPass' type='password' placeholder='Mật khẩu' required style='width:92%;padding:12px 14px;font-size:1.13rem;border-radius:8px;border:1.5px solid #b3d1f7;outline:none;transition:border 0.2s;background:#f7fbff;box-shadow:0 1.5px 0 #fff3 inset;'>
+                        </div>
+                        <button type='submit' class='btn btn-green' style='min-width:120px;font-size:1.13rem;border-radius:8px;'>Đăng nhập</button>
+                    </form>
+                    <div id='adminLoginError' style='color:#e53935;margin-top:14px;display:none;font-weight:600;font-size:1.08rem;'></div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        document.getElementById('adminLoginForm').onsubmit = function(e) {
+            e.preventDefault();
+            const user = document.getElementById('adminUser').value.trim();
+            const pass = document.getElementById('adminPass').value;
+            if (user === 'admin' && pass === 'admin') {
+                sessionStorage.setItem('isAdminLoggedIn', '1');
+                document.body.removeChild(modal);
+                renderMenu('emp');
+                document.querySelector('.container').style.display = '';
+            } else {
+                const err = document.getElementById('adminLoginError');
+                err.textContent = 'Sai tài khoản hoặc mật khẩu!';
+                err.style.display = '';
+            }
+        };
+    }
+    // Kiểm tra trạng thái đăng nhập admin
+    if (sessionStorage.getItem('isAdminLoggedIn') !== '1') {
+        window.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.container').style.display = 'none';
+            showLoginModal();
+        });
+    } else {
+        renderMenu('emp');
+        window.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.container').style.display = '';
+        });
+    }
+    </script>
+    <div class="container" style="display:none;">
         <h2>Workforce 365 HRM Pro - Danh Sách Nhân Viên</h2>
 
         <!-- Snackbar hoàn tác xóa -->
@@ -1590,4 +1643,6 @@
     <script>renderFooter();</script>
 </body>
 </html>
+<script src="hotline.js"></script>
+
 </html>
