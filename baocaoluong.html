@@ -263,6 +263,9 @@
         </div>
         <div id="salaryReportWrap" style="overflow-x:auto"></div>
         <div style="margin-top:24px;text-align:right;">
+            <button id="btnEditSalary" class="btn" style="background:linear-gradient(90deg,#ff9800 60%,#f44336 100%);color:#fff;margin-right:12px;">Chỉnh sửa</button>
+            <button id="btnSaveSalary" class="btn" style="background:linear-gradient(90deg,#43a047 60%,#1976d2 100%);color:#fff;display:none;margin-right:12px;">Lưu</button>
+            <button id="btnCancelEdit" class="btn" style="background:linear-gradient(90deg,#bdbdbd 60%,#757575 100%);color:#fff;display:none;margin-right:12px;">Hủy</button>
             <button id="btnSaveImage" class="btn save-img-btn" style="margin-right:12px;">Save Image</button>
             <button id="btnCopyImage" class="btn copy-img-btn" style="margin-right:12px;">Copy Image</button>
             <button id="btnShareImage" class="btn" style="background:linear-gradient(90deg,#4267B2 60%,#0088cc 100%);color:#fff;">Share</button>
@@ -295,8 +298,8 @@
             return new Date(y, m, 0).getDate();
         }
         function formatVND(val) {
-            if (isNaN(val)) return '0 ₫';
-            return Number(val).toLocaleString('vi-VN') + ' ₫';
+            if (isNaN(val)) return '0';
+            return Number(val).toLocaleString('vi-VN');
         }
         function parseCurrency(val) {
             return Number((val+'').replace(/[^\d\-]/g, '')) || 0;
@@ -368,6 +371,9 @@
             localStorage.setItem('salaryReportColToggles', JSON.stringify(toggles));
         }
 
+        let isEditingSalary = false;
+        let manualSalaryEdits = JSON.parse(localStorage.getItem('manualSalaryEdits') || '{}');
+
         function renderSalaryReport() {
             // Không gọi setColTogglesFromStorage ở đây, chỉ gọi ở init
             const toggles = getColToggles();
@@ -414,12 +420,12 @@
                     <th>Họ tên</th>
                     ${toggles.NgayCong ? '<th>Ngày Công</th>' : ''}
                     ${toggles.TCLT ? '<th>TC/LT</th>' : ''}
-                    ${toggles.PhuCap ? '<th>Phụ cấp</th>' : ''}
-                    ${toggles.ThuongLe ? '<th>Thưởng lễ</th>' : ''}
-                    ${(!hideRevenueCol && toggles.DoanhThu) ? '<th>Doanh thu</th>' : ''}
-                    ${toggles.Phat ? '<th>Phạt</th>' : ''}
-                    ${toggles.TienUng ? '<th>Tiền ứng</th>' : ''}
-                    <th>Tổng lương</th>
+                    ${toggles.PhuCap ? '<th>Phụ cấp<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>' : ''}
+                    ${toggles.ThuongLe ? '<th>Thưởng lễ<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>' : ''}
+                    ${(!hideRevenueCol && toggles.DoanhThu) ? '<th>Doanh thu<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>' : ''}
+                    ${toggles.Phat ? '<th>Phạt<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>' : ''}
+                    ${toggles.TienUng ? '<th>Tiền ứng<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>' : ''}
+                    <th>Tổng lương<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>
                 </tr>
             </thead><tbody>`;
 
@@ -516,19 +522,82 @@
                     tongLuong -= parseCurrency(extras.advance) + parseCurrency(extras.penalty);
                 }
 
-                tongTien += tongLuong;
+                // Xử lý chỉnh sửa thủ công
+                let manualKey = month + '_' + emp.id;
+                let manual = manualSalaryEdits[manualKey] || {};
+                // Lấy giá trị hiển thị ưu tiên giá trị chỉnh sửa
+                let show = {
+                    ngaycong: manual.ngaycong !== undefined ? manual.ngaycong : tongCong,
+                    tclt: manual.tclt !== undefined ? manual.tclt : hesoTC,
+                    phucap: manual.phucap !== undefined ? manual.phucap : extras.allowance,
+                    thuongle: manual.thuongle !== undefined ? manual.thuongle : extras.bonus,
+                    doanhthu: manual.doanhthu !== undefined ? manual.doanhthu : revenue,
+                    phat: manual.phat !== undefined ? manual.phat : extras.penalty,
+                    tienung: manual.tienung !== undefined ? manual.tienung : extras.advance,
+                    luong: manual.luong !== undefined ? manual.luong : tongLuong
+                };
+                tongTien += (manual.luong !== undefined ? manual.luong : tongLuong);
                 rowsHtml += `<tr>
                     <td>${idx+1}</td>
                     <td style="text-align:left;">${emp.name}</td>
-                    ${toggles.NgayCong ? `<td>${tongCong}</td>` : ''}
-                    ${toggles.TCLT ? `<td>${hesoTC ? hesoTC : ''}</td>` : ''}
-                    ${toggles.PhuCap ? `<td>${formatVND(extras.allowance)}</td>` : ''}
-                    ${toggles.ThuongLe ? `<td>${formatVND(extras.bonus)}</td>` : ''}
-                    ${(!hideRevenueCol && toggles.DoanhThu) ? `<td>${emp.salary_type === 'base' ? formatVND(revenue) : ''}</td>` : ''}
-                    ${toggles.Phat ? `<td>- ${formatVND(extras.penalty)}</td>` : ''}
-                    ${toggles.TienUng ? `<td>- ${formatVND(extras.advance)}</td>` : ''}
-                    <td class="salary-final-row">${formatVND(tongLuong)}</td>
+                    ${toggles.NgayCong ? `<td>${isEditingSalary ? `<input type='number' class='manual-salary-input' data-empid='${emp.id}' data-field='ngaycong' value='${show.ngaycong}' style='width:70px;text-align:right;'>` : show.ngaycong}</td>` : ''}
+                    ${toggles.TCLT ? `<td>${isEditingSalary ? `<input type='number' class='manual-salary-input' data-empid='${emp.id}' data-field='tclt' value='${show.tclt}' style='width:70px;text-align:right;'>` : (show.tclt ? show.tclt : '')}</td>` : ''}
+                    ${toggles.PhuCap ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='phucap' value='${formatVND(show.phucap).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;'>` : formatVND(show.phucap)}</td>` : ''}
+                    ${toggles.ThuongLe ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='thuongle' value='${formatVND(show.thuongle).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;'>` : formatVND(show.thuongle)}</td>` : ''}
+                    ${(!hideRevenueCol && toggles.DoanhThu) ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='doanhthu' value='${formatVND(show.doanhthu).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;'>` : (emp.salary_type === 'base' ? formatVND(show.doanhthu) : '')}</td>` : ''}
+                    ${toggles.Phat ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='phat' value='${formatVND(show.phat).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;color:#d32f2f;'>` : ('- ' + formatVND(show.phat))}</td>` : ''}
+                    ${toggles.TienUng ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='tienung' value='${formatVND(show.tienung).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;color:#d32f2f;'>` : ('- ' + formatVND(show.tienung))}</td>` : ''}
+                    <td class="salary-final-row">${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='luong' value='${formatVND(show.luong).replace(/\s?₫/g,"")}' style='width:110px;text-align:right;font-weight:bold;color:#388e3c;font-size:1.1rem;'>` : formatVND(show.luong)}</td>
                 </tr>`;
+                    // Sự kiện chỉnh sửa thủ công lương
+                    document.getElementById('btnEditSalary').onclick = function() {
+                        isEditingSalary = true;
+                        document.getElementById('btnEditSalary').style.display = 'none';
+                        document.getElementById('btnSaveSalary').style.display = '';
+                        document.getElementById('btnCancelEdit').style.display = '';
+                        renderSalaryReport();
+                    };
+                    document.getElementById('btnCancelEdit').onclick = function() {
+                        isEditingSalary = false;
+                        document.getElementById('btnEditSalary').style.display = '';
+                        document.getElementById('btnSaveSalary').style.display = 'none';
+                        document.getElementById('btnCancelEdit').style.display = 'none';
+                        renderSalaryReport();
+                    };
+                    document.getElementById('btnSaveSalary').onclick = function() {
+                        // Lưu các giá trị chỉnh sửa
+                        let inputs = document.querySelectorAll('.manual-salary-input');
+                        inputs.forEach(input => {
+                            let empId = input.getAttribute('data-empid');
+                            let field = input.getAttribute('data-field');
+                            let key = getCurrentMonth() + '_' + empId;
+                            if (!manualSalaryEdits) manualSalaryEdits = {};
+                            if (!manualSalaryEdits[key]) manualSalaryEdits[key] = {};
+                            let val = input.value.replace(/\D/g,"");
+                            if(['ngaycong','tclt'].includes(field)) {
+                                manualSalaryEdits[key][field] = parseFloat(input.value) || 0;
+                            } else {
+                                manualSalaryEdits[key][field] = parseInt(val) || 0;
+                            }
+                        });
+                        localStorage.setItem('manualSalaryEdits', JSON.stringify(manualSalaryEdits));
+                        isEditingSalary = false;
+                        document.getElementById('btnEditSalary').style.display = '';
+                        document.getElementById('btnSaveSalary').style.display = 'none';
+                        document.getElementById('btnCancelEdit').style.display = 'none';
+                        renderSalaryReport();
+                    };
+                    // Định dạng số tiền khi nhập
+                    document.addEventListener('input', function(e) {
+                        if (e.target.classList && e.target.classList.contains('money')) {
+                            let val = e.target.value.replace(/\D/g, '');
+                            if(val) {
+                                e.target.value = Number(val).toLocaleString('vi-VN');
+                            } else {
+                                e.target.value = '';
+                            }
+                        }
+                    });
             });
 
             // Hàm chuyển số thành chữ tiếng Việt chuẩn cho tiền VNĐ
