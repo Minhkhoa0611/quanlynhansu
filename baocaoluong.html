@@ -111,6 +111,48 @@
             text-shadow: 0 2px 8px #1976d220;
         }
         /* Nút chức năng */
+        .btn {
+            border: none;
+            padding: 10px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.08rem;
+            font-weight: 700;
+            margin-right: 14px;
+            margin-bottom: 6px;
+            box-shadow: 0 2px 12px #1976d230, 0 1.5px 4px #0001;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .btn-edit {
+            background: linear-gradient(90deg, #ff9800 60%, #f44336 100%);
+            color: #fff;
+        }
+        .btn-edit:hover {
+            background: linear-gradient(90deg, #fb8c00 60%, #d32f2f 100%);
+            box-shadow: 0 4px 16px #ff980040;
+        }
+        .btn-save {
+            background: linear-gradient(90deg, #43a047 60%, #1976d2 100%);
+            color: #fff;
+        }
+        .btn-save:hover {
+            background: linear-gradient(90deg, #388e3c 60%, #1565c0 100%);
+            box-shadow: 0 4px 16px #43a04740;
+        }
+        .btn-cancel {
+            background: linear-gradient(90deg, #bdbdbd 60%, #757575 100%);
+            color: #fff;
+        }
+        .btn-cancel:hover {
+            background: linear-gradient(90deg, #9e9e9e 60%, #424242 100%);
+            box-shadow: 0 4px 16px #bdbdbd40;
+        }
         .save-img-btn, .copy-img-btn {
             border: none;
             padding: 10px 32px;
@@ -263,9 +305,9 @@
         </div>
         <div id="salaryReportWrap" style="overflow-x:auto"></div>
         <div style="margin-top:24px;text-align:right;">
-            <button id="btnEditSalary" class="btn" style="background:linear-gradient(90deg,#ff9800 60%,#f44336 100%);color:#fff;margin-right:12px;">Chỉnh sửa</button>
-            <button id="btnSaveSalary" class="btn" style="background:linear-gradient(90deg,#43a047 60%,#1976d2 100%);color:#fff;display:none;margin-right:12px;">Lưu</button>
-            <button id="btnCancelEdit" class="btn" style="background:linear-gradient(90deg,#bdbdbd 60%,#757575 100%);color:#fff;display:none;margin-right:12px;">Hủy</button>
+            <button id="btnEditSalary" class="btn btn-edit" style="margin-right:12px;"><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' style='vertical-align:middle;'><path fill='#fff' d='M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/></svg> Chỉnh sửa</button>
+            <button id="btnSaveSalary" class="btn btn-save" style="display:none;margin-right:12px;"><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' style='vertical-align:middle;'><path fill='#fff' d='M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm0 16H5V5h11.17L19 7.83V19zm-7-2h2v-2h-2v2zm0-4h2v-4h-2v4z'/></svg> Lưu</button>
+            <button id="btnCancelEdit" class="btn btn-cancel" style="display:none;margin-right:12px;"><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' style='vertical-align:middle;'><path fill='#fff' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z'/></svg> Hủy</button>
             <button id="btnSaveImage" class="btn save-img-btn" style="margin-right:12px;">Save Image</button>
             <button id="btnCopyImage" class="btn copy-img-btn" style="margin-right:12px;">Copy Image</button>
             <button id="btnShareImage" class="btn" style="background:linear-gradient(90deg,#4267B2 60%,#0088cc 100%);color:#fff;">Share</button>
@@ -298,8 +340,8 @@
             return new Date(y, m, 0).getDate();
         }
         function formatVND(val) {
-            if (isNaN(val)) return '0';
-            return Number(val).toLocaleString('vi-VN');
+            if (isNaN(val)) return '0 ₫';
+            return Number(val).toLocaleString('vi-VN') + ' ₫';
         }
         function parseCurrency(val) {
             return Number((val+'').replace(/[^\d\-]/g, '')) || 0;
@@ -420,12 +462,12 @@
                     <th>Họ tên</th>
                     ${toggles.NgayCong ? '<th>Ngày Công</th>' : ''}
                     ${toggles.TCLT ? '<th>TC/LT</th>' : ''}
-                    ${toggles.PhuCap ? '<th>Phụ cấp<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>' : ''}
-                    ${toggles.ThuongLe ? '<th>Thưởng lễ<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>' : ''}
-                    ${(!hideRevenueCol && toggles.DoanhThu) ? '<th>Doanh thu<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>' : ''}
-                    ${toggles.Phat ? '<th>Phạt<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>' : ''}
-                    ${toggles.TienUng ? '<th>Tiền ứng<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>' : ''}
-                    <th>Tổng lương<br><span style="font-weight:normal;font-size:0.95em;">(VNĐ)</span></th>
+                    ${toggles.PhuCap ? '<th>Phụ cấp</th>' : ''}
+                    ${toggles.ThuongLe ? '<th>Thưởng lễ</th>' : ''}
+                    ${(!hideRevenueCol && toggles.DoanhThu) ? '<th>Doanh thu</th>' : ''}
+                    ${toggles.Phat ? '<th>Phạt</th>' : ''}
+                    ${toggles.TienUng ? '<th>Tiền ứng</th>' : ''}
+                    <th>Tổng lương</th>
                 </tr>
             </thead><tbody>`;
 
@@ -537,18 +579,23 @@
                     luong: manual.luong !== undefined ? manual.luong : tongLuong
                 };
                 tongTien += (manual.luong !== undefined ? manual.luong : tongLuong);
-                rowsHtml += `<tr>
-                    <td>${idx+1}</td>
-                    <td style="text-align:left;">${emp.name}</td>
-                    ${toggles.NgayCong ? `<td>${isEditingSalary ? `<input type='number' class='manual-salary-input' data-empid='${emp.id}' data-field='ngaycong' value='${show.ngaycong}' style='width:70px;text-align:right;'>` : show.ngaycong}</td>` : ''}
-                    ${toggles.TCLT ? `<td>${isEditingSalary ? `<input type='number' class='manual-salary-input' data-empid='${emp.id}' data-field='tclt' value='${show.tclt}' style='width:70px;text-align:right;'>` : (show.tclt ? show.tclt : '')}</td>` : ''}
-                    ${toggles.PhuCap ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='phucap' value='${formatVND(show.phucap).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;'>` : formatVND(show.phucap)}</td>` : ''}
-                    ${toggles.ThuongLe ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='thuongle' value='${formatVND(show.thuongle).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;'>` : formatVND(show.thuongle)}</td>` : ''}
-                    ${(!hideRevenueCol && toggles.DoanhThu) ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='doanhthu' value='${formatVND(show.doanhthu).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;'>` : (emp.salary_type === 'base' ? formatVND(show.doanhthu) : '')}</td>` : ''}
-                    ${toggles.Phat ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='phat' value='${formatVND(show.phat).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;color:#d32f2f;'>` : ('- ' + formatVND(show.phat))}</td>` : ''}
-                    ${toggles.TienUng ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='tienung' value='${formatVND(show.tienung).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;color:#d32f2f;'>` : ('- ' + formatVND(show.tienung))}</td>` : ''}
-                    <td class="salary-final-row">${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='luong' value='${formatVND(show.luong).replace(/\s?₫/g,"")}' style='width:110px;text-align:right;font-weight:bold;color:#388e3c;font-size:1.1rem;'>` : formatVND(show.luong)}</td>
-                </tr>`;
+                    rowsHtml += `<tr id="row-emp-${emp.id}">
+                        <td>${idx+1}</td>
+                        <td style="text-align:left;">
+                            <span id="emp-name-${emp.id}">${emp.name}</span>
+                            ${isEditingSalary ? `<button class='btn-update-emp' data-empid='${emp.id}' title='Cập nhật theo hệ thống' style='padding:2px 6px 2px 6px;margin-left:6px;font-size:1.15em;background:none;border:none;cursor:pointer;vertical-align:middle;'><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24'><path fill='#1976d2' d='M12 6V3l-4 4 4 4V8c3.31 0 6 2.69 6 6 0 1.13-.31 2.19-.85 3.09l1.46 1.46A7.932 7.932 0 0020 14c0-4.42-3.58-8-8-8zm-6 6c0-1.13.31-2.19.85-3.09L5.39 7.45A7.932 7.932 0 004 10c0 4.42 3.58 8 8 8v3l4-4-4-4v2c-3.31 0-6-2.69-6-6z'/></svg></button>` : ''}
+                            <span id="emp-update-status-${emp.id}" style="color:#388e3c;font-size:0.95em;font-weight:bold;margin-left:8px;"></span>
+                        </td>
+                        ${toggles.NgayCong ? `<td>${isEditingSalary ? `<input type='number' class='manual-salary-input' data-empid='${emp.id}' data-field='ngaycong' value='${show.ngaycong}' style='width:70px;text-align:right;'>` : show.ngaycong}</td>` : ''}
+                        ${toggles.TCLT ? `<td>${isEditingSalary ? `<input type='number' class='manual-salary-input' data-empid='${emp.id}' data-field='tclt' value='${show.tclt}' style='width:70px;text-align:right;'>` : (show.tclt ? show.tclt : '')}</td>` : ''}
+                        ${toggles.PhuCap ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='phucap' value='${formatVND(show.phucap).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;'>` : formatVND(show.phucap)}</td>` : ''}
+                        ${toggles.ThuongLe ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='thuongle' value='${formatVND(show.thuongle).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;'>` : formatVND(show.thuongle)}</td>` : ''}
+                        ${(!hideRevenueCol && toggles.DoanhThu) ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='doanhthu' value='${formatVND(show.doanhthu).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;'>` : (emp.salary_type === 'base' ? formatVND(show.doanhthu) : '')}</td>` : ''}
+                        ${toggles.Phat ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='phat' value='${formatVND(show.phat).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;color:#d32f2f;'>` : ('- ' + formatVND(show.phat))}</td>` : ''}
+                        ${toggles.TienUng ? `<td>${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='tienung' value='${formatVND(show.tienung).replace(/\s?₫/g,"")}' style='width:100px;text-align:right;color:#d32f2f;'>` : ('- ' + formatVND(show.tienung))}</td>` : ''}
+                        <td class="salary-final-row">${isEditingSalary ? `<input type='text' class='manual-salary-input money' data-empid='${emp.id}' data-field='luong' value='${formatVND(show.luong).replace(/\s?₫/g,"")}' style='width:110px;text-align:right;font-weight:bold;color:#388e3c;font-size:1.1rem;'>` : formatVND(show.luong)}</td>
+                        <td></td>
+                    </tr>`;
                     // Sự kiện chỉnh sửa thủ công lương
                     document.getElementById('btnEditSalary').onclick = function() {
                         isEditingSalary = true;
@@ -586,6 +633,26 @@
                         document.getElementById('btnSaveSalary').style.display = 'none';
                         document.getElementById('btnCancelEdit').style.display = 'none';
                         renderSalaryReport();
+                            // Thêm sự kiện cập nhật từng nhân viên
+                            setTimeout(() => {
+                                document.querySelectorAll('.btn-update-emp').forEach(btn => {
+                                    btn.onclick = function() {
+                                        let empId = this.getAttribute('data-empid');
+                                        let key = getCurrentMonth() + '_' + empId;
+                                        // Xóa chỉnh sửa thủ công để lấy lại dữ liệu hệ thống
+                                        if (manualSalaryEdits[key]) delete manualSalaryEdits[key];
+                                        localStorage.setItem('manualSalaryEdits', JSON.stringify(manualSalaryEdits));
+                                        // Hiện tên nhân viên vừa cập nhật
+                                        let statusSpan = document.getElementById('emp-update-status-' + empId);
+                                        if (statusSpan) {
+                                            statusSpan.textContent = 'Đã cập nhật!';
+                                            statusSpan.style.color = '#388e3c';
+                                            setTimeout(() => { statusSpan.textContent = ''; }, 2000);
+                                        }
+                                        renderSalaryReport();
+                                    };
+                                });
+                            }, 100);
                     };
                     // Định dạng số tiền khi nhập
                     document.addEventListener('input', function(e) {
@@ -694,6 +761,26 @@
 
             html += `</tbody></table>`;
             document.getElementById('salaryReportWrap').innerHTML = html;
+            // Gán lại sự kiện cho nút cập nhật từng nhân viên nếu đang chỉnh sửa
+            if (isEditingSalary) {
+                setTimeout(() => {
+                    document.querySelectorAll('.btn-update-emp').forEach(btn => {
+                        btn.onclick = function() {
+                            let empId = this.getAttribute('data-empid');
+                            let key = getCurrentMonth() + '_' + empId;
+                            if (manualSalaryEdits[key]) delete manualSalaryEdits[key];
+                            localStorage.setItem('manualSalaryEdits', JSON.stringify(manualSalaryEdits));
+                            let statusSpan = document.getElementById('emp-update-status-' + empId);
+                            if (statusSpan) {
+                                statusSpan.textContent = 'Đã cập nhật!';
+                                statusSpan.style.color = '#388e3c';
+                                setTimeout(() => { statusSpan.textContent = ''; }, 2000);
+                            }
+                            renderSalaryReport();
+                        };
+                    });
+                }, 0);
+            }
         }
 
         // Gắn sự kiện onchange cho các checkbox để vừa render vừa lưu trạng thái
