@@ -258,11 +258,98 @@
             body.with-col-toggle-panel .container { margin-left: 75px; }
         }
     </style>
+            #btnUpdateAll.fixed-corner {
+                position: fixed !important;
+                left: 24px;
+                bottom: 24px;
+                z-index: 9999;
+                margin: 0 !important;
+                box-shadow: 0 4px 24px #1976d250, 0 1.5px 4px #0002;
+            }
     <script src="menu.js"></script>
     <script src="data_io.js"></script>
 </head>
 <body>
     <script>
+                        // Lệnh ẩn: bấm nút "KHOA" để hiện nút cập nhật toàn bộ ở góc trái, không cần chế độ chỉnh sửa
+                        document.addEventListener('DOMContentLoaded', function() {
+                            let updateAllTimeout = null;
+                            document.addEventListener('keydown', function(e) {
+                                if (e.key.toLowerCase() === 'k' && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+                                    let btn = document.getElementById('btnUpdateAll');
+                                    if (btn) {
+                                        if (btn.style.display === '' && btn.classList.contains('fixed-corner')) {
+                                            btn.style.display = 'none';
+                                            btn.classList.remove('fixed-corner');
+                                            if (updateAllTimeout) clearTimeout(updateAllTimeout);
+                                        } else {
+                                            btn.style.display = '';
+                                            btn.classList.add('fixed-corner');
+                                            if (updateAllTimeout) clearTimeout(updateAllTimeout);
+                                            updateAllTimeout = setTimeout(()=>{
+                                                btn.style.display = 'none';
+                                                btn.classList.remove('fixed-corner');
+                                            }, 30000);
+                                        }
+                                    }
+                                }
+                            });
+                            document.getElementById('btnUpdateAll').addEventListener('click', function() {
+                                if (!confirm('Bạn có chắc muốn cập nhật lại toàn bộ lương theo dữ liệu hệ thống?')) return;
+                                let month = getCurrentMonth();
+                                let changed = false;
+                                for (let emp of employees) {
+                                    let key = month + '_' + emp.id;
+                                    if (manualSalaryEdits[key]) {
+                                        delete manualSalaryEdits[key];
+                                        changed = true;
+                                    }
+                                }
+                                if (changed) {
+                                    localStorage.setItem('manualSalaryEdits', JSON.stringify(manualSalaryEdits));
+                                    renderSalaryReport();
+                                }
+                                let btn = document.getElementById('btnUpdateAll');
+                                if (btn) {
+                                    btn.style.display = 'none';
+                                    btn.classList.remove('fixed-corner');
+                                }
+                                if (updateAllTimeout) clearTimeout(updateAllTimeout);
+                            });
+                        });
+                // Lệnh ẩn: bấm nút "KHOA" để hiện nút cập nhật toàn bộ
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key.toLowerCase() === 'k' && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+                            let btn = document.getElementById('btnUpdateAll');
+                            if (btn) btn.style.display = '';
+                        }
+                    });
+                    // Ẩn lại nút cập nhật toàn bộ khi bấm ra ngoài hoặc lưu/hủy
+                    document.getElementById('btnCancelEdit').addEventListener('click', function() {
+                        document.getElementById('btnUpdateAll').style.display = 'none';
+                    });
+                    document.getElementById('btnSaveSalary').addEventListener('click', function() {
+                        document.getElementById('btnUpdateAll').style.display = 'none';
+                    });
+                    // Xử lý cập nhật toàn bộ
+                    document.getElementById('btnUpdateAll').addEventListener('click', function() {
+                        if (!confirm('Bạn có chắc muốn cập nhật lại toàn bộ lương theo dữ liệu hệ thống?')) return;
+                        let month = getCurrentMonth();
+                        let changed = false;
+                        for (let emp of employees) {
+                            let key = month + '_' + emp.id;
+                            if (manualSalaryEdits[key]) {
+                                delete manualSalaryEdits[key];
+                                changed = true;
+                            }
+                        }
+                        if (changed) {
+                            localStorage.setItem('manualSalaryEdits', JSON.stringify(manualSalaryEdits));
+                            renderSalaryReport();
+                        }
+                    });
+                });
         if (typeof renderMenu === 'function') renderMenu();
         // Thêm class để đẩy nội dung sang phải
         document.body.classList.add('with-col-toggle-panel');
@@ -308,6 +395,8 @@
             <button id="btnEditSalary" class="btn btn-edit" style="margin-right:12px;"><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' style='vertical-align:middle;'><path fill='#fff' d='M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/></svg> Chỉnh sửa</button>
             <button id="btnSaveSalary" class="btn btn-save" style="display:none;margin-right:12px;"><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' style='vertical-align:middle;'><path fill='#fff' d='M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm0 16H5V5h11.17L19 7.83V19zm-7-2h2v-2h-2v2zm0-4h2v-4h-2v4z'/></svg> Lưu</button>
             <button id="btnCancelEdit" class="btn btn-cancel" style="display:none;margin-right:12px;"><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' style='vertical-align:middle;'><path fill='#fff' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z'/></svg> Hủy</button>
+            <button id="btnUpdateAll" class="btn btn-save" style="display:none;margin-right:12px;background:linear-gradient(90deg,#1976d2 60%,#43a047 100%);"><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' style='vertical-align:middle;'><path fill='#fff' d='M13 2v2.06A8.001 8.001 0 0 1 20 12h2c0-5.05-3.76-9.21-8.5-9.95V2h-1zm-2 0h1v2.06C7.76 2.79 4 6.95 4 12H2c0-5.05 3.76-9.21 8.5-9.95V2zm1 20v-2.06A8.001 8.001 0 0 1 4 12H2c0 5.05 3.76 9.21 8.5 9.95V22h1zm2 0h-1v-2.06C16.24 21.21 20 17.05 20 12h2c0 5.05-3.76 9.21-8.5 9.95V22z'/></svg> Cập Nhật Toàn Bộ</button>
+            <button id="btnShowUpdateAll" style="display:none;position:absolute;left:-9999px;">Ẩn lệnh</button>
             <button id="btnSaveImage" class="btn save-img-btn" style="margin-right:12px;">Save Image</button>
             <button id="btnCopyImage" class="btn copy-img-btn" style="margin-right:12px;">Copy Image</button>
             <button id="btnShareImage" class="btn" style="background:linear-gradient(90deg,#4267B2 60%,#0088cc 100%);color:#fff;">Share</button>
