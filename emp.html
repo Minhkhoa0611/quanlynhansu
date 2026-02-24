@@ -247,7 +247,8 @@
                         </div>
                         <button type='submit' class='btn btn-green' style='min-width:120px;font-size:1.13rem;border-radius:8px;'>Đăng nhập</button>
                     </form>
-                    <button onclick="window.location.href='att.html'" class="btn" style="margin-top:18px;background:linear-gradient(90deg,#ff9800 60%,#ffd600 100%);color:#222;font-weight:600;min-width:120px;font-size:1.13rem;border-radius:8px;box-shadow:0 2px 8px #ffd60040;">Chấm Công</button>
+                    <div style="margin-top:18px;margin-bottom:2px;font-size:1.01rem;color:#ff9800;font-weight:500;">Chuyển hướng tới chấm công</div>
+                    <button onclick="window.location.href='att.html'" class="btn blink-att-btn" style="margin-top:6px;background:linear-gradient(90deg,#ff9800 60%,#ffd600 100%);color:#222;font-weight:600;min-width:120px;font-size:1.13rem;border-radius:8px;box-shadow:0 2px 8px #ffd60040;">Chấm Công</button>
                     <div id='adminLoginError' style='color:#e53935;margin-top:14px;display:none;font-weight:600;font-size:1.08rem;'></div>
                 </div>
             </div>
@@ -282,6 +283,15 @@
         });
     }
     </script>
+    <style>
+    .blink-att-btn {
+        animation: blink-att 1s linear infinite;
+    }
+    @keyframes blink-att {
+        0%, 100% { filter: brightness(1.1) drop-shadow(0 0 8px #ffd60080); }
+        50% { filter: brightness(1.6) drop-shadow(0 0 18px #ff9800cc); }
+    }
+    </style>
     <div class="container" style="display:none;">
         <h2>Workforce 365 HRM Pro - Danh Sách Nhân Viên</h2>
 
