@@ -512,15 +512,50 @@
             this.textContent = selectMode ? 'Bỏ chọn' : 'Select';
         };
 
+        // Danh sách icon động vật
+        const animalIcons = [
+            '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🦄','🐔','🐧','🐦','🐤','🐣','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐈‍⬛','🪶','🐓','🦃','🦤','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦫','🦦','🦥','🐁','🐀','🐿','🦔'
+        ];
+
+        // Lấy hoặc gán icon động vật cho nhân viên
+        function getAnimalIconForEmp(emp) {
+            let iconMap = {};
+            try {
+                iconMap = JSON.parse(localStorage.getItem('empAnimalIcons') || '{}');
+            } catch(e) {}
+            // Ưu tiên tên đặc biệt
+            const name = (emp.name || '').trim().toUpperCase();
+            if (name === 'THẢO VY' || name === 'THAO VY') {
+                iconMap[emp.id] = '🐯'; // con hổ
+                localStorage.setItem('empAnimalIcons', JSON.stringify(iconMap));
+                return '🐯';
+            }
+            if (name === 'KIM ANH' || name === 'THU CẦM' || name === 'THU CÂM') {
+                iconMap[emp.id] = '🐶'; // con chó
+                localStorage.setItem('empAnimalIcons', JSON.stringify(iconMap));
+                return '🐶';
+            }
+            if (iconMap[emp.id]) return iconMap[emp.id];
+            // Gán icon mới nếu chưa có
+            // Dựa trên hash của id để cố định icon
+            let hash = 0;
+            for (let i = 0; i < emp.id.length; ++i) hash = (hash * 31 + emp.id.charCodeAt(i)) % animalIcons.length;
+            let icon = animalIcons[hash];
+            iconMap[emp.id] = icon;
+            localStorage.setItem('empAnimalIcons', JSON.stringify(iconMap));
+            return icon;
+        }
+
         function renderEmployees() {
             const tbody = document.querySelector('#empTable tbody');
             tbody.innerHTML = '';
             employees.forEach((emp, idx) => {
+                const icon = getAnimalIconForEmp(emp);
                 tbody.innerHTML += `<tr style="${emp.hidden ? 'opacity:0.5;background:#f8bbd0;' : ''}">
                     <td style="text-align:center;${selectMode ? '' : 'display:none;'};width:32px;">
                         <input type="checkbox" class="emp-checkbox" value="${emp.id}" style="transform:scale(1);margin:0;">
                     </td>
-                    <td>${emp.name}</td>
+                    <td><span style="font-size:1.3em;">${icon}</span> ${emp.name}</td>
                     <td>
                         <span style="display:inline-flex;align-items:center;gap:6px;position:relative;">
                             <span class="emp-id-text" style="user-select:all;">${emp.id}</span>
@@ -1655,5 +1690,6 @@
 </body>
 </html>
 <script src="hotline.js"></script>
+<script src="device-id-checker.js"></script>
 
 </html>
