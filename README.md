@@ -86,7 +86,7 @@
     <tr>
       <td>🌐 Web/PC</td>
       <td>
-        <a href="https://minhkhoa0611.github.io/quanlynhansu/index.html">
+        <a href="https://minhkhoa0611.github.io/quanlynhansu/gps.html">
           <img src="https://img.shields.io/badge/Dùng_ngay-1976d2?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Dùng ngay">
         </a>
       </td>
