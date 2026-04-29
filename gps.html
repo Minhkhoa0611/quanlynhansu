@@ -10,7 +10,11 @@
 body { margin:0; background:#000; color:#0f0; font-family:Arial; text-align:center; }
 #map { height:50vh; }
 
-#speed { font-size:55px; margin-top:10px; font-weight:bold; }
+#speed {
+  font-size:55px;
+  margin-top:10px;
+  font-weight:bold;
+}
 
 #info {
   margin-top:10px;
@@ -18,12 +22,28 @@ body { margin:0; background:#000; color:#0f0; font-family:Arial; text-align:cent
   line-height:1.8;
   font-size:14px;
 }
+
+/* nút recenter */
+#btn {
+  position:absolute;
+  bottom:20px;
+  right:20px;
+  z-index:1000;
+  padding:12px;
+  border:none;
+  background:#0f0;
+  color:#000;
+  font-weight:bold;
+  border-radius:10px;
+}
 </style>
 </head>
 
 <body>
 
 <div id="map"></div>
+<button id="btn" onclick="recenter()">📍</button>
+
 <div id="speed">0.0 km/h</div>
 <div id="info">Đang khởi động...</div>
 
@@ -39,6 +59,32 @@ let path = L.polyline([], {color:'lime', weight:5}).addTo(map);
 
 let points = [];
 let lastBearing = 0;
+let followMode = true;
+
+// ===== USER REPORT =====
+let reports = JSON.parse(localStorage.getItem("reports") || "[]");
+
+map.on("click", function(e){
+  reports.push({lat:e.latlng.lat, lon:e.latlng.lng});
+  localStorage.setItem("reports", JSON.stringify(reports));
+  alert("🚨 Đã báo chốt!");
+});
+
+// ===== FOLLOW =====
+function smartFollow(latlng){
+  if(!followMode) return;
+
+  let dist = map.distance(map.getCenter(), latlng);
+  if(dist > 40){
+    map.panTo(latlng, {animate:true});
+  }
+}
+
+map.on("dragstart zoomstart", () => followMode = false);
+
+function recenter(){
+  followMode = true;
+}
 
 // ===== DISTANCE =====
 function getDistance(lat1, lon1, lat2, lon2){
@@ -53,7 +99,7 @@ function getDistance(lat1, lon1, lat2, lon2){
 
 // ===== SPEED =====
 function calculateSpeed(points){
-  if (points.length < 3) return 0;
+  if(points.length<3) return 0;
 
   let total=0,count=0;
 
@@ -85,52 +131,27 @@ function getDirectionText(b){
   return "Tây ←";
 }
 
-// ===== ADDRESS FIX CHUẨN VN =====
+// ===== ADDRESS =====
 let lastAddr="", lastTime=0;
 
-async function getAddressFull(lat, lon){
+async function getAddress(lat, lon){
   let now = Date.now();
-  if(now - lastTime < 5000) return lastAddr;
+  if(now-lastTime<5000) return lastAddr;
 
   try{
     let res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-    let data = await res.json();
-    let a = data.address || {};
+    let d = await res.json();
+    let a = d.address || {};
 
-    // tên đường
-    let road = a.road || data.display_name || "Không rõ";
+    let road = a.road || d.display_name || "Không rõ";
 
-    // cấp nhỏ → lớn
-    let ward =
-      a.suburb ||
-      a.quarter ||
-      a.neighbourhood ||
-      a.village ||
-      a.hamlet ||
-      "";
+    let ward = a.suburb || a.village || "";
+    let district = a.city_district || a.county || "";
+    let city = a.city || a.state || "";
 
-    let district =
-      a.city_district ||
-      a.county ||
-      "";
+    let location = [ward, district, city].filter(Boolean).join(", ");
 
-    let city =
-      a.city ||
-      a.town ||
-      a.state ||   // VN thường nằm đây
-      a.region ||
-      "";
-
-    // ghép địa phận
-    let location = [ward, district, city]
-      .filter(Boolean)
-      .join(", ");
-
-    lastAddr = {
-      road,
-      location: location || "Không rõ"
-    };
-
+    lastAddr = {road, location};
     lastTime = now;
 
     return lastAddr;
@@ -142,25 +163,31 @@ async function getAddressFull(lat, lon){
 
 // ===== SPEED LIMIT =====
 function estimateSpeedLimit(name){
-  if (!name) return null;
-  name = name.toLowerCase();
+  if(!name) return null;
+  name=name.toLowerCase();
 
-  if (name.includes("cao tốc")) return 100;
-  if (name.includes("quốc lộ")) return 80;
-  if (name.includes("đường")) return 50;
+  if(name.includes("cao tốc")) return 100;
+  if(name.includes("quốc lộ")) return 80;
+  if(name.includes("đường")) return 50;
 
   return 40;
 }
 
 function evaluateSpeed(speed, limit){
-  if (!limit) return "Không rõ";
+  if(!limit) return "Không rõ";
 
-  let p = speed/limit;
+  let p=speed/limit;
 
-  if (p < 0.4) return "🐢 Chậm";
-  if (p < 0.8) return "🚶 Trung bình";
-  if (p <= 1) return "🚗 Nhanh";
+  if(p<0.4) return "🐢 Chậm";
+  if(p<0.8) return "🚶 Trung bình";
+  if(p<=1) return "🚗 Nhanh";
   return "🚨 Vượt tốc!";
+}
+
+// ===== WARN =====
+function checkReports(lat,lon){
+  return reports.some(r=>getDistance(lat,lon,r.lat,r.lon)<0.2)
+    ? "🚨 Có người báo chốt!" : "";
 }
 
 // ===== MAIN =====
@@ -169,44 +196,45 @@ async function update(pos){
   const {latitude, longitude, accuracy, speed, altitude} = pos.coords;
   const time = pos.timestamp;
 
-  if (accuracy > 50) return;
+  if(accuracy>50) return;
 
-  let latlng = [latitude, longitude];
+  let latlng=[latitude,longitude];
 
   marker.setLatLng(latlng);
   path.addLatLng(latlng);
-  map.panTo(latlng);
+
+  smartFollow(latlng);
 
   points.push({lat:latitude, lon:longitude, time});
-  if (points.length > 10) points.shift();
+  if(points.length>10) points.shift();
 
-  let finalSpeed = (speed && speed > 0)
-    ? speed * 3.6
-    : calculateSpeed(points);
-
-  if(finalSpeed < 2) finalSpeed = 0;
+  let finalSpeed = speed ? speed*3.6 : calculateSpeed(points);
+  if(finalSpeed<2) finalSpeed=0;
 
   if(points.length>=2){
     let p1=points[points.length-2];
     let p2=points[points.length-1];
-    lastBearing = getBearing(p1.lat,p1.lon,p2.lat,p2.lon);
+    lastBearing=getBearing(p1.lat,p1.lon,p2.lat,p2.lon);
   }
 
-  let addr = await getAddressFull(latitude, longitude);
+  let addr = await getAddress(latitude, longitude);
   let limit = estimateSpeedLimit(addr.road);
   let status = evaluateSpeed(finalSpeed, limit);
 
+  let warn = checkReports(latitude,longitude);
+
   document.getElementById("speed").innerText =
-    finalSpeed.toFixed(1) + " km/h";
+    finalSpeed.toFixed(1)+" km/h";
 
   document.getElementById("info").innerHTML =
     `📍 ${addr.road}<br>
      🏙️ ${addr.location}<br>
      🌐 ${latitude.toFixed(6)}, ${longitude.toFixed(6)}<br>
      🧭 ${getDirectionText(lastBearing)} (${lastBearing.toFixed(0)}°)<br>
-     🏔️ ${altitude ? altitude.toFixed(1)+" m":"--"}<br>
-     🚧 ${limit ? limit+" km/h" : "??"}<br>
+     🏔️ ${altitude?altitude.toFixed(1)+" m":"--"}<br>
+     🚧 ${limit?limit+" km/h":"??"}<br>
      ⚡ ${status}<br>
+     ${warn?warn+"<br>":""}
      🎯 Sai số: ${accuracy.toFixed(0)} m`;
 }
 
