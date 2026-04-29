@@ -2,197 +2,229 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>GPS Tracker Ultimate</title>
+<title>GPS Tracker FINAL</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
-  body { margin:0; background:#000; color:#0f0; font-family:Arial; text-align:center; }
-  #map { height:50vh; }
-  #speed { font-size:55px; margin-top:10px; transition:0.3s; }
-  #info { margin-top:10px; color:#ccc; line-height:1.6; }
+body{margin:0;background:#000;color:#0f0;text-align:center;font-family:Arial;}
+#map{height:55vh;}
+#speed{font-size:60px;font-weight:bold;text-shadow:0 0 10px #0f0;}
+#info{color:#ccc;margin-top:10px;line-height:1.6;}
 </style>
 </head>
 
 <body>
 
 <div id="map"></div>
-
 <div id="speed">0.0 km/h</div>
-<div id="info">Đang khởi động...</div>
+<div id="info">Đang chạy...</div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 // ===== MAP =====
-let map = L.map('map').setView([10.8231,106.6297],15);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let map=L.map('map',{zoomSnap:0.5}).setView([10.8231,106.6297],18);
+L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
 
-let marker = L.marker([10.8231,106.6297]).addTo(map);
+// ===== MARKER + LINE =====
+let marker=L.circleMarker([10.8231,106.6297],{
+  radius:10,color:'#0f0',fillColor:'#0f0',fillOpacity:1
+}).addTo(map);
 
-// 🟢 đường đi
-let path = L.polyline([], {color:'lime', weight:5}).addTo(map);
+let path=L.polyline([],{color:'#0f0',weight:5}).addTo(map);
 
-let points = [];
-let lastBearing = 0;
+// ===== DATA =====
+let points=[];
+let smoothLat=null,smoothLon=null;
+let smoothSpeed=0;
+let lastBearing=0;
 
-// ===== DISTANCE =====
-function getDistance(lat1, lon1, lat2, lon2){
-  const R = 6371;
-  const dLat = (lat2-lat1)*Math.PI/180;
-  const dLon = (lon2-lon1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 +
-    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-    Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+let lastFetch={lat:0,lon:0};
+let roadCache="",poiCache="";
+
+// ===== UTILS =====
+function getDistance(a,b,c,d){
+  const R=6371;
+  const dLat=(c-a)*Math.PI/180;
+  const dLon=(d-b)*Math.PI/180;
+  const x=Math.sin(dLat/2)**2+
+  Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
+  Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
 
-// ===== BEARING =====
-function getBearing(lat1, lon1, lat2, lon2){
-  let y = Math.sin((lon2-lon1)*Math.PI/180)*Math.cos(lat2*Math.PI/180);
-  let x = Math.cos(lat1*Math.PI/180)*Math.sin(lat2*Math.PI/180) -
-          Math.sin(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-          Math.cos((lon2-lon1)*Math.PI/180);
-  return (Math.atan2(y,x)*180/Math.PI + 360) % 360;
+function smoothPos(lat,lon){
+  if(smoothLat===null){smoothLat=lat;smoothLon=lon;}
+  smoothLat=smoothLat*0.7+lat*0.3;
+  smoothLon=smoothLon*0.7+lon*0.3;
+  return [smoothLat,smoothLon];
 }
 
-function getDirectionText(b){
-  if (b < 45 || b >= 315) return "Bắc ↑";
-  if (b < 135) return "Đông →";
-  if (b < 225) return "Nam ↓";
-  return "Tây ←";
+function smooth(v){
+  smoothSpeed=smoothSpeed*0.7+v*0.3;
+  return smoothSpeed;
 }
 
-// ===== ROAD =====
-async function getRoadName(lat, lon){
-  try{
-    let res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-    let data = await res.json();
-    return data.address.road || data.display_name;
-  }catch{
-    return "Không rõ";
-  }
+function getBearing(a,b,c,d){
+  let y=Math.sin((d-b)*Math.PI/180)*Math.cos(c*Math.PI/180);
+  let x=Math.cos(a*Math.PI/180)*Math.sin(c*Math.PI/180)-
+  Math.sin(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
+  Math.cos((d-b)*Math.PI/180);
+  return (Math.atan2(y,x)*180/Math.PI+360)%360;
 }
 
-// ===== SPEED LIMIT =====
-function estimateSpeedLimit(name){
-  if (!name) return null;
-  name = name.toLowerCase();
-  if (name.includes("cao tốc")) return 100;
-  if (name.includes("quốc lộ")) return 80;
-  if (name.includes("đường")) return 50;
+function dirText(b){
+  if(b<45||b>=315)return"↑ Bắc";
+  if(b<135)return"→ Đông";
+  if(b<225)return"↓ Nam";
+  return"← Tây";
+}
+
+function speedLimit(n){
+  if(!n)return null;
+  n=n.toLowerCase();
+  if(n.includes("cao tốc"))return 100;
+  if(n.includes("quốc lộ"))return 80;
+  if(n.includes("đường"))return 50;
   return 40;
 }
 
-// ===== SPEED STATUS =====
-function evaluateSpeed(speed, limit){
-  if (!limit) return "Không rõ";
-  let p = speed/limit;
-  if (p < 0.4) return "🐢 Chậm";
-  if (p < 0.8) return "🚶 Trung bình";
-  if (p <= 1) return "🚗 Nhanh";
-  return "🚨 Vượt tốc!";
+function speedStatus(s,l){
+  if(!l)return"Không rõ";
+  let p=s/l;
+  if(p<0.4)return"🐢 Chậm";
+  if(p<0.8)return"🚶 TB";
+  if(p<=1)return"🚗 Nhanh";
+  return"🚨 Vượt!";
 }
 
-function updateColor(status){
-  let el = document.getElementById("speed");
-  if (status.includes("Vượt")) el.style.color = "red";
-  else if (status.includes("Nhanh")) el.style.color = "orange";
-  else if (status.includes("Trung bình")) el.style.color = "yellow";
-  else el.style.color = "#0f0";
+function color(st){
+  let el=document.getElementById("speed");
+  if(st.includes("Vượt"))el.style.color="red";
+  else if(st.includes("Nhanh"))el.style.color="orange";
+  else if(st.includes("TB"))el.style.color="yellow";
+  else el.style.color="#0f0";
 }
 
-// ===== POI AHEAD =====
-async function getPOIAhead(lat, lon){
-  let query = `
-  [out:json];
-  (
-    node(around:120,${lat},${lon})["highway"="traffic_signals"];
-    way(around:120,${lat},${lon})["tunnel"="yes"];
-  );
-  out center;
-  `;
+function shouldFetch(lat,lon){
+  return getDistance(lat,lon,lastFetch.lat,lastFetch.lon)>0.05;
+}
 
+// ===== API =====
+async function getRoad(lat,lon){
   try{
-    let res = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query));
-    let data = await res.json();
+    let r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+    let d=await r.json();
+    return d.address.road||d.display_name;
+  }catch{return"Không rõ";}
+}
 
-    if (!data.elements.length) return "";
+function isAhead(ulat,ulon,plat,plon,b){
+  let bb=getBearing(ulat,ulon,plat,plon);
+  return Math.abs(bb-b)<60;
+}
 
-    let msgs = [];
-
-    data.elements.forEach(e=>{
-      if (e.tags?.highway==="traffic_signals") msgs.push("🚦 Có đèn giao thông");
-      if (e.tags?.tunnel==="yes") msgs.push("🕳️ Sắp vào hầm");
+async function getPOI(lat,lon){
+  let q=`[out:json];(node(around:120,${lat},${lon})["highway"="traffic_signals"];way(around:120,${lat},${lon})["tunnel"="yes"];);out center;`;
+  try{
+    let r=await fetch("https://overpass-api.de/api/interpreter?data="+encodeURIComponent(q));
+    let d=await r.json();
+    let m=[];
+    d.elements.forEach(e=>{
+      let la=e.lat||e.center?.lat;
+      let lo=e.lon||e.center?.lon;
+      if(!la)return;
+      if(!isAhead(lat,lon,la,lo,lastBearing))return;
+      if(e.tags?.highway==="traffic_signals")m.push("🚦 Đèn đỏ");
+      if(e.tags?.tunnel==="yes")m.push("🕳️ Hầm");
     });
-
-    return msgs.join("<br>");
-  }catch{
-    return "";
-  }
+    return m.join("<br>");
+  }catch{return"";}
 }
 
 // ===== MAIN =====
 async function update(pos){
-  const {latitude, longitude, accuracy, speed} = pos.coords;
-  const time = pos.timestamp;
+  let {latitude,longitude,accuracy,speed}=pos.coords;
+  let time=pos.timestamp;
 
-  if (accuracy > 30) return;
+  if(accuracy>120)return;
 
-  let latlng = [latitude, longitude];
+  let latlng=smoothPos(latitude,longitude);
 
-  marker.setLatLng(latlng);
-  map.setView(latlng);
+  let newPoint={lat:latlng[0],lon:latlng[1],time};
 
-  path.addLatLng(latlng);
+  // 🛑 chống trôi
+  if(points.length===0){
+    points.push(newPoint);
+    path.addLatLng(latlng);
+  }else{
+    let last=points[points.length-1];
+    let d=getDistance(last.lat,last.lon,newPoint.lat,newPoint.lon);
 
-  points.push({lat:latitude, lon:longitude, time});
-  if (points.length > 6) points.shift();
-
-  let finalSpeed = 0;
-
-  if (speed !== null && speed > 0){
-    finalSpeed = speed * 3.6;
-  } else if (points.length >= 2){
-    let d=0,t=0;
-    for(let i=1;i<points.length;i++){
-      let p1=points[i-1], p2=points[i];
-      let dist=getDistance(p1.lat,p1.lon,p2.lat,p2.lon);
-      let dt=(p2.time-p1.time)/1000;
-      if(dt>0){ d+=dist; t+=dt; }
+    if(d>0.005){ // >5m mới tính là di chuyển
+      points.push(newPoint);
+      path.addLatLng(latlng);
+      marker.setLatLng(latlng);
     }
-    finalSpeed = (d/t)*3600;
   }
 
-  if (points.length>=2){
+  // ===== SPEED =====
+  let sp=0;
+  if(speed&&speed>0){
+    sp=speed*3.6;
+  }else if(points.length>=2){
     let p1=points[points.length-2];
     let p2=points[points.length-1];
-    lastBearing = getBearing(p1.lat,p1.lon,p2.lat,p2.lon);
+    let d=getDistance(p1.lat,p1.lon,p2.lat,p2.lon);
+    let dt=(p2.time-p1.time)/1000;
+    if(dt>0)sp=(d/dt)*3600;
   }
 
-  let direction = getDirectionText(lastBearing);
-  let road = await getRoadName(latitude, longitude);
-  let limit = estimateSpeedLimit(road);
-  let status = evaluateSpeed(finalSpeed, limit);
+  if(sp<5)sp=0;
+  sp=smooth(sp);
 
-  updateColor(status);
+  if(points.length>=2){
+    let p1=points[points.length-2];
+    let p2=points[points.length-1];
+    lastBearing=getBearing(p1.lat,p1.lon,p2.lat,p2.lon);
+  }
 
-  let poi = await getPOIAhead(latitude, longitude);
+  let zoom=18;
+  if(sp>60)zoom=15;
+  else if(sp>30)zoom=16;
+  else if(sp>10)zoom=17;
+  map.setZoom(zoom);
 
-  document.getElementById("speed").innerText =
-    finalSpeed.toFixed(1) + " km/h";
+  if(shouldFetch(latitude,longitude)){
+    lastFetch={lat:latitude,lon:longitude};
+    roadCache=await getRoad(latitude,longitude);
+    poiCache=await getPOI(latitude,longitude);
+  }
 
-  document.getElementById("info").innerHTML =
-    `📍 ${road}<br>
-     🧭 ${direction}<br>
-     🚧 ${limit ? limit + " km/h" : "??"}<br>
-     ⚡ ${status}<br>
-     ${poi ? "📡 "+poi+"<br>" : ""}
-     🎯 Sai số: ${accuracy.toFixed(0)} m`;
+  let dir=dirText(lastBearing);
+  let limit=speedLimit(roadCache);
+  let st=speedStatus(sp,limit);
+
+  color(st);
+
+  let q="🟢 Tốt";
+  if(accuracy>20)q="🟡 TB";
+  if(accuracy>50)q="🔴 Kém";
+
+  document.getElementById("speed").innerText=sp.toFixed(1)+" km/h";
+
+  document.getElementById("info").innerHTML=
+  `📍 ${roadCache}<br>
+   📌 ${latitude.toFixed(6)}, ${longitude.toFixed(6)}<br>
+   🧭 ${dir}<br>
+   🚧 ${limit?limit+" km/h":"??"}<br>
+   ⚡ ${st}<br>
+   ${poiCache?poiCache+"<br>":""}
+   🎯 ${accuracy.toFixed(0)}m (${q})`;
 }
 
-// START
-navigator.geolocation.watchPosition(update, console.error, {
+navigator.geolocation.watchPosition(update,console.error,{
   enableHighAccuracy:true,
   maximumAge:0,
   timeout:5000
