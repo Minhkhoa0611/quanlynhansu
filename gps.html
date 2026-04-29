@@ -42,7 +42,7 @@ button {
 <div id="speed">0.0 km/h</div>
 
 <div style="margin-top:5px;">
-  <button onclick="recenter()">📍 Về vị trí</button>
+  <button id="followBtn" onclick="recenter()">📍 Đang theo</button>
 </div>
 
 <div id="info">Đang khởi động...</div>
@@ -70,20 +70,32 @@ map.on("click", function(e){
   alert("🚨 Đã báo chốt!");
 });
 
-// ===== FOLLOW =====
+// ===== FOLLOW MƯỢT =====
 function smartFollow(latlng){
-  if(!followMode) return;
+  let center = map.getCenter();
+  let dist = map.distance(center, latlng);
 
-  let dist = map.distance(map.getCenter(), latlng);
-  if(dist > 40){
-    map.panTo(latlng, {animate:true});
+  if(followMode){
+    if(dist > 30){
+      map.panTo(latlng, {animate:true});
+    }
+  } else {
+    if(dist > 120){
+      map.panTo(latlng, {animate:true});
+    }
   }
 }
 
-map.on("dragstart zoomstart", () => followMode = false);
+// user kéo map → tắt follow
+map.on("dragstart", ()=>{
+  followMode = false;
+  document.getElementById("followBtn").innerText = "📍 Bật theo";
+});
 
+// bật lại follow
 function recenter(){
   followMode = true;
+  document.getElementById("followBtn").innerText = "📍 Đang theo";
 }
 
 // ===== DISTANCE =====
@@ -147,7 +159,7 @@ async function getAddress(lat, lon){
 
     let ward = a.suburb || a.village || "";
     let district = a.city_district || a.county || "";
-    let city = a.city || a.state || "";
+    let city = a.city || a.state || a.region || "";
 
     let location = [ward, district, city].filter(Boolean).join(", ");
 
