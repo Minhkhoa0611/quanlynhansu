@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>GPS Speed + Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+  body {
+    margin: 0;
+    background: #000;
+    color: #0f0;
+    font-family: Arial;
+    text-align: center;
+  }
+
+  #map {
+    height: 50vh;
+    width: 100%;
+  }
+
+  .speed-box {
+    padding: 20px;
+  }
+
+  #speed {
+    font-size: 60px;
+  }
+
+  #status {
+    color: #888;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<div class="speed-box">
+  <div id="speed">0.0 km/h</div>
+  <div id="status">Đang chờ GPS...</div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+let map = L.map('map').setView([10.8231, 106.6297], 15);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+}).addTo(map);
+
+let marker = L.marker([10.8231, 106.6297]).addTo(map);
+let path = L.polyline([], {color: 'lime'}).addTo(map);
+
+let points = [];
+const MAX_POINTS = 6;
+
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) *
+            Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+function update(pos) {
+  const { latitude, longitude, accuracy, speed } = pos.coords;
+  const time = pos.timestamp;
+
+  if (accuracy > 30) return;
+
+  let latlng = [latitude, longitude];
+
+  // cập nhật map
+  marker.setLatLng(latlng);
+  map.setView(latlng);
+  path.addLatLng(latlng);
+
+  // lưu điểm để tính speed
+  points.push({ lat: latitude, lon: longitude, time });
+
+  if (points.length > MAX_POINTS) {
+    points.shift();
+  }
+
+  let finalSpeed = 0;
+
+  if (speed !== null && speed > 0) {
+    finalSpeed = speed * 3.6;
+  } else if (points.length >= 2) {
+    let totalDist = 0;
+    let totalTime = 0;
+
+    for (let i = 1; i < points.length; i++) {
+      let p1 = points[i - 1];
+      let p2 = points[i];
+
+      let d = getDistance(p1.lat, p1.lon, p2.lat, p2.lon);
+      let t = (p2.time - p1.time) / 1000;
+
+      if (t > 0) {
+        totalDist += d;
+        totalTime += t;
+      }
+    }
+
+    finalSpeed = (totalDist / totalTime) * 3600;
+  }
+
+  document.getElementById("speed").innerText =
+    finalSpeed.toFixed(1) + " km/h";
+
+  document.getElementById("status").innerText =
+    "Sai số: " + accuracy.toFixed(0) + " m";
+}
+
+function error(err) {
+  document.getElementById("status").innerText =
+    "Lỗi GPS: " + err.message;
+}
+
+navigator.geolocation.watchPosition(update, error, {
+  enableHighAccuracy: true,
+  maximumAge: 0,
+  timeout: 5000
+});
+</script>
+
+</body>
+</html>
