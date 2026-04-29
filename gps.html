@@ -2,27 +2,16 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>GPS PRO MAX</title>
+<title>GPS Tracker Ultimate</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
 body { margin:0; background:#000; color:#0f0; font-family:Arial; text-align:center; }
 #map { height:50vh; }
-
 #speed { font-size:55px; margin-top:10px; font-weight:bold; }
-
-#info { margin-top:10px; color:#ccc; line-height:1.8; font-size:14px; }
-
-button {
-  padding:10px 20px;
-  font-size:16px;
-  border:none;
-  border-radius:10px;
-  background:#0f0;
-  color:#000;
-  font-weight:bold;
-}
+#info { margin-top:10px; color:#ccc; line-height:1.6; }
+button { padding:10px 14px; margin:5px; border-radius:10px; border:none; background:#0f0; color:#000; font-weight:bold; }
 </style>
 </head>
 
@@ -32,8 +21,10 @@ button {
 
 <div id="speed">0.0 km/h</div>
 
-<div style="margin-top:5px;">
+<div>
   <button id="followBtn" onclick="recenter()">📍 Đang theo</button>
+  <button onclick="clearPath()">🧹 Xóa dữ liệu</button>
+  <button onclick="exportGPX()">📤 Xuất GPX</button>
 </div>
 
 <div id="info">Đang khởi động...</div>
@@ -42,12 +33,15 @@ button {
 
 <script>
 
+// ===== LOAD PATH =====
+let savedPath = JSON.parse(localStorage.getItem("path") || "[]");
+
 // ===== MAP =====
-let map = L.map('map').setView([10.8231,106.6297],16);
+let map = L.map('map').setView([10.8231,106.6297],15);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
 let marker = L.marker([10.8231,106.6297]).addTo(map);
-let path = L.polyline([], {color:'lime', weight:5}).addTo(map);
+let path = L.polyline(savedPath, {color:'lime', weight:5}).addTo(map);
 
 let points = [];
 let lastBearing = 0;
@@ -56,21 +50,61 @@ let followMode = true;
 // ===== FOLLOW =====
 function smartFollow(latlng){
   let dist = map.distance(map.getCenter(), latlng);
+
   if(followMode){
-    if(dist > 30) map.panTo(latlng, {animate:true});
+    if(dist > 30) map.panTo(latlng);
   } else {
-    if(dist > 120) map.panTo(latlng, {animate:true});
+    if(dist > 120) map.panTo(latlng);
   }
 }
 
 map.on("dragstart", ()=>{
   followMode = false;
-  followBtn.innerText = "📍 Bật theo";
+  document.getElementById("followBtn").innerText = "📍 Bật theo";
 });
 
 function recenter(){
   followMode = true;
-  followBtn.innerText = "📍 Đang theo";
+  document.getElementById("followBtn").innerText = "📍 Đang theo";
+}
+
+// ===== CLEAR =====
+function clearPath(){
+  if(confirm("Xóa toàn bộ hành trình?")){
+    savedPath = [];
+    localStorage.removeItem("path");
+    path.setLatLngs([]);
+  }
+}
+
+// ===== EXPORT GPX =====
+function exportGPX(){
+
+  if(!savedPath.length){
+    alert("Không có dữ liệu!");
+    return;
+  }
+
+  let gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="GPS Tracker">
+<trk><name>Hanh trinh</name><trkseg>
+`;
+
+  savedPath.forEach(p=>{
+    gpx += `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>\n`;
+  });
+
+  gpx += `</trkseg></trk></gpx>`;
+
+  let blob = new Blob([gpx], {type:"application/gpx+xml"});
+  let url = URL.createObjectURL(blob);
+
+  let a = document.createElement("a");
+  a.href = url;
+  a.download = "hanh_trinh.gpx";
+  a.click();
+
+  URL.revokeObjectURL(url);
 }
 
 // ===== DISTANCE =====
@@ -82,21 +116,6 @@ function getDistance(lat1, lon1, lat2, lon2){
     Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
     Math.sin(dLon/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-// ===== SPEED =====
-function calculateSpeed(points){
-  if(points.length<3) return 0;
-  let total=0,count=0;
-  for(let i=1;i<points.length;i++){
-    let d=getDistance(points[i-1].lat,points[i-1].lon,points[i].lat,points[i].lon);
-    let t=(points[i].time-points[i-1].time)/1000;
-    if(t>0){
-      let s=(d/t)*3600;
-      if(s<120){ total+=s; count++; }
-    }
-  }
-  return count?total/count:0;
 }
 
 // ===== BEARING =====
@@ -136,6 +155,7 @@ async function getAddress(lat, lon){
 
     lastAddr = {road, location};
     lastTime = now;
+
     return lastAddr;
 
   }catch{
@@ -145,67 +165,42 @@ async function getAddress(lat, lon){
 
 // ===== SPEED LIMIT =====
 function estimateSpeedLimit(name){
-  if(!name) return null;
-  name=name.toLowerCase();
-
-  if(name.includes("cao tốc")) return 100;
-  if(name.includes("quốc lộ")) return 80;
-  if(name.includes("đường")) return 50;
-
+  if (!name) return null;
+  name = name.toLowerCase();
+  if (name.includes("cao tốc")) return 100;
+  if (name.includes("quốc lộ")) return 80;
+  if (name.includes("đường")) return 50;
   return 40;
-}
-
-function evaluateSpeed(speed, limit){
-  if(!limit) return "Không rõ";
-
-  let p=speed/limit;
-  if(p<0.4) return "🐢 Chậm";
-  if(p<0.8) return "🚶 Trung bình";
-  if(p<=1) return "🚗 Nhanh";
-  return "🚨 Vượt tốc!";
 }
 
 // ===== TOLL =====
 let lastToll="", lastTollTime=0;
 
-async function getTollAhead(lat, lon, bearing){
+async function getToll(lat, lon, bearing){
   let now = Date.now();
   if(now - lastTollTime < 10000) return lastToll;
 
-  let query = `
-  [out:json];
-  (
-    node(around:5000,${lat},${lon})["barrier"="toll_booth"];
-    node(around:5000,${lat},${lon})["amenity"="toll_booth"];
-  );
-  out;
-  `;
-
   try{
-    let res = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query));
-    let data = await res.json();
+    let res = await fetch(`https://overpass-api.de/api/interpreter?data=[out:json];node(around:5000,${lat},${lon})["barrier"="toll_booth"];out;`);
+    let d = await res.json();
 
     let best=null, bestDist=999;
 
-    data.elements.forEach(e=>{
-      let d=getDistance(lat,lon,e.lat,e.lon);
+    d.elements.forEach(e=>{
+      let dist=getDistance(lat,lon,e.lat,e.lon);
       let b=getBearing(lat,lon,e.lat,e.lon);
-
       let diff=Math.abs(bearing-b);
       if(diff>180) diff=360-diff;
 
-      if(diff<60 && d<bestDist){
+      if(diff<60 && dist<bestDist){
         best=e;
-        bestDist=d;
+        bestDist=dist;
       }
     });
 
-    if(!best){
-      lastToll="";
-      return "";
-    }
+    if(!best) return "";
 
-    lastToll = `${bestDist.toFixed(1)} km`;
+    lastToll = bestDist.toFixed(1)+" km";
     lastTollTime = now;
     return lastToll;
 
@@ -214,53 +209,36 @@ async function getTollAhead(lat, lon, bearing){
   }
 }
 
-// ===== NEXT STOP =====
+// ===== STOP =====
 let lastStop="", lastStopTime=0;
 
-async function getNextStop(lat, lon, bearing){
+async function getStop(lat, lon, bearing){
   let now = Date.now();
   if(now - lastStopTime < 15000) return lastStop;
 
-  let query = `
-  [out:json][timeout:25];
-  (
-    node(around:20000,${lat},${lon})["amenity"~"fuel|restaurant|cafe|fast_food|parking|rest_area"];
-    way(around:20000,${lat},${lon})["amenity"~"fuel|restaurant|cafe|fast_food|parking|rest_area"];
-  );
-  out center;
-  `;
-
   try{
-    let res = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query));
-    let data = await res.json();
+    let res = await fetch(`https://overpass-api.de/api/interpreter?data=[out:json];node(around:20000,${lat},${lon})["amenity"~"fuel|restaurant|cafe|fast_food|parking"];out;`);
+    let d = await res.json();
 
     let best=null, bestDist=999;
 
-    data.elements.forEach(e=>{
-      let lat2 = e.lat || e.center?.lat;
-      let lon2 = e.lon || e.center?.lon;
-      if(!lat2) return;
-
-      let d=getDistance(lat,lon,lat2,lon2);
-      let b=getBearing(lat,lon,lat2,lon2);
-
+    d.elements.forEach(e=>{
+      let dist=getDistance(lat,lon,e.lat,e.lon);
+      let b=getBearing(lat,lon,e.lat,e.lon);
       let diff=Math.abs(bearing-b);
       if(diff>180) diff=360-diff;
 
-      if(diff<70 && d<bestDist){
+      if(diff<70 && dist<bestDist){
         best=e;
-        bestDist=d;
+        bestDist=dist;
       }
     });
 
-    if(!best){
-      lastStop="";
-      return "";
-    }
+    if(!best) return "";
 
     let name = best.tags?.name || "🛑 Trạm dừng chân";
 
-    lastStop = `${name} • ${(bestDist).toFixed(1)} km`;
+    lastStop = `${name} • ${bestDist.toFixed(1)} km`;
     lastStopTime = now;
 
     return lastStop;
@@ -274,56 +252,48 @@ async function getNextStop(lat, lon, bearing){
 async function update(pos){
 
   const {latitude, longitude, accuracy, speed, altitude} = pos.coords;
-  const time = pos.timestamp;
 
-  if(accuracy>50) return;
+  if(accuracy > 50) return;
 
-  let latlng=[latitude,longitude];
+  let latlng = [latitude, longitude];
 
   marker.setLatLng(latlng);
   path.addLatLng(latlng);
+
+  savedPath.push(latlng);
+  if(savedPath.length > 5000) savedPath.shift();
+  localStorage.setItem("path", JSON.stringify(savedPath));
+
   smartFollow(latlng);
 
-  points.push({lat:latitude, lon:longitude, time});
-  if(points.length>10) points.shift();
-
-  let finalSpeed = speed ? speed*3.6 : calculateSpeed(points);
-  if(finalSpeed<2) finalSpeed=0;
-
-  if(points.length>=2){
-    let p1=points[points.length-2];
-    let p2=points[points.length-1];
-    lastBearing=getBearing(p1.lat,p1.lon,p2.lat,p2.lon);
+  points.push({lat:latitude, lon:longitude});
+  if(points.length > 2){
+    lastBearing = getBearing(points[points.length-2].lat, points[points.length-2].lon, latitude, longitude);
   }
 
   let addr = await getAddress(latitude, longitude);
   let limit = estimateSpeedLimit(addr.road);
-  let status = evaluateSpeed(finalSpeed, limit);
 
-  let toll = await getTollAhead(latitude, longitude, lastBearing);
-  let nextStop = await getNextStop(latitude, longitude, lastBearing);
+  let toll = await getToll(latitude, longitude, lastBearing);
+  let stop = await getStop(latitude, longitude, lastBearing);
 
   document.getElementById("speed").innerText =
-    finalSpeed.toFixed(1)+" km/h";
+    (speed ? speed*3.6 : 0).toFixed(1) + " km/h";
 
   document.getElementById("info").innerHTML =
     `📍 ${addr.road}<br>
      🏙️ ${addr.location}<br>
-     🚧 Đoạn đường cho phép chạy tốc độ: ${limit ? limit + " km/h" : "Đang xác định"}<br>
+     🚧 Đoạn đường cho phép chạy tốc độ: ${limit ? limit+" km/h" : "Đang xác định"}<br>
      🚏 Trạm thu phí: ${toll || "Đang tìm..."}<br>
-     🛑 Trạm dừng chân: ${nextStop || "Đang tìm..."}<br>
+     🛑 Trạm dừng chân: ${stop || "Đang tìm..."}<br>
      🌐 ${latitude.toFixed(6)}, ${longitude.toFixed(6)}<br>
      🧭 ${getDirectionText(lastBearing)} (${lastBearing.toFixed(0)}°)<br>
-     🏔️ ${altitude?altitude.toFixed(1)+" m":"--"}<br>
-     ⚡ ${status}<br>
+     🏔️ ${altitude ? altitude.toFixed(1)+" m" : "--"}<br>
      🎯 Sai số: ${accuracy.toFixed(0)} m`;
 }
 
-// START
 navigator.geolocation.watchPosition(update, console.error, {
-  enableHighAccuracy:true,
-  maximumAge:0,
-  timeout:5000
+  enableHighAccuracy:true
 });
 
 </script>
