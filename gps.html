@@ -2,16 +2,16 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>GPS Tracker Ultimate</title>
+<title>GPS PRO MAX</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
 
 <style>
 body { margin:0; background:#000; color:#0f0; font-family:Arial; text-align:center; }
-#map { height:50vh; }
+#map { height:50vh; width:100vw; }
 #speed { font-size:55px; margin-top:10px; font-weight:bold; }
-#info { margin-top:10px; color:#ccc; line-height:1.6; }
-button { padding:10px 14px; margin:5px; border-radius:10px; border:none; background:#0f0; color:#000; font-weight:bold; }
+#info { margin-top:10px; color:#ccc; line-height:1.6; font-size:14px; }
+button { padding:10px; margin:5px; border-radius:8px; border:none; background:#0f0; color:#000; }
 </style>
 </head>
 
@@ -23,277 +23,278 @@ button { padding:10px 14px; margin:5px; border-radius:10px; border:none; backgro
 
 <div>
   <button id="followBtn" onclick="recenter()">📍 Đang theo</button>
-  <button onclick="clearPath()">🧹 Xóa dữ liệu</button>
+  <button onclick="clearPath()">🧹 Xóa</button>
   <button onclick="exportGPX()">📤 Xuất GPX</button>
+  <button onclick="document.getElementById('gpxInput').click()">📥 Nạp GPX</button>
+  <input type="file" id="gpxInput" accept=".gpx" style="display:none" onchange="importGPX(event)">
+  <button onclick="setMapType('road')">🛣️ Đường</button>
+  <button onclick="setMapType('sat')">🛰️ Vệ tinh</button>
 </div>
 
-<div id="info">Đang khởi động...</div>
+<div id="info">Đang khởi động GPS...</div>
 
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 
-// ===== LOAD PATH =====
+
+// ===== LOAD =====
 let savedPath = JSON.parse(localStorage.getItem("path") || "[]");
 
-// ===== MAP =====
-let map = L.map('map').setView([10.8231,106.6297],15);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let map = L.map('map').setView([10.8231, 106.6297], 15);
 
-let marker = L.marker([10.8231,106.6297]).addTo(map);
-let path = L.polyline(savedPath, {color:'lime', weight:5}).addTo(map);
-
-let points = [];
-let lastBearing = 0;
-let followMode = true;
-
-// ===== FOLLOW =====
-function smartFollow(latlng){
-  let dist = map.distance(map.getCenter(), latlng);
-
-  if(followMode){
-    if(dist > 30) map.panTo(latlng);
-  } else {
-    if(dist > 120) map.panTo(latlng);
-  }
-}
-
-map.on("dragstart", ()=>{
-  followMode = false;
-  document.getElementById("followBtn").innerText = "📍 Bật theo";
+// Tile layers
+let roadLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap'
+});
+let satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 19,
+  attribution: 'Tiles © Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
 });
 
-function recenter(){
+roadLayer.addTo(map);
+
+function setMapType(type) {
+  if (type === 'road') {
+    map.removeLayer(satLayer);
+    roadLayer.addTo(map);
+  } else if (type === 'sat') {
+    map.removeLayer(roadLayer);
+    satLayer.addTo(map);
+  }
+}
+
+let marker = L.marker([10.8231, 106.6297]).addTo(map);
+let polyline = L.polyline(savedPath, { color: 'lime', weight: 5 }).addTo(map);
+let followMode = true, lastBearing = 0, points = [];
+
+map.on('dragstart', () => {
+  followMode = false;
+  followBtn.innerText = "📍 Bật theo";
+});
+
+function smartFollow(latlng) {
+  let d = map.distance(map.getCenter(), latlng);
+  if (followMode && d > 30) map.panTo(latlng);
+}
+
+function recenter() {
   followMode = true;
-  document.getElementById("followBtn").innerText = "📍 Đang theo";
+  followBtn.innerText = "📍 Đang theo";
 }
 
-// ===== CLEAR =====
-function clearPath(){
-  if(confirm("Xóa toàn bộ hành trình?")){
-    savedPath = [];
-    localStorage.removeItem("path");
-    path.setLatLngs([]);
-  }
+function clearPath() {
+  savedPath = [];
+  localStorage.removeItem("path");
+  polyline.setLatLngs([]);
 }
 
-// ===== EXPORT GPX =====
-function exportGPX(){
-
-  if(!savedPath.length){
-    alert("Không có dữ liệu!");
-    return;
-  }
-
-  let gpx = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="GPS Tracker">
-<trk><name>Hanh trinh</name><trkseg>
-`;
-
-  savedPath.forEach(p=>{
-    gpx += `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>\n`;
+function exportGPX() {
+  if (!savedPath.length) return alert("Không có dữ liệu");
+  let gpx = `<?xml version="1.0"?><gpx><trk><trkseg>`;
+  savedPath.forEach(p => {
+    gpx += `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`;
   });
-
   gpx += `</trkseg></trk></gpx>`;
-
-  let blob = new Blob([gpx], {type:"application/gpx+xml"});
-  let url = URL.createObjectURL(blob);
-
+  let blob = new Blob([gpx]);
   let a = document.createElement("a");
-  a.href = url;
-  a.download = "hanh_trinh.gpx";
+  a.href = URL.createObjectURL(blob);
+  a.download = "track.gpx";
   a.click();
-
-  URL.revokeObjectURL(url);
 }
 
-// ===== DISTANCE =====
-function getDistance(lat1, lon1, lat2, lon2){
-  const R = 6371;
-  const dLat = (lat2-lat1)*Math.PI/180;
-  const dLon = (lon2-lon1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 +
-    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+// ===== GPX IMPORT =====
+function importGPX(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    // Parse GPX
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, "application/xml");
+    const trkpts = xml.getElementsByTagName("trkpt");
+    if (!trkpts.length) {
+      alert("Không tìm thấy dữ liệu GPX");
+      return;
+    }
+    let newPath = [];
+    for (let i = 0; i < trkpts.length; i++) {
+      const lat = parseFloat(trkpts[i].getAttribute("lat"));
+      const lon = parseFloat(trkpts[i].getAttribute("lon"));
+      newPath.push([lat, lon]);
+    }
+    if (newPath.length) {
+      savedPath = newPath;
+      localStorage.setItem("path", JSON.stringify(savedPath));
+      polyline.setLatLngs(savedPath);
+      if (savedPath.length) {
+        map.fitBounds(polyline.getBounds());
+        marker.setLatLng(savedPath[savedPath.length - 1]);
+      }
+      document.getElementById("info").innerHTML = `Đã nạp ${savedPath.length} điểm từ GPX.`;
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ===== DIST =====
+function getDistance(a,b,c,d){
+  const R=6371;
+  const dLat=(c-a)*Math.PI/180;
+  const dLon=(d-b)*Math.PI/180;
+  const x=Math.sin(dLat/2)**2+
+    Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
     Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
 
 // ===== BEARING =====
-function getBearing(lat1, lon1, lat2, lon2){
-  let y = Math.sin((lon2-lon1)*Math.PI/180)*Math.cos(lat2*Math.PI/180);
-  let x = Math.cos(lat1*Math.PI/180)*Math.sin(lat2*Math.PI/180) -
-          Math.sin(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-          Math.cos((lon2-lon1)*Math.PI/180);
-  return (Math.atan2(y,x)*180/Math.PI + 360) % 360;
+function getBearing(a,b,c,d){
+  let y=Math.sin((d-b)*Math.PI/180)*Math.cos(c*Math.PI/180);
+  let x=Math.cos(a*Math.PI/180)*Math.sin(c*Math.PI/180)-
+        Math.sin(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
+        Math.cos((d-b)*Math.PI/180);
+  return (Math.atan2(y,x)*180/Math.PI+360)%360;
 }
 
-function getDirectionText(b){
-  if (b < 45 || b >= 315) return "Bắc ↑";
-  if (b < 135) return "Đông →";
-  if (b < 225) return "Nam ↓";
-  return "Tây ←";
-}
+// ===== ADDRESS (CACHE) =====
+let addrCache={}, addrTime={};
 
-// ===== ADDRESS =====
-let lastAddr="", lastTime=0;
-
-async function getAddress(lat, lon){
+async function getAddress(lat,lon){
+  let key = lat.toFixed(4)+","+lon.toFixed(4);
   let now = Date.now();
-  if(now-lastTime<5000) return lastAddr;
+
+  if(addrCache[key] && now - addrTime[key] < 10000){
+    return addrCache[key];
+  }
 
   try{
-    let res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-    let d = await res.json();
-    let a = d.address || {};
+    let r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+    let d=await r.json();
+    let a=d.address||{};
 
-    let road = a.road || d.display_name || "Không rõ";
-    let ward = a.suburb || a.village || "";
-    let district = a.city_district || a.county || "";
-    let city = a.city || a.state || a.region || "";
+    let result={
+      road:a.road||"Không rõ",
+      location:[a.suburb,a.city_district,a.city].filter(Boolean).join(", ")
+    };
 
-    let location = [ward, district, city].filter(Boolean).join(", ");
+    addrCache[key]=result;
+    addrTime[key]=now;
 
-    lastAddr = {road, location};
-    lastTime = now;
-
-    return lastAddr;
+    return result;
 
   }catch{
-    return lastAddr || {road:"Không rõ", location:""};
+    return {road:"Không rõ", location:""};
   }
 }
 
 // ===== SPEED LIMIT =====
-function estimateSpeedLimit(name){
-  if (!name) return null;
-  name = name.toLowerCase();
-  if (name.includes("cao tốc")) return 100;
-  if (name.includes("quốc lộ")) return 80;
-  if (name.includes("đường")) return 50;
+function estimateSpeedLimit(n){
+  if(!n) return null;
+  n=n.toLowerCase();
+  if(n.includes("cao tốc")) return 100;
+  if(n.includes("quốc lộ")) return 80;
+  if(n.includes("đường")) return 50;
   return 40;
 }
 
-// ===== TOLL =====
-let lastToll="", lastTollTime=0;
-
-async function getToll(lat, lon, bearing){
-  let now = Date.now();
-  if(now - lastTollTime < 10000) return lastToll;
-
+// ===== TOLL (CÓ ĐỊA CHỈ) =====
+async function getToll(lat,lon){
   try{
-    let res = await fetch(`https://overpass-api.de/api/interpreter?data=[out:json];node(around:5000,${lat},${lon})["barrier"="toll_booth"];out;`);
-    let d = await res.json();
+    let r=await fetch(`https://overpass-api.de/api/interpreter?data=[out:json];node(around:5000,${lat},${lon})["barrier"="toll_booth"];out;`);
+    let d=await r.json();
 
-    let best=null, bestDist=999;
+    if(!d.elements.length) return "";
 
-    d.elements.forEach(e=>{
-      let dist=getDistance(lat,lon,e.lat,e.lon);
-      let b=getBearing(lat,lon,e.lat,e.lon);
-      let diff=Math.abs(bearing-b);
-      if(diff>180) diff=360-diff;
+    let e=d.elements[0];
+    let dist=getDistance(lat,lon,e.lat,e.lon);
 
-      if(diff<60 && dist<bestDist){
-        best=e;
-        bestDist=dist;
-      }
-    });
+    let addr=await getAddress(e.lat,e.lon);
 
-    if(!best) return "";
+    return `${dist.toFixed(1)} km<br>
+            📍 ${addr.road}<br>
+            🏙️ ${addr.location}`;
 
-    lastToll = bestDist.toFixed(1)+" km";
-    lastTollTime = now;
-    return lastToll;
-
-  }catch{
-    return "";
-  }
+  }catch{return "";}
 }
 
-// ===== STOP =====
-let lastStop="", lastStopTime=0;
-
-async function getStop(lat, lon, bearing){
-  let now = Date.now();
-  if(now - lastStopTime < 15000) return lastStop;
-
+// ===== STOP (CÓ ĐỊA CHỈ) =====
+async function getStop(lat,lon){
   try{
-    let res = await fetch(`https://overpass-api.de/api/interpreter?data=[out:json];node(around:20000,${lat},${lon})["amenity"~"fuel|restaurant|cafe|fast_food|parking"];out;`);
-    let d = await res.json();
+    let r=await fetch(`https://overpass-api.de/api/interpreter?data=[out:json];node(around:20000,${lat},${lon})["amenity"~"fuel|restaurant|cafe"];out;`);
+    let d=await r.json();
 
-    let best=null, bestDist=999;
+    if(!d.elements.length) return "";
 
-    d.elements.forEach(e=>{
-      let dist=getDistance(lat,lon,e.lat,e.lon);
-      let b=getBearing(lat,lon,e.lat,e.lon);
-      let diff=Math.abs(bearing-b);
-      if(diff>180) diff=360-diff;
+    let e=d.elements[0];
+    let dist=getDistance(lat,lon,e.lat,e.lon);
 
-      if(diff<70 && dist<bestDist){
-        best=e;
-        bestDist=dist;
-      }
-    });
+    let name=e.tags?.name||"🛑 Trạm dừng chân";
+    let addr=await getAddress(e.lat,e.lon);
 
-    if(!best) return "";
+    return `${name} • ${dist.toFixed(1)} km<br>
+            📍 ${addr.road}<br>
+            🏙️ ${addr.location}`;
 
-    let name = best.tags?.name || "🛑 Trạm dừng chân";
-
-    lastStop = `${name} • ${bestDist.toFixed(1)} km`;
-    lastStopTime = now;
-
-    return lastStop;
-
-  }catch{
-    return "";
-  }
+  }catch{return "";}
 }
+
 
 // ===== MAIN =====
-async function update(pos){
-
-  const {latitude, longitude, accuracy, speed, altitude} = pos.coords;
-
-  if(accuracy > 50) return;
-
+async function update(pos) {
+  const { latitude, longitude, accuracy, speed, altitude } = pos.coords;
   let latlng = [latitude, longitude];
 
   marker.setLatLng(latlng);
-  path.addLatLng(latlng);
+  polyline.addLatLng(latlng);
 
   savedPath.push(latlng);
-  if(savedPath.length > 5000) savedPath.shift();
   localStorage.setItem("path", JSON.stringify(savedPath));
 
   smartFollow(latlng);
 
-  points.push({lat:latitude, lon:longitude});
-  if(points.length > 2){
-    lastBearing = getBearing(points[points.length-2].lat, points[points.length-2].lon, latitude, longitude);
+  points.push({ lat: latitude, lon: longitude });
+  if (points.length > 2) {
+    lastBearing = getBearing(points[points.length - 2].lat, points[points.length - 2].lon, latitude, longitude);
   }
 
   let addr = await getAddress(latitude, longitude);
   let limit = estimateSpeedLimit(addr.road);
+  let toll = await getToll(latitude, longitude);
+  let stop = await getStop(latitude, longitude);
 
-  let toll = await getToll(latitude, longitude, lastBearing);
-  let stop = await getStop(latitude, longitude, lastBearing);
-
-  document.getElementById("speed").innerText =
-    (speed ? speed*3.6 : 0).toFixed(1) + " km/h";
+  document.getElementById("speed").innerText = (speed ? speed * 3.6 : 0).toFixed(1) + " km/h";
 
   document.getElementById("info").innerHTML =
-    `📍 ${addr.road}<br>
-     🏙️ ${addr.location}<br>
-     🚧 Đoạn đường cho phép chạy tốc độ: ${limit ? limit+" km/h" : "Đang xác định"}<br>
-     🚏 Trạm thu phí: ${toll || "Đang tìm..."}<br>
-     🛑 Trạm dừng chân: ${stop || "Đang tìm..."}<br>
-     🌐 ${latitude.toFixed(6)}, ${longitude.toFixed(6)}<br>
-     🧭 ${getDirectionText(lastBearing)} (${lastBearing.toFixed(0)}°)<br>
-     🏔️ ${altitude ? altitude.toFixed(1)+" m" : "--"}<br>
-     🎯 Sai số: ${accuracy.toFixed(0)} m`;
+    `📍 <b>Tên đường:</b> ${addr.road}<br>
+     🏙️ <b>Địa phận:</b> ${addr.location}<br>
+     🚧 <b>Tốc độ cho phép:</b> ${limit || "??"} km/h<br>
+     🚏 <b>Trạm thu phí phía trước:</b><br>${toll || "Đang tìm..."}<br>
+     🛑 <b>Trạm dừng chân phía trước:</b><br>${stop || "Đang tìm..."}<br>
+     🌐 <b>Tọa độ:</b> ${latitude.toFixed(6)}, ${longitude.toFixed(6)}<br>
+     🧭 <b>Hướng:</b> ${lastBearing.toFixed(0)}°<br>
+     🏔️ <b>Độ cao:</b> ${altitude ? altitude.toFixed(1) + " m" : "Không có"}<br>
+     🎯 <b>Sai số:</b> ${accuracy.toFixed(0)} m`;
 }
 
-navigator.geolocation.watchPosition(update, console.error, {
-  enableHighAccuracy:true
+
+// ===== START =====
+window.addEventListener('load', () => {
+  navigator.geolocation.watchPosition(
+    update,
+    err => {
+      let msg = "Lỗi GPS";
+      if (err.code === 1) msg = "❌ Chưa cấp quyền vị trí";
+      if (err.code === 2) msg = "❌ Không lấy được vị trí";
+      if (err.code === 3) msg = "❌ GPS quá chậm";
+      document.getElementById("info").innerHTML = msg;
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
 });
 
 </script>
