@@ -1,43 +1,197 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>GPS PRO MAX</title>
 
 
 
 <style>
-body { margin:0; background:#000; color:#0f0; font-family:Arial; text-align:center; }
-#map { height:50vh; width:100vw; }
-#speed { font-size:55px; margin-top:10px; font-weight:bold; }
-#info { margin-top:10px; color:#ccc; line-height:1.6; font-size:14px; }
-button { padding:10px; margin:5px; border-radius:8px; border:none; background:#0f0; color:#000; }
+body {
+  margin: 0;
+  background: #f5f5f5;
+  color: #222;
+  font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+  text-align: center;
+}
+#container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-frame {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 32px #0002, 0 1.5px 8px #2222;
+  max-width: 430px;
+  width: 100vw;
+  min-width: 280px;
+  margin: 0 auto;
+  height: 98vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1.5px solid #e0e0e0;
+}
+#map {
+  height: 65vh;
+  min-height: 140px;
+  width: 100%;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  transition: height 0.1s;
+  box-shadow: 0 2px 8px #0001;
+}
+#resizer {
+  height: 8px;
+  background: #e0e0e0;
+  cursor: row-resize;
+  width: 100%;
+  z-index: 10;
+}
+#speed {
+  font-size: 38px;
+  margin-top: 12px;
+  font-weight: 700;
+  color: #1976d2;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 0 #fff8;
+}
+#info {
+  margin-top: 10px;
+  color: #444;
+  line-height: 1.7;
+  font-size: 15.5px;
+  word-break: break-word;
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px #0001;
+  padding: 10px 8px 10px 8px;
+}
+button {
+  padding: 10px 16px;
+  margin: 5px 2px;
+  border-radius: 16px;
+  border: none;
+  background: #fff;
+  color: #1976d2;
+  font-size: 18px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px #1976d222, 0 1px 2px #0001;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  outline: none;
+  cursor: pointer;
+}
+button:active, button:focus {
+  background: #e3f2fd;
+  color: #0d47a1;
+  box-shadow: 0 1px 2px #1976d211;
+}
+button#toggleInfoBtn {
+  background: #e3f2fd;
+  color: #1976d2;
+  font-size: 15px;
+  margin-top: 2px;
+  margin-bottom: 8px;
+  box-shadow: none;
+}
+button#toggleInfoBtn:active {
+  background: #bbdefb;
+}
+input[type="file"] {
+  display: none;
+}
+@media (max-width: 480px) {
+  .mobile-frame {
+    max-width: 100vw;
+    border-radius: 0;
+    height: 100vh;
+  }
+  #map {
+    border-radius: 0;
+  }
+}
 </style>
 </head>
 
 <body>
 
-<div id="map"></div>
 
-<div id="speed">0.0 km/h</div>
+<div id="container">
+  <div class="mobile-frame">
+    <div id="map"></div>
+    <div id="resizer"></div>
+    <div id="info-container" style="padding: 0 10px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start;">
+      <div id="speed">0.0 km/h</div>
+      <div style="margin-bottom: 8px;">
+        <button id="followBtn" onclick="recenter()">📍 Đang theo</button>
+        <button onclick="clearPath()">🧹 Xóa</button>
+        <button onclick="exportGPX()">📤 Xuất GPX</button>
+        <button onclick="document.getElementById('gpxInput').click()">📥 Nạp GPX</button>
+        <input type="file" id="gpxInput" accept=".gpx" style="display:none" onchange="importGPX(event)">
+        <button onclick="setMapType('road')">🛣️ Đường</button>
+        <button onclick="setMapType('sat')">🛰️ Vệ tinh</button>
+      </div>
+      <button id="toggleInfoBtn" style="margin-bottom:8px;">Hiện thông số ▼</button>
+      <div id="info" style="overflow-y:auto; max-height:30vh; display:none;">Đang khởi động GPS...</div>
+    </div>
+  <script>
+  // Ẩn/hiện chỉ phần thông số chi tiết (info), luôn hiện speed
+  const toggleInfoBtn = document.getElementById('toggleInfoBtn');
+  const infoDiv = document.getElementById('info');
+  let infoVisible = false;
 
-<div>
-  <button id="followBtn" onclick="recenter()">📍 Đang theo</button>
-  <button onclick="clearPath()">🧹 Xóa</button>
-  <button onclick="exportGPX()">📤 Xuất GPX</button>
-  <button onclick="document.getElementById('gpxInput').click()">📥 Nạp GPX</button>
-  <input type="file" id="gpxInput" accept=".gpx" style="display:none" onchange="importGPX(event)">
-  <button onclick="setMapType('road')">🛣️ Đường</button>
-  <button onclick="setMapType('sat')">🛰️ Vệ tinh</button>
+  toggleInfoBtn.onclick = function() {
+    infoVisible = !infoVisible;
+    if (infoVisible) {
+      infoDiv.style.display = '';
+      toggleInfoBtn.innerText = 'Ẩn thông số ▲';
+    } else {
+      infoDiv.style.display = 'none';
+      toggleInfoBtn.innerText = 'Hiện thông số ▼';
+    }
+  };
+  </script>
+  </div>
 </div>
-
-<div id="info">Đang khởi động GPS...</div>
 
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<!-- Google Fonts Roboto -->
+<link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
+
 <script>
+// ===== RESIZER =====
+const mapDiv = document.getElementById('map');
+const resizer = document.getElementById('resizer');
+let isResizing = false, startY = 0, startHeight = 0;
+
+resizer.addEventListener('mousedown', function(e) {
+  isResizing = true;
+  startY = e.clientY;
+  startHeight = mapDiv.offsetHeight;
+  document.body.style.userSelect = 'none';
+});
+
+window.addEventListener('mousemove', function(e) {
+  if (!isResizing) return;
+  let dy = e.clientY - startY;
+  let newHeight = Math.max(100, startHeight + dy);
+  mapDiv.style.height = newHeight + 'px';
+  if (window.map) map.invalidateSize();
+});
+
+window.addEventListener('mouseup', function() {
+  isResizing = false;
+  document.body.style.userSelect = '';
+});
 
 
 // ===== LOAD =====
@@ -300,4 +454,4 @@ window.addEventListener('load', () => {
 </script>
 
 </body>
-</html>
+</html>>
