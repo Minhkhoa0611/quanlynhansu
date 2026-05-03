@@ -4,7 +4,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>GPS PRO MAX</title>
+<title>Đồng Hồ GPS</title>
 
 
 
@@ -131,11 +131,17 @@ input[type="file"] {
       <div style="margin-bottom: 8px;">
         <button id="followBtn" onclick="recenter()">📍 Đang theo</button>
         <button onclick="clearPath()">🧹 Xóa</button>
-        <button onclick="exportGPX()">📤 Xuất GPX</button>
-        <button onclick="document.getElementById('gpxInput').click()">📥 Nạp GPX</button>
-        <input type="file" id="gpxInput" accept=".gpx" style="display:none" onchange="importGPX(event)">
         <button onclick="setMapType('road')">🛣️ Đường</button>
         <button onclick="setMapType('sat')">🛰️ Vệ tinh</button>
+        <button id="settingsBtn" title="Nâng cao" style="font-size:20px;padding:10px 14px;vertical-align:middle;">
+          <span style="pointer-events:none;">⚙️</span>
+        </button>
+        <!-- Menu nâng cao dạng dropdown liền mạch -->
+        <div id="advancedMenu" style="display:none;width:100%;background:#f8f9fa;border-radius:0 0 14px 14px;box-shadow:0 2px 8px #0001 inset;padding:8px 0 8px 0;margin-top:2px;border-top:1px solid #e0e0e0;">
+          <button onclick="exportGPX()" style="width:90%;margin:6px 5%;font-size:17px;">📤 Xuất GPX</button>
+          <button onclick="document.getElementById('gpxInput').click()" style="width:90%;margin:6px 5%;font-size:17px;">📥 Nạp GPX</button>
+          <input type="file" id="gpxInput" accept=".gpx" style="display:none" onchange="importGPX(event)">
+        </div>
       </div>
       <button id="toggleInfoBtn" style="margin-bottom:8px;">Hiện thông số ▼</button>
       <div id="info" style="overflow-y:auto; max-height:30vh; display:none;">Đang khởi động GPS...</div>
@@ -156,6 +162,27 @@ input[type="file"] {
       toggleInfoBtn.innerText = 'Hiện thông số ▼';
     }
   };
+
+  // Menu nâng cao (cài đặt) dạng dropdown liền mạch
+  const settingsBtn = document.getElementById('settingsBtn');
+  const advancedMenu = document.getElementById('advancedMenu');
+  let menuOpen = false;
+  settingsBtn.onclick = function(e) {
+    e.stopPropagation();
+    menuOpen = !menuOpen;
+    advancedMenu.style.display = menuOpen ? 'block' : 'none';
+    // Cuộn menu vào vùng nhìn thấy nếu bị khuất
+    if (menuOpen) {
+      advancedMenu.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+    }
+  };
+  // Đóng menu khi click ra ngoài
+  document.addEventListener('click', function(e) {
+    if (menuOpen && !advancedMenu.contains(e.target) && e.target !== settingsBtn) {
+      advancedMenu.style.display = 'none';
+      menuOpen = false;
+    }
+  });
   </script>
   </div>
 </div>
