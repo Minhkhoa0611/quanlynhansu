@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Thước Cân Bằng</title>
+
+<style>
+body {
+    margin:0;
+    background:#0f172a;
+    color:#fff;
+    font-family:Arial;
+    text-align:center;
+}
+
+h2 { margin-top:20px; }
+
+button {
+    margin-top:15px;
+    padding:12px 25px;
+    font-size:18px;
+    border:none;
+    border-radius:10px;
+    background:#22c55e;
+    color:#000;
+}
+
+#circle {
+    width:260px;
+    height:260px;
+    border:6px solid #22c55e;
+    border-radius:50%;
+    margin:40px auto;
+    position:relative;
+    overflow:hidden; /* khóa không cho tràn */
+}
+
+#dot {
+    width:22px;
+    height:22px;
+    background:red;
+    border-radius:50%;
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+#status { font-size:26px; margin-top:10px; }
+#value { margin-top:10px; }
+</style>
+</head>
+
+<body>
+
+<h2>📐 Thước Cân Bằng</h2>
+<button onclick="start()">BẬT CẢM BIẾN</button>
+
+<div id="circle">
+    <div id="dot"></div>
+</div>
+
+<div id="value">---</div>
+<div id="status">Chưa kích hoạt</div>
+
+<script>
+let dot = document.getElementById("dot");
+let value = document.getElementById("value");
+let statusText = document.getElementById("status");
+
+const RADIUS = 110; // bán kính vùng di chuyển
+
+function start() {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(p => {
+            if (p === 'granted') {
+                window.addEventListener("deviceorientation", handle);
+            }
+        });
+    } else {
+        window.addEventListener("deviceorientation", handle);
+    }
+}
+
+function handle(e) {
+    let x = e.beta || 0;
+    let y = e.gamma || 0;
+
+    // chuyển góc → pixel
+    let px = (y / 45) * RADIUS;
+    let py = (x / 45) * RADIUS;
+
+    // ===== CLAMP TRONG HÌNH TRÒN =====
+    let dist = Math.sqrt(px*px + py*py);
+
+    if (dist > RADIUS) {
+        let scale = RADIUS / dist;
+        px *= scale;
+        py *= scale;
+    }
+
+    dot.style.transform =
+        `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
+
+    value.innerText = `X: ${x.toFixed(1)}° | Y: ${y.toFixed(1)}°`;
+
+    if (Math.abs(x) < 2 && Math.abs(y) < 2) {
+        statusText.innerText = "✅ CÂN BẰNG";
+        statusText.style.color = "lime";
+    } else {
+        statusText.innerText = "⚠️ LỆCH";
+        statusText.style.color = "red";
+    }
+}
+</script>
+
+</body>
+</html>
