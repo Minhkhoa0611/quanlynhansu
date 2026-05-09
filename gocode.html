@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Runner Pro</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0f0f0f;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    font-family:Arial;
+}
+
+.topbar{
+    background:#1b1b1b;
+    border-bottom:1px solid #333;
+    padding:10px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+button{
+    border:none;
+    padding:12px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:14px;
+    transition:0.2s;
+}
+
+button:hover{
+    transform:scale(1.05);
+}
+
+.run{
+    background:#00c853;
+    color:white;
+}
+
+.copy{
+    background:#2196f3;
+    color:white;
+}
+
+.cut{
+    background:#ff9800;
+    color:white;
+}
+
+.select{
+    background:#9c27b0;
+    color:white;
+}
+
+.delete{
+    background:#ff3d3d;
+    color:white;
+}
+
+textarea{
+    flex:1;
+    width:100%;
+    background:#0d0d0d;
+    color:#00ff99;
+    border:none;
+    outline:none;
+    resize:none;
+    padding:20px;
+    font-size:15px;
+    font-family:Consolas, monospace;
+    line-height:1.5;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <button class="run" onclick="runCode()">▶ Run</button>
+
+    <button class="select" onclick="selectAllText()">
+        📌 Select All
+    </button>
+
+    <button class="copy" onclick="copyText()">
+        📋 Copy
+    </button>
+
+    <button class="cut" onclick="cutText()">
+        ✂ Cut
+    </button>
+
+    <button class="delete" onclick="deleteText()">
+        🗑 Delete
+    </button>
+</div>
+
+<textarea 
+id="code" 
+placeholder="Nhập code HTML ở đây..."
+></textarea>
+
+<script>
+
+const textarea = document.getElementById("code");
+
+function runCode(){
+
+    const code = textarea.value;
+
+    const newTab = window.open();
+
+    newTab.document.open();
+    newTab.document.write(code);
+    newTab.document.close();
+}
+
+function selectAllText(){
+    textarea.select();
+}
+
+function copyText(){
+
+    textarea.select();
+
+    navigator.clipboard.writeText(textarea.value);
+}
+
+function cutText(){
+
+    textarea.select();
+
+    navigator.clipboard.writeText(textarea.value);
+
+    textarea.value = "";
+}
+
+function deleteText(){
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    const text = textarea.value;
+
+    textarea.value =
+        text.substring(0,start) +
+        text.substring(end);
+
+    textarea.focus();
+}
+</script>
+
+</body>
+</html>
