@@ -17,7 +17,7 @@ body{
     height:100vh;
     display:flex;
     flex-direction:column;
-    font-family:Arial;
+    font-family:Arial,sans-serif;
 }
 
 .topbar{
@@ -36,7 +36,7 @@ button{
     cursor:pointer;
     font-weight:bold;
     font-size:14px;
-    transition:0.2s;
+    transition:.2s;
 }
 
 button:hover{
@@ -45,49 +45,58 @@ button:hover{
 
 .run{
     background:#00c853;
-    color:white;
+    color:#fff;
 }
 
-.copy{
-    background:#2196f3;
-    color:white;
-}
-
-.cut{
-    background:#ff9800;
-    color:white;
+.open{
+    background:#607d8b;
+    color:#fff;
 }
 
 .select{
     background:#9c27b0;
-    color:white;
+    color:#fff;
+}
+
+.copy{
+    background:#2196f3;
+    color:#fff;
+}
+
+.cut{
+    background:#ff9800;
+    color:#fff;
 }
 
 .delete{
     background:#ff3d3d;
-    color:white;
+    color:#fff;
 }
 
 textarea{
     flex:1;
     width:100%;
-    background:#0d0d0d;
-    color:#00ff99;
     border:none;
     outline:none;
     resize:none;
+    background:#0d0d0d;
+    color:#00ff99;
     padding:20px;
     font-size:15px;
-    font-family:Consolas, monospace;
     line-height:1.5;
+    font-family:Consolas,monospace;
 }
 </style>
 </head>
-
 <body>
 
 <div class="topbar">
+
     <button class="run" onclick="runCode()">▶ Run</button>
+
+    <button class="open" onclick="openHtmlFile()">
+        📂 Open HTML
+    </button>
 
     <button class="select" onclick="selectAllText()">
         📌 Select All
@@ -104,16 +113,25 @@ textarea{
     <button class="delete" onclick="deleteText()">
         🗑 Delete
     </button>
+
 </div>
 
-<textarea 
-id="code" 
+<input
+type="file"
+id="fileInput"
+accept=".html,.htm,text/html"
+style="display:none"
+>
+
+<textarea
+id="code"
 placeholder="Nhập code HTML ở đây..."
 ></textarea>
 
 <script>
 
 const textarea = document.getElementById("code");
+const fileInput = document.getElementById("fileInput");
 
 function runCode(){
 
@@ -121,44 +139,83 @@ function runCode(){
 
     const newTab = window.open();
 
+    if(!newTab){
+        alert("Trình duyệt đã chặn popup.");
+        return;
+    }
+
     newTab.document.open();
     newTab.document.write(code);
     newTab.document.close();
 }
 
+function openHtmlFile(){
+
+    fileInput.click();
+
+}
+
+fileInput.addEventListener("change",function(e){
+
+    const file = e.target.files[0];
+
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(event){
+
+        textarea.value = event.target.result;
+
+    };
+
+    reader.readAsText(file,"UTF-8");
+
+});
+
 function selectAllText(){
+
+    textarea.focus();
     textarea.select();
+
 }
 
-function copyText(){
+async function copyText(){
 
-    textarea.select();
+    try{
 
-    navigator.clipboard.writeText(textarea.value);
+        await navigator.clipboard.writeText(textarea.value);
+
+        alert("Đã copy");
+
+    }catch{
+
+        textarea.select();
+        document.execCommand("copy");
+
+    }
+
 }
 
-function cutText(){
+async function cutText(){
 
-    textarea.select();
+    try{
 
-    navigator.clipboard.writeText(textarea.value);
+        await navigator.clipboard.writeText(textarea.value);
+
+    }catch{}
 
     textarea.value = "";
+
 }
 
 function deleteText(){
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-
-    const text = textarea.value;
-
-    textarea.value =
-        text.substring(0,start) +
-        text.substring(end);
-
+    textarea.value = "";
     textarea.focus();
+
 }
+
 </script>
 
 </body>
