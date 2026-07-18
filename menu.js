@@ -74,33 +74,32 @@ function renderMenu(active) {
     style.id = 'menu-style';
     style.innerHTML = `
         .navbar {
-            background: ${menuColor};
-            color: #fff;
-            padding: 0 32px;
+            background: #fff;
+            color: #0f172a;
+            padding: 0 24px;
             display: flex;
             align-items: center;
-            min-height: 64px;
+            min-height: 54px;
             gap: 0;
-            box-shadow: 0 4px 16px #0001;
-            border-bottom-left-radius: 18px;
-            border-bottom-right-radius: 18px;
+            box-shadow: 0 1px 0 #e5e7eb, 0 2px 10px rgba(15,23,42,0.05);
             position: relative;
             z-index: 10;
+            border-bottom: 1px solid #e5e7eb;
         }
         .navbar .navbar-logo {
             font-family: ${logoFont};
-            font-size: 22px;
-            font-weight: bold;
-            letter-spacing: 1.2px;
-            color: ${logoColor};
-            margin-right: 32px;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            color: #0f172a;
+            margin-right: 24px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             user-select: none;
             font-style: italic;
-            transform: skew(-8deg,0deg);
-            text-shadow: 0 2px 8px #0003;
+            transform: none;
+            text-shadow: none;
         }
         .navbar .navbar-logo-icon {
             width: 32px;
@@ -144,23 +143,24 @@ function renderMenu(active) {
             flex: 1;
         }
         .navbar button {
-            background: none;
+            background: transparent;
             border: none;
-            color: #fff;
-            font-size: 16px;
+            color: #4b5563;
+            font-size: 14px;
             cursor: pointer;
-            padding: 10px 20px;
-            border-radius: 8px;
-            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-            font-weight: 500;
-            letter-spacing: 0.5px;
+            padding: 10px 12px;
+            border-radius: 0;
+            transition: background 0.15s, color 0.15s;
+            font-weight: 600;
+            letter-spacing: 0.2px;
             margin: 0 2px;
             position: relative;
         }
         .navbar button.active, .navbar button:hover {
-            background: #fff;
-            color: #1976d2;
-            box-shadow: 0 2px 8px #1976d233;
+            background: #f8fafc;
+            color: ${menuColor};
+            box-shadow: inset 0 -2px 0 ${menuColor};
+            transform: none;
         }
         .navbar .menu-export-btn {
             background: #43a047;
@@ -218,6 +218,7 @@ function renderMenu(active) {
             letter-spacing: 0.5px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 6px;
             transition: background 0.18s;
         }
@@ -225,12 +226,19 @@ function renderMenu(active) {
         .navbar .menu-data-btn:focus {
             background: #1976d2;
         }
+        .navbar .menu-data-btn .menu-toggle-icon {
+            margin-left: 8px;
+            font-size: 13px;
+            transition: transform 0.2s ease;
+        }
+        .navbar .menu-data-dropdown.open .menu-data-btn .menu-toggle-icon {
+            transform: rotate(180deg);
+        }
         .navbar .menu-data-list {
             display: none;
-            position: absolute;
-            top: 110%;
-            right: 0;
-            min-width: 180px;
+            position: relative;
+            margin-top: 8px;
+            min-width: 100%;
             background: #fff;
             color: #1976d2;
             border-radius: 8px;
@@ -269,34 +277,170 @@ function renderMenu(active) {
         .navbar .menu-data-list .menu-telegram-btn {
             color: #0088cc;
         }
+        .navbar .menu-footer-logo {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .navbar .menu-footer-logo img {
+            max-width: 100%;
+            max-height: 72px;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(15,23,42,0.08);
+            background: #fff;
+        }
+        .navbar.collapsed .menu-footer-logo {
+            display: none;
+        }
         .navbar input[type="file"] {
             display: none;
+        }
+        .navbar-toggle {
+            width: 38px;
+            height: 38px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #f8fafc;
+            color: #1976d2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            margin-bottom: 10px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .navbar-toggle:hover {
+            background: #e3f0ff;
+        }
+        .navbar .navbar-logo-text,
+        .navbar .app-version-label,
+        .navbar .menu-label {
+            transition: opacity 0.2s;
+        }
+        .navbar.collapsed {
+            width: 78px;
+            padding: 16px 10px;
+        }
+        .navbar.collapsed .navbar-logo-text,
+        .navbar.collapsed .app-version-label,
+        .navbar.collapsed .menu-label {
+            display: none;
+        }
+        .navbar.collapsed .navbar-menu button,
+        .navbar.collapsed .menu-data-btn,
+        .navbar.collapsed .menu-export-btn,
+        .navbar.collapsed .menu-import-btn {
+            justify-content: center;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .navbar.collapsed .menu-data-list {
+            display: none !important;
+        }
+        .navbar.collapsed .navbar-logo {
+            align-items: center;
         }
         @keyframes fadeInMenu {
             from { opacity: 0; transform: translateY(10px);}
             to { opacity: 1; transform: translateY(0);}
         }
+        body {
+            padding-left: 270px !important;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        body.sidebar-collapsed {
+            padding-left: 92px !important;
+        }
+        .navbar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            min-height: 100vh;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            padding: 18px 14px;
+            gap: 10px;
+            border-bottom: none;
+            border-right: 1px solid #e5e7eb;
+            box-shadow: 0 0 0 1px #e5e7eb, 8px 0 24px rgba(15,23,42,0.08);
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 1100;
+        }
+        .navbar .navbar-logo {
+            margin-right: 0;
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .navbar .navbar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+        .navbar button {
+            width: 100%;
+            text-align: left;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin: 0;
+        }
+        .navbar button.active,
+        .navbar button:hover {
+            background: #f8fafc;
+            color: ${menuColor};
+            box-shadow: inset 0 0 0 1px rgba(25,118,210,0.12);
+        }
+        .navbar .menu-export-btn,
+        .navbar .menu-import-btn,
+        .navbar .menu-data-btn {
+            margin-left: 0;
+            width: 100%;
+            justify-content: center;
+        }
+        .navbar .menu-data-dropdown {
+            position: relative;
+            margin-left: 0;
+            margin-top: 6px;
+        }
+        .navbar .menu-data-list {
+            position: static;
+            display: none;
+            margin-top: 6px;
+            min-width: 100%;
+            border: 1px solid #e3f2fd;
+            box-shadow: none;
+        }
+        .navbar .menu-data-dropdown.open .menu-data-list {
+            display: flex;
+        }
         @media (max-width: 900px) {
+            body {
+                padding-left: 240px !important;
+            }
             .navbar {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 0 10px;
-                min-height: unset;
+                width: 220px;
             }
-            .navbar .navbar-logo {
-                margin: 10px 0 0 0;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding-left: 200px !important;
             }
-            .navbar .navbar-menu {
-                flex-wrap: wrap;
-                gap: 4px;
-                margin-bottom: 8px;
-            }
-            .navbar .menu-export-btn, .navbar .menu-import-btn {
-                margin-left: 0;
-            }
-            .navbar .menu-data-dropdown {
-                margin-left: 0;
-                margin-top: 8px;
+            .navbar {
+                width: 180px;
+                padding: 12px 8px;
             }
         }
         `;
@@ -306,6 +450,7 @@ function renderMenu(active) {
     const nav = document.createElement('div');
     nav.className = 'navbar';
     nav.innerHTML = `
+        <button type="button" class="navbar-toggle" onclick="toggleSidebarMenu(event)" aria-expanded="true" title="Thu gọn/hiện menu">☰</button>
         <div class="navbar-logo" style="position:relative;">
             <span class="navbar-logo-icon">
                 <!-- SVG đồng hồ hiện đại -->
@@ -317,7 +462,7 @@ function renderMenu(active) {
                   <circle cx="16" cy="16" r="1.6" fill="#ec4899"/>
                 </svg>
             </span>
-            <span style="display:inline-block;transform:skew(8deg,0deg);color:${logoColor};font-family:${logoFont};">
+            <span class="navbar-logo-text" style="display:inline-block;transform:skew(8deg,0deg);color:${logoColor};font-family:${logoFont};">
                 Workforce 365 <span style="font-size:0.9em;letter-spacing:1px;">HRM Pro</span>
                 <span id="app-version-number" style="
                     position: absolute;
@@ -370,15 +515,15 @@ function renderMenu(active) {
                 menus = menus.filter(m => defaultMenus.some(d => d.id === m.id));
                 // Render các menu visible
                 let html = menus.filter(m => m.visible !== false).map(m =>
-                    `<button onclick="location.href='${m.href}'"${active===m.id?' class="active"':''}>${m.label}</button>`
+                    `<button onclick="location.href='${m.href}'"${active===m.id?' class="active"':''} title="${m.label}"><span class="menu-label">${m.label}</span></button>`
                 ).join('');
                 return html;
             })()}
         </div>
-        <button onclick="showSupportBotPopup()" style="background:#fff; color:#1976d2; border:1px solid #1976d2; margin-left:8px; height:40px; display:flex; align-items:center;">🤖 Hỗ trợ</button>
+        <button onclick="showSupportBotPopup()" style="background:#fff; color:#1976d2; border:1px solid #1976d2; margin-left:8px; height:40px; display:flex; align-items:center;" title="Hỗ trợ"><span class="menu-icon">🤖</span><span class="menu-label">Hỗ trợ</span></button>
         <div class="menu-data-dropdown" tabindex="0">
-            <button type="button" class="menu-data-btn" onclick="toggleMenuDataDropdown(event)">
-                🛠️ Tiện Ích
+            <button type="button" class="menu-data-btn" onclick="toggleMenuDataDropdown(event)" title="Tiện Ích">
+                <span class="menu-icon">🛠️</span><span class="menu-label">Tiện Ích</span><span class="menu-toggle-icon">▾</span>
             </button>
             <div class="menu-data-list">
                 <button onclick="exportAllData()" class="menu-export-btn"${active==='export'?' class="active"':''}>Xuất dữ liệu</button>
@@ -400,11 +545,36 @@ function renderMenu(active) {
                 <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ Giới thiệu</button>
             </div>
         </div>
-
-
-        
+        <div class="menu-footer-logo">
+            <img src="timespro.png" alt="TimesPro logo" />
+        </div>
     `;
     document.body.insertBefore(nav, document.body.firstChild);
+
+    const savedCollapsed = localStorage.getItem('sidebarCollapsed') === '1';
+    const navbarEl = document.querySelector('.navbar');
+    if (navbarEl) {
+        navbarEl.classList.toggle('collapsed', savedCollapsed);
+        document.body.classList.toggle('sidebar-collapsed', savedCollapsed);
+        const toggleBtn = navbarEl.querySelector('.navbar-toggle');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', savedCollapsed ? 'false' : 'true');
+            toggleBtn.innerHTML = savedCollapsed ? '☰' : '✕';
+        }
+    }
+    window.toggleSidebarMenu = function(event) {
+        const navbarEl = document.querySelector('.navbar');
+        if (!navbarEl) return;
+        const collapsed = navbarEl.classList.toggle('collapsed');
+        document.body.classList.toggle('sidebar-collapsed', collapsed);
+        localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
+        const toggleBtn = navbarEl.querySelector('.navbar-toggle');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            toggleBtn.innerHTML = collapsed ? '☰' : '✕';
+        }
+        if (event && event.stopPropagation) event.stopPropagation();
+    };
 
     // Thêm popup nhập key nếu chưa có
     if (!document.getElementById('popup-key-overlay')) {
@@ -612,10 +782,10 @@ function renderMenu(active) {
                 localStorage.removeItem('menuColor');
                 overlay.style.display = 'none';
                 showSuccessPopup(msgText);
-                // Tự động F5 lại trang sau khi chọn phiên bản
+                // Không tự reload lại trang sau khi chọn phiên bản; chỉ cập nhật giao diện hiện tại
                 setTimeout(() => {
-                    location.reload();
-                }, 600);
+                    if (typeof renderMenu === 'function') renderMenu(active || 'emp');
+                }, 200);
             }
             if (key === '22062002Pro') {
                 setVersion('Pro', 'Đã nâng cấp lên phiên bản Pro!');
@@ -1363,7 +1533,9 @@ function renderMenu(active) {
     }, 0);
 
     // Đóng dropdown khi click ngoài hoặc chuyển tab
+    const savedUtilitiesCollapsed = localStorage.getItem('utilitiesCollapsed') === '1';
     document.querySelectorAll('.menu-data-dropdown').forEach(drop => {
+        drop.classList.toggle('open', !savedUtilitiesCollapsed);
         drop.addEventListener('blur', function() {
             setTimeout(() => drop.classList.remove('open'), 120);
         });
@@ -1373,15 +1545,20 @@ function renderMenu(active) {
 // Thêm hàm toggle dropdown
 function toggleMenuDataDropdown(e) {
     e.stopPropagation();
-    document.querySelectorAll('.menu-data-dropdown').forEach(drop => drop.classList.remove('open'));
     const dropdown = e.currentTarget.parentElement;
-    dropdown.classList.toggle('open');
+    const isOpening = !dropdown.classList.contains('open');
+    document.querySelectorAll('.menu-data-dropdown').forEach(drop => drop.classList.remove('open'));
+    dropdown.classList.toggle('open', isOpening);
+    localStorage.setItem('utilitiesCollapsed', isOpening ? '0' : '1');
     // Đóng khi click ngoài
     if (dropdown.classList.contains('open')) {
         document.addEventListener('mousedown', closeDropdown, { once: true });
     }
     function closeDropdown(ev) {
-        if (!dropdown.contains(ev.target)) dropdown.classList.remove('open');
+        if (!dropdown.contains(ev.target)) {
+            dropdown.classList.remove('open');
+            localStorage.setItem('utilitiesCollapsed', '1');
+        }
     }
 }
 

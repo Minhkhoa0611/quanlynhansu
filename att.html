@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html style="zoom:90%;">
 <head>
@@ -9,6 +10,9 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             background: linear-gradient(120deg, #e3f0ff 0%, #f7f7f7 100%);
             margin: 0;
+            padding-left: 270px;
+            padding-right: 20px;
+            box-sizing: border-box;
         }
         .container {
             max-width: 1100px;
@@ -559,13 +563,230 @@
             min-width: 90px;
             text-align: left;
         }
+        .demo-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+            color: #fff;
+            padding: 16px 20px;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px #1976d230;
+            margin-bottom: 16px;
+        }
+        .demo-brand {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .demo-toolbar-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .demo-toolbar-controls select,
+        .demo-toolbar-controls input {
+            padding: 9px 12px;
+            border: 1px solid #dce9f6;
+            border-radius: 8px;
+            min-width: 160px;
+        }
+        .demo-wrap {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 280px;
+            gap: 18px;
+            margin: 16px 0 24px;
+        }
+        .demo-calendar {
+            background: linear-gradient(135deg, #ffffff 0%, #f4faff 100%);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 10px 30px #1976d220;
+            border: 1.5px solid #dceeff;
+            min-height: 260px;
+        }
+        .demo-calendar-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #f4faff 0%, #eaf4ff 100%);
+            border: 1px solid #dfefff;
+        }
+        .demo-calendar-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #19539b;
+        }
+        .demo-calendar-subtitle {
+            font-size: 0.92rem;
+            color: #5a7da4;
+            margin-top: 2px;
+        }
+        .demo-calendar-badge {
+            background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+            color: #fff;
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 10px #1976d220;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(100px, 1fr));
+            gap: 12px;
+        }
+        .dayhead {
+            font-weight: 800;
+            text-align: center;
+            padding: 10px 2px;
+            color: #19539b;
+            background: #eef6ff;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            border: 1px solid #dceeff;
+        }
+        .demo-cell {
+            min-height: 118px;
+            border: 1px solid #e4ecf6;
+            border-radius: 14px;
+            padding: 10px 10px 12px;
+            background: #fcfdff;
+            box-shadow: 0 2px 8px #1976d210;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            justify-content: flex-start;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .demo-cell:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px #1976d220;
+        }
+        .demo-cell.blank {
+            background: linear-gradient(180deg, #fbfdff 0%, #f7fbff 100%);
+            border-style: dashed;
+            border-color: #e6eef8;
+            box-shadow: none;
+            min-height: 112px;
+        }
+        .demo-cell.present {
+            background: linear-gradient(135deg, #f3fdf4 0%, #eaf8ee 100%);
+            border-color: #8bc34a;
+        }
+        .demo-cell.holiday {
+            background: linear-gradient(135deg, #fffdf5 0%, #fff8e4 100%);
+            border-color: #ffcc80;
+        }
+        .demo-cell.today {
+            box-shadow: 0 0 0 2px #1976d2 inset, 0 4px 12px #1976d220;
+        }
+        .demo-cell .day-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+        .demo-cell .day-number {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #223a54;
+        }
+        .demo-cell .day-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+            border-radius: 6px;
+            background: #fff;
+            border: 1px solid #dce7f2;
+        }
+        .demo-cell .day-top .demo-checkbox {
+            width: 16px;
+            height: 16px;
+            accent-color: #1976d2;
+            cursor: pointer;
+            margin: 0;
+        }
+        .demo-cell .status-pill {
+            display: inline-block;
+            width: fit-content;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: #f4f9ff;
+            color: #1976d2;
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+        .demo-cell.present .status-pill {
+            background: #dff6e4;
+            color: #2e7d32;
+        }
+        .demo-cell.holiday .status-pill {
+            background: #fff3d0;
+            color: #b36b00;
+        }
+        .demo-cell .factor-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: auto;
+            padding-top: 6px;
+            border-top: 1px dashed #dce7f2;
+        }
+        .demo-cell .factor-label {
+            font-size: 0.72rem;
+            color: #1976d2;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+        .demo-cell .factor-input {
+            width: 46px;
+            padding: 3px 5px;
+            font-size: 11px;
+            border-radius: 6px;
+            border: 1px solid #cfe0f7;
+            background: #fff;
+        }
+        .demo-cell .day-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+        .demo-side {
+            background: #fff;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 2px 10px #0001;
+            height: fit-content;
+        }
+        .demo-side .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
         @media (max-width: 900px) {
             .modern-attendance-table { font-size: 13px; }
             .modern-attendance-table thead th, .modern-attendance-table tbody td { padding: 7px 4px; }
+            .demo-wrap { grid-template-columns: 1fr; }
         }
         @media (max-width: 600px) {
             .modern-attendance-table { font-size: 12px; }
             .modern-attendance-table thead th, .modern-attendance-table tbody td { padding: 5px 2px; }
+            .demo-toolbar { padding: 14px; }
+            .demo-toolbar-controls { width: 100%; }
+            .demo-toolbar-controls > * { flex: 1 1 100%; }
         }
     </style>
     <script src="menu.js"></script>
@@ -609,42 +830,59 @@
         <div style="color:#d32f2f;font-size:15px;font-weight:600;margin-bottom:10px;text-align:center;">
             CÔNG CỤ CHỈ HỖ TRỢ CHẤM CÔNG TRÊN THIẾT BỊ TẠI CỬA HÀNG, KHÔNG THỂ CHẤM CÔNG Ở THIẾT BỊ KHÁC
         </div>
-        <div class="form-row">
-            <label style="width:130px;">Chọn cửa hàng:</label>
-            <select id="attStoreSelect" onchange="renderEmpSelect();renderAttendance();updateSalaryTypeDisplay()" style="font-size:18px;padding:8px 18px;min-width:180px;border-radius:8px;border:1.5px solid #b3d1f7;background:#f7fbff;color:#1976d2;font-weight:500;box-shadow:0 1px 6px #1976d210;">
-                <option value="">--Tất cả--</option>
-                <option value="LepShop">LepShop</option>
-                <option value="H'Farm">H'Farm</option>
-            </select>
-            <label>Chọn nhân viên:</label>
-            <select id="empSelect" onchange="renderAttendance();updateSalaryTypeDisplay()" style="font-size:20px;padding:8px 18px;min-width:220px;border-radius:8px;">
-            </select>
-            <button type="button" class="btn" id="noteBtn" style="margin-left:12px;" onclick="openNoteModal()">Note</button>
-            <!-- Thêm nút quét QR -->
-            <button type="button" class="btn" style="margin-left:12px;background:#43a047;" onclick="openQRModal()">Quét QR chấm công</button>
-            <!-- Thêm nút CC với icon ổ khóa -->
-            <button type="button" class="btn" style="margin-left:12px;background:#ff9800;padding:7px 12px;" onclick="openCCModal()" title="Mở khóa chấm công">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" style="vertical-align:middle;">
-                    <rect x="5" y="11" width="14" height="8" rx="3" fill="#fff3cd" stroke="#b8860b" stroke-width="2"/>
-                    <path d="M7 11V8a5 5 0 0 1 10 0v3" stroke="#b8860b" stroke-width="2" fill="none"/>
-                    <circle cx="12" cy="15" r="1.5" fill="#b8860b"/>
-                </svg>
-            </button>
+        <div class="demo-toolbar">
+            <div class="demo-brand">Workforce 365 HRM - Chấm công</div>
+            <div class="demo-toolbar-controls">
+                <select id="attStoreSelect" onchange="renderEmpSelect();renderAttendance();updateSalaryTypeDisplay()" style="font-size:16px;min-width:170px;border-radius:8px;border:1.5px solid #b3d1f7;background:#f7fbff;color:#1976d2;font-weight:500;box-shadow:0 1px 6px #1976d210;">
+                    <option value="">--Tất cả--</option>
+                    <option value="LepShop">LepShop</option>
+                    <option value="H'Farm">H'Farm</option>
+                </select>
+                <select id="empSelect" onchange="renderAttendance();updateSalaryTypeDisplay()" style="font-size:16px;min-width:220px;border-radius:8px;">
+                </select>
+                <input type="month" id="attMonth" onchange="renderAttendance()" style="min-width:150px;">
+                <button type="button" class="btn" id="noteBtn" onclick="openNoteModal()">Note</button>
+                <button type="button" class="btn" style="background:#43a047;" onclick="openQRModal()">Quét QR</button>
+                <button type="button" class="btn" style="background:#ff9800;padding:7px 12px;" onclick="openCCModal()" title="Mở khóa chấm công">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" style="vertical-align:middle;">
+                        <rect x="5" y="11" width="14" height="8" rx="3" fill="#fff3cd" stroke="#b8860b" stroke-width="2"/>
+                        <path d="M7 11V8a5 5 0 0 1 10 0v3" stroke="#b8860b" stroke-width="2" fill="none"/>
+                        <circle cx="12" cy="15" r="1.5" fill="#b8860b"/>
+                    </svg>
+                </button>
+            </div>
         </div>
         <div class="form-row" id="salaryTypeRow" style="display:none;">
             <label>Hình thức trả lương:</label>
             <span id="salaryTypeDisplay" style="font-size:16px;color:#1976d2;font-weight:500"></span>
-        </div>
-        <div class="form-row">
-            <label>Chọn tháng:</label>
-            <input type="month" id="attMonth" onchange="renderAttendance()">
-            <!-- <button class="btn" onclick="saveAttendanceMonth()" style="display:none;">Lưu chấm công</button> -->
         </div>
         <!-- Thêm vùng chọn ngày lễ -->
         <div class="form-row" id="holidayRow">
             <label>Ngày lễ:</label>
             <button type="button" class="btn" onclick="openHolidayModal()" style="padding:6px 18px;">Chọn ngày lễ</button>
             <span id="holidaySummary" style="font-size:13px;color:#b8860b;margin-left:10px;"></span>
+        </div>
+        <div class="demo-wrap" style="margin-top:8px;">
+            <div class="demo-calendar">
+                <div class="demo-calendar-head">
+                    <div>
+                        <div class="demo-calendar-title">Lịch chấm công</div>
+                        <div class="demo-calendar-subtitle" id="demoCalendarMonthLabel">Tháng hiện tại</div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <div class="demo-calendar-badge" id="demoCalendarBadge">Chọn nhân viên</div>
+                    </div>
+                </div>
+                <div class="demo-grid" id="demoCalendar"></div>
+            </div>
+            <div class="demo-side">
+                <h3 style="margin-top:0;color:#1976d2;">Thống kê</h3>
+                <div class="stat"><span>Ngày đi làm</span><b id="demoWork">0</b></div>
+                <div class="stat"><span>Nghỉ</span><b id="demoAbsent">0</b></div>
+                <div class="stat"><span>Ngày lễ</span><b id="demoHoliday">0</b></div>
+                <div class="stat"><span>Nhân viên</span><b id="demoEmpCount">0</b></div>
+                <div class="stat"><span>Tổng lương</span><b id="demoSalary">0</b></div>
+            </div>
         </div>
         <!-- Thêm vùng cảnh báo trạng thái cửa hàng (nên đặt ở đây) -->
         <div id="storeStatusAlert" style="display:none;margin-bottom:12px;font-size:15px;font-weight:600;color:#d32f2f;text-align:center;background:#fff3cd;border-radius:8px;padding:8px 0;border:1.5px solid #ffc107;"></div>
@@ -918,6 +1156,7 @@
             shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
             const month = getCurrentMonth();
             const tbody = document.querySelector(`#shiftTable_${empId} tbody`);
+            if (!tbody) return;
             const shifts = getShiftsForEmpMonth(empId, month);
             const emp = employees.find(e => e.id == empId);
             let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay_' + empId)) 
@@ -1023,12 +1262,14 @@
             renderAttendance();
             updateSalaryTypeDisplay();
             showMissingAttendanceAlert();
+            renderDemoAttendanceCalendar();
         });
         document.getElementById('attMonth').addEventListener('change', function() {
             // Khi đổi tháng, luôn nạp lại dữ liệu và render lại bảng chấm công
             renderAttendance();
             showMissingAttendanceAlert();
             updateHolidayInput();
+            renderDemoAttendanceCalendar();
         });
         // --- Thêm hàm này để tránh lỗi nếu chưa có định nghĩa ---
         function showMissingAttendanceAlert() {
@@ -1048,6 +1289,14 @@
                 span.textContent = '';
             }
         }
+        let demoCalendarRenderTimer = null;
+        function requestDemoCalendarRender() {
+            if (demoCalendarRenderTimer) clearTimeout(demoCalendarRenderTimer);
+            demoCalendarRenderTimer = setTimeout(() => {
+                demoCalendarRenderTimer = null;
+                renderDemoAttendanceCalendar();
+            }, 0);
+        }
         function getWorkFactor(month, empId, dayShift) {
             if (!workFactorByMonth[month]) workFactorByMonth[month] = {};
             if (!workFactorByMonth[month][empId]) workFactorByMonth[month][empId] = {};
@@ -1061,11 +1310,175 @@
             if (!workFactorByMonth[month][empId]) workFactorByMonth[month][empId] = {};
             workFactorByMonth[month][empId][dayShift] = value;
             localStorage.setItem('workFactorByMonth', JSON.stringify(workFactorByMonth));
-            // Gọi autoSendDataToTelegramBot để đảm bảo thay đổi hệ số công được gửi lên bot
             if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
-            // Nạp lại workFactorByMonth từ localStorage để đảm bảo giá trị mới nhập được hiển thị
             workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
-            renderAttendance();
+            requestDemoCalendarRender();
+        }
+        function toggleDemoDayAttendance(day, checked) {
+            const month = getCurrentMonth();
+            const empId = document.getElementById('empSelect').value;
+            if (!empId) return;
+            if (!attendanceByMonth[month]) attendanceByMonth[month] = {};
+            if (!attendanceByMonth[month][empId]) attendanceByMonth[month][empId] = {};
+            const key = String(day);
+            const current = attendanceByMonth[month][empId][key] || [];
+            let arr = Array.isArray(current) ? current.slice() : [];
+            if (checked) {
+                if (!arr.includes(0)) arr.push(0);
+            } else {
+                arr = arr.filter(x => x !== 0);
+            }
+            if (arr.length === 0) {
+                delete attendanceByMonth[month][empId][key];
+            } else {
+                attendanceByMonth[month][empId][key] = arr;
+            }
+            saveAttendanceMonth();
+            requestDemoCalendarRender();
+            updateHolidayInput();
+        }
+        function quickMarkAllDays(checked, skipWeekends = false) {
+            const month = getCurrentMonth();
+            const empId = document.getElementById('empSelect').value;
+            if (!empId) return;
+            if (!attendanceByMonth[month]) attendanceByMonth[month] = {};
+            if (!attendanceByMonth[month][empId]) attendanceByMonth[month][empId] = {};
+            const [year, monthNum] = month.split('-').map(Number);
+            const days = daysInMonth(month);
+            for (let i = 1; i <= days; i++) {
+                const date = new Date(year, monthNum - 1, i);
+                const weekday = date.getDay();
+                const isWeekend = weekday === 0 || weekday === 6;
+                if (skipWeekends && isWeekend) continue;
+                const key = String(i);
+                if (checked) {
+                    if (!Array.isArray(attendanceByMonth[month][empId][key])) {
+                        attendanceByMonth[month][empId][key] = [0];
+                    } else if (!attendanceByMonth[month][empId][key].includes(0)) {
+                        attendanceByMonth[month][empId][key].push(0);
+                    }
+                } else {
+                    const arr = attendanceByMonth[month][empId][key] || [];
+                    const filtered = arr.filter(x => x !== 0);
+                    if (filtered.length === 0) {
+                        delete attendanceByMonth[month][empId][key];
+                    } else {
+                        attendanceByMonth[month][empId][key] = filtered;
+                    }
+                }
+            }
+            saveAttendanceMonth();
+            requestDemoCalendarRender();
+            updateHolidayInput();
+        }
+        function quickMarkWeekdays(checked) {
+            quickMarkAllDays(checked, true);
+        }
+        function openWorkFactorPrompt(day) {
+            const month = getCurrentMonth();
+            const empId = document.getElementById('empSelect').value;
+            if (!empId) return;
+            const key = `${day}_0`;
+            const current = getWorkFactor(month, empId, key);
+            const value = prompt('Nhập hệ số công cho ngày này:', current);
+            if (value === null) return;
+            const parsed = parseFloat(value);
+            if (!isNaN(parsed) && parsed >= 0) {
+                setWorkFactor(month, empId, key, parsed);
+            } else {
+                alert('Vui lòng nhập số hợp lệ!');
+            }
+        }
+        function renderDemoAttendanceCalendar() {
+            const cal = document.getElementById('demoCalendar');
+            if (!cal) return;
+            const month = getCurrentMonth();
+            const [year, monthNum] = month.split('-').map(Number);
+            const days = daysInMonth(month);
+            const empId = document.getElementById('empSelect')?.value || '';
+            const monthData = attendanceByMonth[month] || {};
+            const empAtt = monthData[empId] || {};
+            const holidayDays = getHolidayDays(month);
+            const headers = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+            const monthLabel = document.getElementById('demoCalendarMonthLabel');
+            const badge = document.getElementById('demoCalendarBadge');
+            const monthName = new Date(year, monthNum - 1, 1).toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' });
+            if (monthLabel) {
+                monthLabel.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+            }
+            if (badge) {
+                const emp = employees.find(e => e.id == empId);
+                badge.textContent = emp ? `NV: ${emp.name}` : 'Chọn nhân viên';
+            }
+            cal.innerHTML = '';
+            headers.forEach(h => {
+                const d = document.createElement('div');
+                d.className = 'dayhead';
+                d.textContent = h;
+                cal.appendChild(d);
+            });
+            const firstDay = new Date(year, monthNum - 1, 1);
+            const offset = (firstDay.getDay() + 6) % 7;
+            for (let i = 0; i < offset; i++) {
+                const blank = document.createElement('div');
+                blank.className = 'demo-cell blank';
+                cal.appendChild(blank);
+            }
+            let workCount = 0;
+            for (let i = 1; i <= days; i++) {
+                const cell = document.createElement('div');
+                const hasAttendance = Array.isArray(empAtt[i]) && empAtt[i].length > 0;
+                const isHoliday = holidayDays.includes(i);
+                const isPresent = hasAttendance || isHoliday;
+                const factorKey = `${i}_0`;
+                const currentWorkFactor = empId ? getWorkFactor(month, empId, factorKey) : 1;
+                const today = new Date();
+                const isToday = year === today.getFullYear() && monthNum === today.getMonth() + 1 && i === today.getDate();
+                cell.className = `demo-cell${isPresent ? ' present' : ''}${isHoliday ? ' holiday' : ''}${isToday ? ' today' : ''}`;
+                cell.innerHTML = `
+                    <div class="day-top">
+                        <span class="day-number">${String(i).padStart(2, '0')}</span>
+                        <label class="day-toggle" title="Chọn ngày làm">
+                            <input type="checkbox" class="demo-checkbox" ${hasAttendance ? 'checked' : ''} onchange="toggleDemoDayAttendance(${i}, this.checked)">
+                        </label>
+                    </div>
+                    <div class="day-actions">
+                        <span class="status-pill">${hasAttendance ? 'Đi làm' : isHoliday ? 'Ngày lễ' : 'Chưa chấm'}</span>
+                    </div>
+                    <div class="factor-row">
+                        <span class="factor-label">HS</span>
+                        <input type="number" min="0" step="0.1" value="${currentWorkFactor}" class="factor-input" onchange="setWorkFactor('${month}', '${empId}', '${factorKey}', parseFloat(this.value) || 0)">
+                    </div>`;
+                cell.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    openWorkFactorPrompt(i);
+                });
+                if (hasAttendance) workCount++;
+                cal.appendChild(cell);
+            }
+            const demoWork = document.getElementById('demoWork');
+            const demoAbsent = document.getElementById('demoAbsent');
+            const demoHoliday = document.getElementById('demoHoliday');
+            const demoEmpCount = document.getElementById('demoEmpCount');
+            const demoSalary = document.getElementById('demoSalary');
+            if (demoWork) demoWork.textContent = workCount;
+            if (demoAbsent) demoAbsent.textContent = Math.max(days - workCount, 0);
+            if (demoHoliday) demoHoliday.textContent = holidayDays.length;
+            if (demoEmpCount) demoEmpCount.textContent = employees.length;
+            if (demoSalary) {
+                let salary = 0;
+                if (empId) {
+                    for (let i = 1; i <= days; i++) {
+                        const factorKey = `${i}_0`;
+                        const factor = parseFloat(getWorkFactor(month, empId, factorKey) || 1);
+                        const hasAttendance = Array.isArray(empAtt[i]) && empAtt[i].length > 0;
+                        if (hasAttendance) salary += factor;
+                    }
+                }
+                const salaryPerDay = parseInt(localStorage.getItem('salaryPerDay_' + empId)) || parseInt(localStorage.getItem('salaryPerDay') || '0');
+                const value = salaryPerDay > 0 ? salary * salaryPerDay : salary;
+                demoSalary.textContent = value.toLocaleString('vi-VN') + ' ₫';
+            }
         }
         function renderAttendance() {
             
@@ -1089,7 +1502,10 @@
                 html = `<div style="color:#e53935;font-size:18px;padding:24px 0;text-align:center;">
                     Chưa có nhân viên nào.<br>Vui lòng thêm nhân viên trước khi chấm công.
                 </div>`;
-                document.getElementById('attTableWrap').innerHTML = html;
+                const attTableWrap = document.getElementById('attTableWrap');
+                if (attTableWrap) attTableWrap.innerHTML = html;
+                updateHolidayInput();
+                renderDemoAttendanceCalendar();
                 return;
             }
             const emp = employees.find(e => e.id == empId);
@@ -1100,157 +1516,16 @@
             if (emp) {
                 let empAtt = attendanceByMonth[month][emp.id] || {};
                 let shifts = getShiftsForEmpMonth(emp.id, month);
-                html += `<div style="margin-bottom:32px;">`;
-                html += `<div style="font-weight:bold;font-size:18px;margin-bottom:8px;color:#1976d2">${emp.name}</div>`;
-                html += `<div><b>Thiết lập ca làm:</b> 
-                    <button class="btn" type="button" onclick="addShiftRow('${emp.id}')">Thêm ca</button>
-                    <button class="btn" type="button" style="background:#43a047;margin-left:8px;" onclick="openCopyShiftModal()">Copy ca từ NV khác</button>
-                </div>`;
-                html += `<table class="shift-setup-table" id="shiftTable_${emp.id}" style="margin-top:10px;">
-                    <thead>
-                        <tr>
-                            <th>Tên ca</th>
-                            <th>Giờ bắt đầu</th>
-                            <th>Giờ kết thúc</th>
-                            <th>Tiền ca</th>
-                            <!-- <th>Nửa ca</th> -->
-                            <th>Xóa</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>`;
-
-                html += `<table style="margin-bottom:0;"><thead>`;
-                html += `<tr>
-                    <th colspan="${days + (emp.salary_type === 'shift' ? 6 : 5)}" style="background:#1976d2;color:#fff;font-size:20px;font-weight:700;text-align:center;letter-spacing:1px;">
-                        BẢNG CHẤM CÔNG ${emp.name ? emp.name.toUpperCase() : ''} THÁNG ${String(tableM).padStart(2, '0')}/${tableY}
-                    </th>
-                </tr>`;
-                html += `<tr><th style="min-width:100px">Ca</th>`;
-                html += `<th style="min-width:110px">Thời gian</th>`;
-                for(let d=1; d<=days; ++d) {
-                    const [y, m] = month.split('-').map(Number);
-                    let isToday = (curY === y && curM === m && curD === d);
-                    let isHoliday = holidayDays.includes(d);
-                    html += `<th${isToday ? ' class="today-col"' : ''}${isHoliday ? ' class="holiday-col"' : ''}>${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}`;
-                    if (isHoliday) html += `<span class="holiday-marker">Lễ</span>`;
-                    html += `</th>`;
-                }
-                html += `<th style="min-width:90px">Tổng ca</th><th style="min-width:120px">Tổng công</th>`;
-                if (emp.salary_type === 'shift') {
-                    html += `<th style="min-width:120px">Lương từng ca</th>`;
-                }
-                html += `<th style="min-width:140px">Lương thực nhận</th>`;
-                html += `</tr>`;
-                // Bỏ dòng nhập hệ số công phía trên
-                html += `<tr><th></th><th></th>`;
-                for(let d=1; d<=days; ++d) {
-                    const [y, m] = month.split('-').map(Number);
-                    const date = new Date(y, m-1, d);
-                    const weekday = ['CN','T2','T3','T4','T5','T6','T7'][date.getDay()];
-                    let isToday = (curY === y && curM === m && curD === d);
-                    let isHoliday = holidayDays.includes(d);
-                    html += `<th${isToday ? ' class="today-col"' : ''}${isHoliday ? ' class="holiday-col"' : ''}>${weekday}</th>`;
-                }
-                html += `<th></th><th></th><th></th><th></th>`;
-                html += `</tr></thead><tbody>`;
-                let caCong = [];
-                let caSalaries = [];
-                let daysWithWork = new Set();
-                let numShifts = shifts.length || 1;
-                for(let s=0; s<numShifts; ++s) {
-                    let rowWork = 0;
-                    html += `<tr>`;
-                    html += `<td style="text-align:left">${shifts[s]?.name || 'Ca '+(s+1)}</td>`;
-                    let start = (typeof shifts[s]?.start === 'string' && shifts[s].start) ? formatTime24h(shifts[s].start) : '--';
-                    let end = (typeof shifts[s]?.end === 'string' && shifts[s].end) ? formatTime24h(shifts[s].end) : '--';
-                    html += `<td>${start} - ${end}</td>`;
-                    for(let d=1; d<=days; ++d) {
-                        let checked = (empAtt[d] && empAtt[d].includes(s)) ? 'checked' : '';
-                        let shiftVal = shifts[s]?.half ? 0.5 : 1;
-                        let factor = getWorkFactor(month, emp.id, `${d}_${s}`);
-                        if (checked) rowWork += shiftVal * factor;
-                        if (empAtt[d] && empAtt[d].length > 0) daysWithWork.add(d);
-                        let isToday = (curY === tableY && curM === tableM && curD === d);
-                        let isHoliday = holidayDays.includes(d);
-                        // --- Thêm kiểm tra trạng thái cửa hàng ---
-                        let store = emp.store || '';
-                        let allowFuture = isStoreAllowFutureCheckIn(store);
-                        let isFuture = false;
-                        if (tableY > curY || (tableY === curY && tableM > curM) || (tableY === curY && tableM === curM && d > curD)) {
-                            isFuture = true;
-                        }
-                        // --- Sửa logic: chỉ cấm nếu là ngày tương lai và trạng thái cửa hàng là OFF ---
-                        let disableCheck = (isFuture && !isStoreAllowFutureCheckIn(emp.store || ''));
-                        html += `<td${isToday ? ' class="today-col"' : ''}${isHoliday ? ' class="holiday-col"' : ''}>`;
-                        if (disableCheck) {
-                            html += `<span onclick="showNotAllowedPopup(event)" style="display:inline-block;">`;
-                            html += `<input type="checkbox" onchange="toggleAttendanceShift('${emp.id}',${d},${s},this.checked)" ${(checked ? 'checked' : '')} style="width:24px;height:24px;pointer-events:none;" disabled>`;
-                            html += `</span>`;
-                        } else {
-                            html += `<input type="checkbox" onchange="toggleAttendanceShift('${emp.id}',${d},${s},this.checked)" ${(checked ? 'checked' : '')} style="width:24px;height:24px;">`;
-                        }
-                        // Luôn hiện input hệ số công cho từng ca, từng ngày
-                        html += `<input type="number" min="0" step="0.1" value="${factor}" 
-                            style="width:54px;font-size:15px;padding:3px 4px;margin-left:2px;text-align:center;"
-                            title="Hệ số công"
-                            onchange="setWorkFactor('${month}','${emp.id}','${d}_${s}',parseFloat(this.value)||1)">`;
-                        html += `</td>`;
-                    }
-                    caCong[s] = rowWork;
-                    let caSalary = parseInt(shifts[s]?.salary || 0);
-                    let salary = rowWork * caSalary;
-                    caSalaries[s] = salary;
-                    html += `<td>${rowWork}</td>`;
-                    if (s === numShifts - 1) {
-                        let tongCong = caCong.reduce((a, b) => a + b, 0);
-                        let tongLuong = 0;
-                        if (emp.salary_type === 'shift') {
-                            tongLuong = caSalaries.reduce((a, b) => a + b, 0);
-                        } else {
-                            let baseSalary = emp.base_salary || 0;
-                            let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay' + empId)) 
-                                || parseInt(localStorage.getItem('salaryPerDay') || '0');
-                            let workDaysStd = parseInt(localStorage.getItem('workDaysStd_' + empId)) 
-                                || parseInt(localStorage.getItem('workDaysStd') || '26');
-                            if (tongCong >= workDaysStd) {
-                                tongLuong = baseSalary + ((tongCong - workDaysStd) * salaryPerDay);
-                            } else {
-                                tongLuong = baseSalary - ((workDaysStd - tongCong) * salaryPerDay);
-                                if (tongLuong < 0) tongLuong = 0;
-                            }
-                        }
-                        html += `<td>${tongCong}</td>`;
-                        if (emp.salary_type === 'shift') {
-                            html += `<td>${formatVND(caSalaries[s])}</td>`;
-                        }
-                        html += `<td>${formatVND(tongLuong)}</td>`;
-                    } else {
-                        html += `<td></td>`;
-                        if (emp.salary_type === 'shift') {
-                            html += `<td>${formatVND(caSalaries[s])}</td>`;
-                        }
-                        html += `<td></td>`;
-                    }
-                    html += `</tr>`;
-                }
-                html += `</tbody></table></div>`;
+                // Chỉ giữ giao diện mới, không render bảng chấm công cũ
+                if (typeof renderShifts === 'function') renderShifts(emp.id);
             }
-            document.getElementById('attTableWrap').innerHTML = html;
-            if (emp) renderShifts(emp.id);
-            // XÓA DÒNG NÀY: setTimeout(() => renderShiftPieChartInAtt(emp, month), 0);
-
-            // Thêm ghi chú nhỏ về vấn đề kỹ thuật chấm công dưới bảng chấm công
+            const attTableWrap = document.getElementById('attTableWrap');
+            if (attTableWrap) attTableWrap.innerHTML = '';
             let note = document.getElementById('attTechNote');
-            if (!note) {
-                note = document.createElement('div');
-                note.id = 'attTechNote';
-                note.style = 'margin:10px 0 0 0;font-size:13px;color:#d32f2f;text-align:center;';
-                document.getElementById('attTableWrap').after(note);
-            }
-            note.innerHTML = 'Nếu gặp sự cố kỹ thuật khi chấm công, vui lòng liên hệ quản lý hoặc bộ phận kỹ thuật để được hỗ trợ kịp thời.';
+            if (note) note.remove();
             // Cập nhật giao diện chọn ngày lễ khi render lại
             updateHolidayInput();
+            renderDemoAttendanceCalendar();
         }
         function toggleAttendanceShift(empId, day, shiftIdx, checked) {
             const month = getCurrentMonth();
@@ -1470,6 +1745,7 @@
             updateSalaryTypeDisplay();
             showMissingAttendanceAlert();
             updateHolidayInput();
+            renderDemoAttendanceCalendar();
         })();
     </script>
     <script>
@@ -1555,8 +1831,9 @@
         }
         window.renderHolidaySummary = renderHolidaySummary;
     </script>
-    <script src="footer.js"></script>
-    <script>renderFooter();</script>
+    <script>
+        if (typeof renderFooter === 'function') renderFooter();
+    </script>
     <script>
         // ====== KIỂM TRA VÀ THIẾT LẬP QUYỀN CHẤM CÔNG ======
         function getCheckInOptions() {
@@ -1706,11 +1983,5 @@ function toggleCCPassword() {
 }
     </script>
 </body>
-
-
-<script src="att_duplicate_checker.js"></script>
-<script src="att_speech.js"></script>
-<script src="hotline.js"></script>
-<script src="device-id-checker.js"></script>
 
 </html>

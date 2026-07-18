@@ -9,6 +9,9 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             background: linear-gradient(120deg, #e3f0ff 0%, #f7f7f7 100%);
             margin: 0;
+            padding-left: 270px;
+            padding-right: 20px;
+            box-sizing: border-box;
         }
         .container {
             max-width: 1200px;
@@ -18,31 +21,95 @@
             border-radius: 22px;
             box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001;
         }
-        h2 {
+        .salary-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+            color: #fff;
+            padding: 16px 20px;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px #1976d230;
+            margin-bottom: 16px;
+        }
+        .salary-toolbar-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .salary-toolbar-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .salary-toolbar select,
+        .salary-toolbar input {
+            padding: 9px 12px;
+            border: 1px solid #dce9f6;
+            border-radius: 8px;
+            min-width: 160px;
+            background: #f7fbff;
             color: #1976d2;
-            font-size: 2.3rem;
-            margin-bottom: 22px;
-            letter-spacing: 2px;
-            text-align: center;
-            text-shadow: 0 2px 8px #1976d220;
+            font-weight: 500;
+        }
+        .salary-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 8px 24px #1976d220;
+            border: 1.5px solid #dceeff;
+            margin-bottom: 16px;
+        }
+        .salary-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #f4faff 0%, #eaf4ff 100%);
+            border: 1px solid #dfefff;
+        }
+        .salary-card-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #19539b;
+        }
+        .salary-card-subtitle {
+            font-size: 0.92rem;
+            color: #5a7da4;
+            margin-top: 2px;
+        }
+        .salary-card-badge {
+            background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+            color: #fff;
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 10px #1976d220;
         }
         .form-row {
-            margin-bottom: 22px;
+            margin-bottom: 0;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 18px 32px;
-            justify-content: center;
+            gap: 10px;
         }
         .form-row label {
             font-weight: 600;
             color: #1976d2;
-            font-size: 1.1rem;
+            font-size: 1rem;
             min-width: 120px;
         }
         select, input[type="month"] {
-            font-size: 1.1rem;
-            padding: 8px 18px;
+            font-size: 1rem;
+            padding: 8px 12px;
             border-radius: 10px;
             border: 1.5px solid #b3d1f7;
             background: #f7fbff;
@@ -58,48 +125,51 @@
         }
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 18px;
-            background: #fafcff;
-            border-radius: 16px;
-            box-shadow: 0 2px 12px #1976d210;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 0;
+            background: #fcfeff;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px #1976d220;
             overflow: hidden;
+            border: 1px solid #dceeff;
         }
         th, td {
-            border: 1px solid #e3eaf3;
-            padding: 14px 10px;
+            border: 1px solid #eef5ff;
+            padding: 12px 10px;
             text-align: center;
-            font-size: 1.08rem;
+            font-size: 1rem;
             transition: background 0.2s;
         }
         th {
-            background: linear-gradient(90deg, #e3f0ff 60%, #f7fafd 100%);
-            color: #1976d2;
+            background: linear-gradient(90deg, #e3f0ff 0%, #f4faff 100%);
+            color: #19539b;
             font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
+            font-size: 1rem;
+            letter-spacing: 0.4px;
+            border-bottom: 1px solid #dceeff;
         }
         tbody tr:hover {
-            background: #e3f0ff55;
+            background: #f4faff;
             transition: background 0.2s;
         }
         .salary-final-row {
             font-weight: bold;
             color: #388e3c;
-            font-size: 1.15rem;
-            background: #e3f9e5;
+            font-size: 1.05rem;
+            background: linear-gradient(90deg, #e8f7ea 0%, #f2fdf3 100%);
         }
         .salary-total-row {
             font-weight: bold;
             color: #d32f2f;
-            font-size: 1.15rem;
-            background: #fffbe6;
+            font-size: 1.05rem;
+            background: linear-gradient(90deg, #fff8e1 0%, #fffdf3 100%);
         }
         .salary-text-row {
             font-style: italic;
             color: #1976d2;
             background: #f7fafd;
-            font-size: 1.08rem;
+            font-size: 1rem;
         }
         .table-title {
             font-size: 1.45rem;
@@ -200,62 +270,51 @@
             color: #fff;
             text-decoration: none;
         }
-        /* Ẩn/hiện cột - panel dọc bên trái */
+        /* Ẩn/hiện cột - panel nằm dưới bảng báo cáo */
         .col-toggle-panel {
-            position: fixed;
-            top: 80px;
-            left: 0;
-            z-index: 1001;
-            background: #e3f0ff;
-            border-radius: 0 14px 14px 0;
-            box-shadow: 2px 4px 16px #1976d220;
-            padding: 18px 16px 18px 10px;
+            position: relative;
+            margin-top: 14px;
+            background: #f7fbff;
+            border-radius: 12px;
+            box-shadow: inset 0 0 0 1px #dceeff;
+            padding: 12px 14px;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            min-width: 140px;
-            border-right: 2px solid #1976d2;
-            transition: left 0.2s;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            align-items: center;
+            border: 1px solid #dceeff;
         }
         .col-toggle-panel label {
             font-weight: 500;
             color: #1976d2;
-            font-size: 1rem;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
             gap: 6px;
             cursor: pointer;
+            margin: 0;
         }
         .col-toggle-panel input[type="checkbox"] {
             accent-color: #1976d2;
-            width: 18px;
-            height: 18px;
-            margin-right: 4px;
+            width: 16px;
+            height: 16px;
+            margin-right: 2px;
         }
         .col-toggle-panel-title {
+            width: 100%;
             font-weight: bold;
             color: #1976d2;
-            font-size: 1.08rem;
-            margin-bottom: 6px;
-            letter-spacing: 1px;
+            font-size: 0.98rem;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
         }
         @media (max-width: 900px) {
-            .col-toggle-panel { min-width: 100px; padding: 10px 6px 10px 2px; }
-            .col-toggle-panel label { font-size: 0.95rem; }
+            .col-toggle-panel { padding: 10px 12px; }
+            .col-toggle-panel label { font-size: 0.9rem; }
         }
         @media (max-width: 600px) {
-            .col-toggle-panel { min-width: 70px; padding: 6px 2px 6px 0; }
-            .col-toggle-panel label { font-size: 0.88rem; }
-        }
-        /* Đẩy nội dung sang phải để không bị panel che */
-        body.with-col-toggle-panel .container {
-            margin-left: 160px;
-        }
-        @media (max-width: 900px) {
-            body.with-col-toggle-panel .container { margin-left: 110px; }
-        }
-        @media (max-width: 600px) {
-            body.with-col-toggle-panel .container { margin-left: 75px; }
+            .col-toggle-panel { padding: 8px 10px; }
+            .col-toggle-panel label { font-size: 0.85rem; }
         }
     </style>
     <script src="menu.js"></script>
@@ -343,46 +402,58 @@
                     });
                 });
         if (typeof renderMenu === 'function') renderMenu();
-        // Thêm class để đẩy nội dung sang phải
-        document.body.classList.add('with-col-toggle-panel');
     </script>
-    <!-- Panel ẩn/hiện cột bên trái -->
-    <div class="col-toggle-panel" id="colTogglePanel">
-        <div class="col-toggle-panel-title">Ẩn/Hiện cột</div>
-        <label>
-            <input type="checkbox" id="toggleColNgayCong" checked> Ngày Công
-        </label>
-        <label>
-            <input type="checkbox" id="toggleColTCLT" checked> TC/LT
-        </label>
-        <label>
-            <input type="checkbox" id="toggleColPhuCap" checked> Phụ cấp
-        </label>
-        <label>
-            <input type="checkbox" id="toggleColThuongLe" checked> Thưởng lễ
-        </label>
-        <label id="toggleColDoanhThuWrap">
-            <input type="checkbox" id="toggleColDoanhThu" checked> Doanh thu
-        </label>
-        <label>
-            <input type="checkbox" id="toggleColPhat" checked> Phạt
-        </label>
-        <label>
-            <input type="checkbox" id="toggleColTienUng" checked> Tiền ứng
-        </label>
-    </div>
     <div class="container">
-        <h2>BÁO CÁO LƯƠNG NHÂN VIÊN</h2>
-        <div class="form-row">
-            <label>Chọn cửa hàng:</label>
-            <select id="storeSelect">
-                <option value="LepShop">LepShop</option>
-                <option value="H'Farm">H'Farm</option>
-            </select>
-            <label style="margin-left:24px;">Chọn tháng:</label>
-            <input type="month" id="salaryMonth" onchange="renderSalaryReport()">
+        <div class="salary-toolbar">
+            <div class="salary-toolbar-title">Workforce 365 HRM - Báo cáo lương</div>
+            <div class="salary-toolbar-controls">
+                <div class="form-row">
+                    <label>Chọn cửa hàng:</label>
+                    <select id="storeSelect">
+                        <option value="LepShop">LepShop</option>
+                        <option value="H'Farm">H'Farm</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Chọn tháng:</label>
+                    <input type="month" id="salaryMonth" onchange="renderSalaryReport()">
+                </div>
+            </div>
         </div>
-        <div id="salaryReportWrap" style="overflow-x:auto"></div>
+        <div class="salary-card">
+            <div class="salary-card-header">
+                <div>
+                    <div class="salary-card-title">Báo cáo lương nhân viên</div>
+                    <div class="salary-card-subtitle">Tổng hợp lương theo tháng và cửa hàng</div>
+                </div>
+                <div class="salary-card-badge">Tổng hợp</div>
+            </div>
+            <div id="salaryReportWrap" style="overflow-x:auto"></div>
+            <div class="col-toggle-panel" id="colTogglePanel">
+                <div class="col-toggle-panel-title">Ẩn/Hiện cột</div>
+                <label>
+                    <input type="checkbox" id="toggleColNgayCong" checked> Ngày Công
+                </label>
+                <label>
+                    <input type="checkbox" id="toggleColTCLT" checked> TC/LT
+                </label>
+                <label>
+                    <input type="checkbox" id="toggleColPhuCap" checked> Phụ cấp
+                </label>
+                <label>
+                    <input type="checkbox" id="toggleColThuongLe" checked> Thưởng lễ
+                </label>
+                <label id="toggleColDoanhThuWrap">
+                    <input type="checkbox" id="toggleColDoanhThu" checked> Doanh thu
+                </label>
+                <label>
+                    <input type="checkbox" id="toggleColPhat" checked> Phạt
+                </label>
+                <label>
+                    <input type="checkbox" id="toggleColTienUng" checked> Tiền ứng
+                </label>
+            </div>
+        </div>
         <div style="margin-top:24px;text-align:right;">
             <button id="btnEditSalary" class="btn btn-edit" style="margin-right:12px;"><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' style='vertical-align:middle;'><path fill='#fff' d='M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/></svg> Chỉnh sửa</button>
             <button id="btnSaveSalary" class="btn btn-save" style="display:none;margin-right:12px;"><svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' style='vertical-align:middle;'><path fill='#fff' d='M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm0 16H5V5h11.17L19 7.83V19zm-7-2h2v-2h-2v2zm0-4h2v-4h-2v4z'/></svg> Lưu</button>
@@ -1208,7 +1279,5 @@
     </script>
 </body>
 <script src="hotline.js"></script>
-<script src="device-id-checker.js"></script>
-
 
 </html>

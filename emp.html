@@ -7,25 +7,32 @@
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(120deg, #e3f0ff 0%, #f7f7f7 100%);
+            background: linear-gradient(135deg, #eef5ff 0%, #f8fbff 45%, #eef7f3 100%);
             margin: 0;
             min-height: 100vh;
+            color: #16324f;
+            padding-left: 270px;
+            padding-right: 20px;
+            box-sizing: border-box;
         }
         .container {
-            max-width: 1200px; /* tăng từ 900px lên 1200px */
-            margin: 40px auto;
-            background: #fff;
-            padding: 32px 28px 28px 28px;
-            border-radius: 18px;
-            box-shadow: 0 4px 24px #0002;
+            max-width: 1400px;
+            margin: 28px auto 48px;
+            background: rgba(255,255,255,0.95);
+            padding: 30px 28px 32px 28px;
+            border-radius: 24px;
+            box-shadow: 0 18px 45px rgba(25, 118, 210, 0.12);
+            border: 1px solid #dce9f7;
             position: relative;
+            backdrop-filter: blur(6px);
         }
         h2 {
             color: #1976d2;
-            margin-bottom: 18px;
-            letter-spacing: 1px;
-            font-size: 2.8rem; /* tăng từ 2rem lên 2.8rem */
+            margin-bottom: 20px;
+            letter-spacing: 0.8px;
+            font-size: 2.4rem;
             text-align: center;
+            font-weight: 700;
         }
         table {
             width: 100%;
@@ -156,14 +163,29 @@
             box-shadow: 0 4px 16px #ff585860, 0 1.5px 0 #fff3 inset;
         }
         #addEmpForm {
-            background: #f4f8fc;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px #1976d210;
-            padding: 18px 18px 10px 18px;
+            background: linear-gradient(135deg, #f7fbff 0%, #eef5ff 100%);
+            border-radius: 16px;
+            box-shadow: 0 10px 28px rgba(25, 118, 210, 0.10);
+            padding: 20px 20px 14px 20px;
             margin-bottom: 18px;
             display: flex;
             flex-direction: column;
             gap: 0;
+            border: 1px solid #dce9f7;
+        }
+        #empTable {
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(25, 118, 210, 0.08);
+        }
+        #empTable thead th {
+            background: linear-gradient(90deg, #1976d2 0%, #4f8edb 100%);
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        #empTable tbody tr:hover {
+            background: #f3f9ff;
         }
         .emp-hide-checkbox {
             transform: scale(1.3);
@@ -228,71 +250,12 @@
 </head>
 <body>
     <script>
-    // --- LOGIN ADMIN ---
-    function showLoginModal() {
-        const modal = document.createElement('div');
-        modal.id = 'adminLoginModal';
-        modal.style = 'position:fixed;z-index:9999;left:0;top:0;width:100vw;height:100vh;background:#0007;display:flex;align-items:center;justify-content:center;';
-        modal.innerHTML = `
-            <div style="background:linear-gradient(120deg,#e3f0ff 60%,#f7f7f7 100%);padding:38px 32px 28px 32px;border-radius:18px;box-shadow:0 8px 32px #1976d230,0 2px 8px #1976d210;max-width:370px;width:96%;text-align:center;position:relative;overflow:hidden;">
-                <div style="position:absolute;top:-38px;right:-38px;width:110px;height:110px;background:radial-gradient(circle,#1976d2 60%,#2196f3 100%);opacity:0.13;border-radius:50%;z-index:0;"></div>
-                <div style="position:absolute;bottom:-38px;left:-38px;width:110px;height:110px;background:radial-gradient(circle,#43e97b 60%,#38f9d7 100%);opacity:0.13;border-radius:50%;z-index:0;"></div>
-                <div style="position:relative;z-index:1;">
-                    <svg width="54" height="54" viewBox="0 0 54 54" style="margin-bottom:10px;"><circle cx="27" cy="27" r="27" fill="#1976d2" opacity="0.13"/><path d="M27 13a7 7 0 1 1 0 14a7 7 0 0 1 0-14zm0 18c6.08 0 18 3.06 18 9.14V43H9v-2.86C9 34.06 20.92 31 27 31z" fill="#1976d2"/></svg>
-                    <h2 style='color:#1976d2;margin-bottom:18px;font-size:2.1rem;font-weight:700;letter-spacing:1px;'>Đăng nhập Admin</h2>
-                    <form id='adminLoginForm' autocomplete='off' style="margin-bottom:0;">
-                        <div style="margin-bottom:18px;">
-                            <input id='adminUser' type='text' placeholder='Tài khoản' required autofocus style='width:92%;margin-bottom:12px;padding:12px 14px;font-size:1.13rem;border-radius:8px;border:1.5px solid #b3d1f7;outline:none;transition:border 0.2s;background:#f7fbff;box-shadow:0 1.5px 0 #fff3 inset;'>
-                            <input id='adminPass' type='password' placeholder='Mật khẩu' required style='width:92%;padding:12px 14px;font-size:1.13rem;border-radius:8px;border:1.5px solid #b3d1f7;outline:none;transition:border 0.2s;background:#f7fbff;box-shadow:0 1.5px 0 #fff3 inset;'>
-                        </div>
-                        <button type='submit' class='btn btn-green' style='min-width:120px;font-size:1.13rem;border-radius:8px;'>Đăng nhập</button>
-                    </form>
-                    <div style="margin-top:18px;margin-bottom:2px;font-size:1.01rem;color:#ff9800;font-weight:500;">Chuyển hướng tới chấm công</div>
-                    <button onclick="window.location.href='att.html'" class="btn blink-att-btn" style="margin-top:6px;background:linear-gradient(90deg,#ff9800 60%,#ffd600 100%);color:#222;font-weight:600;min-width:120px;font-size:1.13rem;border-radius:8px;box-shadow:0 2px 8px #ffd60040;">Chấm Công</button>
-                    <div id='adminLoginError' style='color:#e53935;margin-top:14px;display:none;font-weight:600;font-size:1.08rem;'></div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        document.getElementById('adminLoginForm').onsubmit = function(e) {
-            e.preventDefault();
-            const user = document.getElementById('adminUser').value.trim();
-            const pass = document.getElementById('adminPass').value;
-            if (user === 'admin' && pass === 'admin') {
-                sessionStorage.setItem('isAdminLoggedIn', '1');
-                document.body.removeChild(modal);
-                renderMenu('emp');
-                document.querySelector('.container').style.display = '';
-            } else {
-                const err = document.getElementById('adminLoginError');
-                err.textContent = 'Sai tài khoản hoặc mật khẩu!';
-                err.style.display = '';
-            }
-        };
-    }
-    // Kiểm tra trạng thái đăng nhập admin
-    if (sessionStorage.getItem('isAdminLoggedIn') !== '1') {
-        window.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('.container').style.display = 'none';
-            showLoginModal();
-        });
-    } else {
+    // Login overlay removed; page renders directly.
+    if (typeof renderMenu === 'function') {
         renderMenu('emp');
-        window.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('.container').style.display = '';
-        });
     }
     </script>
-    <style>
-    .blink-att-btn {
-        animation: blink-att 1s linear infinite;
-    }
-    @keyframes blink-att {
-        0%, 100% { filter: brightness(1.1) drop-shadow(0 0 8px #ffd60080); }
-        50% { filter: brightness(1.6) drop-shadow(0 0 18px #ff9800cc); }
-    }
-    </style>
-    <div class="container" style="display:none;">
+    <div class="container">
         <h2>Workforce 365 HRM Pro - Danh Sách Nhân Viên</h2>
 
         <!-- Snackbar hoàn tác xóa -->
@@ -512,50 +475,15 @@
             this.textContent = selectMode ? 'Bỏ chọn' : 'Select';
         };
 
-        // Danh sách icon động vật
-        const animalIcons = [
-            '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🦄','🐔','🐧','🐦','🐤','🐣','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐈‍⬛','🪶','🐓','🦃','🦤','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦫','🦦','🦥','🐁','🐀','🐿','🦔'
-        ];
-
-        // Lấy hoặc gán icon động vật cho nhân viên
-        function getAnimalIconForEmp(emp) {
-            let iconMap = {};
-            try {
-                iconMap = JSON.parse(localStorage.getItem('empAnimalIcons') || '{}');
-            } catch(e) {}
-            // Ưu tiên tên đặc biệt
-            const name = (emp.name || '').trim().toUpperCase();
-            if (name === 'THẢO VY' || name === 'THAO VY') {
-                iconMap[emp.id] = '🐯'; // con hổ
-                localStorage.setItem('empAnimalIcons', JSON.stringify(iconMap));
-                return '🐯';
-            }
-            if (name === 'KIM ANH' || name === 'THU CẦM' || name === 'THU CÂM') {
-                iconMap[emp.id] = '🐶'; // con chó
-                localStorage.setItem('empAnimalIcons', JSON.stringify(iconMap));
-                return '🐶';
-            }
-            if (iconMap[emp.id]) return iconMap[emp.id];
-            // Gán icon mới nếu chưa có
-            // Dựa trên hash của id để cố định icon
-            let hash = 0;
-            for (let i = 0; i < emp.id.length; ++i) hash = (hash * 31 + emp.id.charCodeAt(i)) % animalIcons.length;
-            let icon = animalIcons[hash];
-            iconMap[emp.id] = icon;
-            localStorage.setItem('empAnimalIcons', JSON.stringify(iconMap));
-            return icon;
-        }
-
         function renderEmployees() {
             const tbody = document.querySelector('#empTable tbody');
             tbody.innerHTML = '';
             employees.forEach((emp, idx) => {
-                const icon = getAnimalIconForEmp(emp);
                 tbody.innerHTML += `<tr style="${emp.hidden ? 'opacity:0.5;background:#f8bbd0;' : ''}">
                     <td style="text-align:center;${selectMode ? '' : 'display:none;'};width:32px;">
                         <input type="checkbox" class="emp-checkbox" value="${emp.id}" style="transform:scale(1);margin:0;">
                     </td>
-                    <td><span style="font-size:1.3em;">${icon}</span> ${emp.name}</td>
+                    <td>${emp.name}</td>
                     <td>
                         <span style="display:inline-flex;align-items:center;gap:6px;position:relative;">
                             <span class="emp-id-text" style="user-select:all;">${emp.id}</span>
@@ -1325,9 +1253,10 @@
                             localStorage.setItem('payrollInputs', JSON.stringify(mergedPayrollInputs));
                         }
 
-                        alert('Nhập dữ liệu thành công! Trang sẽ được tải lại.');
+                        alert('Nhập dữ liệu thành công! Đang cập nhật bảng nhân viên.');
                         if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
-                        location.reload();
+                        renderEmployees();
+                        renderStoreOptions();
                     } else {
                         alert('File không đúng định dạng!');
                     }
@@ -1690,6 +1619,5 @@
 </body>
 </html>
 <script src="hotline.js"></script>
-<script src="device-id-checker.js"></script>
 
 </html>

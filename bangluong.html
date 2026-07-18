@@ -10,6 +10,9 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             background: linear-gradient(120deg, #e3f0ff 0%, #f7f7f7 100%);
             margin: 0;
+            padding-left: 270px;
+            padding-right: 20px;
+            box-sizing: border-box;
         }
         .container {
             max-width: 1100px;
@@ -18,6 +21,94 @@
             padding: 32px 28px 28px 28px;
             border-radius: 18px;
             box-shadow: 0 8px 32px #1976d230, 0 1.5px 4px #0001;
+        }
+        .salary-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+            color: #fff;
+            padding: 16px 20px;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px #1976d230;
+            margin-bottom: 16px;
+        }
+        .salary-toolbar-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .salary-toolbar-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .salary-toolbar select,
+        .salary-toolbar input {
+            padding: 9px 12px;
+            border: 1px solid #dce9f6;
+            border-radius: 8px;
+            min-width: 160px;
+            background: #f7fbff;
+            color: #1976d2;
+            font-weight: 500;
+        }
+        .salary-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 8px 24px #1976d220;
+            border: 1.5px solid #dceeff;
+            margin-bottom: 16px;
+        }
+        .salary-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #f4faff 0%, #eaf4ff 100%);
+            border: 1px solid #dfefff;
+        }
+        .salary-card-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #19539b;
+        }
+        .salary-card-subtitle {
+            font-size: 0.92rem;
+            color: #5a7da4;
+            margin-top: 2px;
+        }
+        .salary-card-badge {
+            background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+            color: #fff;
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 10px #1976d220;
+        }
+        .salary-summary-note {
+            background: #f7fafd;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #1976d2;
+            box-shadow: 0 1px 6px #1976d210;
+            border: 1px solid #e3f0ff;
+        }
+        #salaryTableWrap {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
         h2 {
             color: #1976d2;
@@ -528,27 +619,35 @@
             font-weight: bold;
             color: #388e3c;
             font-size: 18px;
-            background: #e3f9e5;
+            background: linear-gradient(90deg, #e8f7ea 0%, #f2fdf3 100%);
         }
         .salary-detail-table th, .salary-detail-table td {
-            padding: 10px 6px !important;
+            padding: 10px 8px !important;
             font-size: 15px !important;
         }
         .salary-detail-table {
             margin-bottom: 0;
             width: 100%;
-            background: #fafcff;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px #0001;
-            border-collapse: collapse;
+            background: #fcfeff;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px #1976d220;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border: 1px solid #dceeff;
         }
         .salary-detail-table th {
-            background: #e3f0ff;
-            color: #1976d2;
-            font-weight: 600;
+            background: linear-gradient(90deg, #e3f0ff 0%, #f4faff 100%);
+            color: #19539b;
+            font-weight: 700;
+            border-bottom: 1px solid #dceeff;
         }
         .salary-detail-table td {
             text-align: center;
+            border-bottom: 1px solid #eef5ff;
+        }
+        .salary-detail-table tr:last-child td {
+            border-bottom: none;
         }
         .salary-extra-summary-table {
             margin-top: 18px;
@@ -700,12 +799,13 @@
         }
         /* --- Thu nhỏ TỔNG CA/TỔNG LƯƠNG trong bảng lương ca --- */
         .salary-summary-chip {
-            background: #e3f0ff;
-            border-radius: 6px;
-            padding: 4px 12px 4px 10px;
+            background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+            color: #fff;
+            border-radius: 999px;
+            padding: 6px 12px;
             margin-right: 10px;
-            box-shadow: 0 2px 8px #1976d210;
-            font-size: 1.05rem;
+            box-shadow: 0 4px 12px #1976d220;
+            font-size: 0.95rem;
             display: inline-flex;
             align-items: center;
             min-width: 0;
@@ -714,9 +814,9 @@
             margin-right: 0;
         }
         .salary-summary-chip .salary-summary-value {
-            font-size: 1.18rem;
-            color: #222;
-            font-weight: bold;
+            font-size: 1.05rem;
+            color: #fff;
+            font-weight: 800;
             margin-left: 8px;
         }
         @media (max-width: 900px) {
@@ -736,28 +836,26 @@
         if (typeof renderMenu === 'function') renderMenu();
     </script>
     <div class="container">
-        <div style="display:flex;justify-content:center;align-items:center;margin-bottom:18px;">
-            <div style="border-radius:14px;padding:12px 36px;background:#e3f0ff;color:#1976d2;font-size:2.1rem;font-weight:bold;letter-spacing:2px;text-transform:uppercase;text-align:center;box-shadow:0 2px 12px #1976d220;">
-                Workforce 365 HRM Pro - BẢNG LƯƠNG NHÂN VIÊN
+        <div class="salary-toolbar">
+            <div class="salary-toolbar-title">Workforce 365 HRM - Bảng lương</div>
+            <div class="salary-toolbar-controls">
+                <select id="storeSelect" onchange="renderEmpSelect();renderSalaryTable()">
+                    <option value="">--Tất cả--</option>
+                    <option value="LepShop">LepShop</option>
+                    <option value="H'Farm">H'Farm</option>
+                </select>
+                <select id="empSelect" onchange="renderSalaryTable()"></select>
+                <input type="month" id="salaryMonth" onchange="renderSalaryTable()">
             </div>
         </div>
-        <div class="form-row">
-            <label style="width:130px;">Chọn cửa hàng:</label>
-            <select id="storeSelect" onchange="renderEmpSelect();renderSalaryTable()" style="font-size:18px;padding:8px 18px;min-width:180px;border-radius:8px;border:1.5px solid #b3d1f7;background:#f7fbff;color:#1976d2;font-weight:500;box-shadow:0 1px 6px #1976d210;">
-                <option value="">--Tất cả--</option>
-                <option value="LepShop">LepShop</option>
-                <option value="H'Farm">H'Farm</option>
-            </select>
-            <label>Chọn nhân viên:</label>
-            <select id="empSelect" onchange="renderSalaryTable()" style="font-size:20px;padding:8px 18px;min-width:220px;border-radius:8px;">
-            </select>
-        </div>
-        <div class="form-row">
-            <label>Chọn tháng:</label>
-            <input type="month" id="salaryMonth" onchange="renderSalaryTable()">
-        </div>
-        <!-- Phần nhập các khoản bổ sung: 1 hàng, có ghi chú -->
-        <div class="salary-extra-form-row">
+        <div class="salary-card">
+            <div class="salary-card-header">
+                <div>
+                    <div class="salary-card-title">Khoản bổ sung</div>
+                    <div class="salary-card-subtitle">Nhập phụ cấp, thưởng, ứng, phạt và doanh thu</div>
+                </div>
+            </div>
+            <div class="salary-extra-form-row">
             <div class="salary-extra-cell">
                 <label class="salary-extra-label" for="extraAllowance">
                     <span class="icon">💸</span>Phụ cấp:
@@ -831,6 +929,7 @@
                 <span class="salary-extra-note" style="align-self: flex-end;">•</span>
                 <span class="salary-extra-remark" style="align-self: flex-end;">Nhập hệ số tăng ca/làm thêm (ví dụ 1 = 1 ca)</span>
             </div>
+        </div>
         </div>
         <div id="salaryTableWrap" style="overflow-x:auto"></div>
     </div>
@@ -1036,11 +1135,17 @@
             let tongLuong = 0;
             let caThanhTien = [];
             let luongThucNhan = 0; // <-- Khai báo biến ở đây
-            let html = `<div style="margin-bottom:32px;">`;
-            html += `<div style="font-weight:bold;font-size:18px;margin-bottom:8px;color:#1976d2">${emp.name}</div>`;
+            let html = `<div class="salary-card">`;
+            html += `<div class="salary-card-header">
+                <div>
+                    <div class="salary-card-title">${emp.name}</div>
+                    <div class="salary-card-subtitle">Bảng tính lương tháng ${month}</div>
+                </div>
+                <div class="salary-card-badge">${emp.salary_type === 'shift' ? 'Lương ca' : 'Lương cơ bản'}</div>
+            </div>`;
 
             // Thêm ghi chú giải thích cách tính lương thực nhận
-            html += `<div style="background:#f7fafd;border-radius:8px;padding:8px 14px 8px 14px;margin-bottom:12px;font-size:14px;color:#1976d2;box-shadow:0 1px 6px #1976d210;">
+            html += `<div class="salary-summary-note">
                 <b>Ghi chú:</b> <span style="color:#d32f2f;font-weight:bold;">Lương thực nhận</span> = Tổng lương (lương ca hoặc lương cơ bản/ngày công)
                 <span style="color:#388e3c;">+ Phụ cấp + Thưởng lễ + Doanh thu (nếu có) + Tăng ca/Làm thêm</span>
                 <span style="color:#d32f2f;">- Tiền ứng - Phạt</span>
@@ -1229,7 +1334,7 @@
                 <a href="baocaoluong.html" style="color:#1976d2;font-weight:bold;text-decoration:underline;font-size:1.05rem;">Chuyển sang báo cáo lương</a>
             </div>`;
 
-            document.getElementById('salaryTableWrap').innerHTML = html;
+            document.getElementById('salaryTableWrap').innerHTML = html + '</div>';
         }
 
         // ====== KHỞI TẠO ======
@@ -1245,8 +1350,6 @@
     <script src="footer.js"></script>
     <script>renderFooter();</script>
     <script src="hotline.js"></script>
-    <script src="device-id-checker.js"></script>
-
 
 </body>
 </html>

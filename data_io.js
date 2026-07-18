@@ -44,9 +44,17 @@ function getExportData() {
         attendanceByMonth: JSON.parse(localStorage.getItem('attendanceByMonth') || '{}'),
         workDaysStd: String(Number(localStorage.getItem('workDaysStd')) || 26),
         salaryPerDay: String(Number(localStorage.getItem('salaryPerDay')) || 0),
+        workFactorByMonth: JSON.parse(localStorage.getItem('workFactorByMonth') || '{}'),
+        holidayDaysByMonth: JSON.parse(localStorage.getItem('holidayDaysByMonth') || '{}'),
         shiftsByEmp,
         shiftsByEmpByMonth,
         payrollInputs: JSON.parse(localStorage.getItem('payrollInputs') || '{}'), // advance (tiền ứng) nằm trong đây
+        payrollData: JSON.parse(localStorage.getItem('payrollData') || '{}'),
+        salaryExtrasByEmpMonth: JSON.parse(localStorage.getItem('salaryExtrasByEmpMonth') || '{}'),
+        tcByEmpMonth: JSON.parse(localStorage.getItem('tcByEmpMonth') || '{}'),
+        revenueByEmpByMonth: JSON.parse(localStorage.getItem('revenueByEmpByMonth') || '{}'),
+        manualSalaryEdits: JSON.parse(localStorage.getItem('manualSalaryEdits') || '{}'),
+        salaryReportColToggles: JSON.parse(localStorage.getItem('salaryReportColToggles') || '{}'),
         notes: (() => {
             let notes = {};
             Object.keys(localStorage).forEach(k => {
@@ -181,20 +189,40 @@ async function autoSendDataToTelegramBot() {
     } catch (e) {}
 }
 
-// Hàm nhập lại toàn bộ dữ liệu từ file JSON (áp dụng lại dữ liệu)
-function importAllData(jsonData) {
+// Hàm nhập lại toàn bộ dữ liệu từ file JSON hoặc từ Firebase (áp dụng lại dữ liệu)
+function importAllData(jsonData, options) {
+    const opts = options || {};
+    const suppressUpload = Boolean(opts && opts.source === 'cloud');
+    const previousRemoteSyncFlag = window.__HRM_APPLYING_REMOTE_SYNC__;
+    if (suppressUpload) {
+        window.__HRM_APPLYING_REMOTE_SYNC__ = true;
+    }
     try {
-        const data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+        const parsed = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+        const data = (parsed && parsed.data && typeof parsed.data === 'object') ? parsed.data : parsed;
+        const incomingStoreName = (parsed && parsed.store) || (parsed && parsed.storeName) || (data && data.storeName) || '';
+        if (incomingStoreName) {
+            localStorage.setItem('storeName', incomingStoreName);
+        }
         // Xóa sạch các key liên quan trước khi nhập lại
         Object.keys(localStorage).forEach(k => {
             if (
                 k === 'employees' ||
+                k === 'nhanvien' ||
                 k === 'attendanceByMonth' ||
                 k === 'workDaysStd' ||
                 k === 'salaryPerDay' ||
+                k === 'workFactorByMonth' ||
+                k === 'holidayDaysByMonth' ||
                 k === 'shiftsByEmp' ||
                 k === 'shiftsByEmpByMonth' ||
                 k === 'payrollInputs' ||
+                k === 'payrollData' ||
+                k === 'salaryExtrasByEmpMonth' ||
+                k === 'tcByEmpMonth' ||
+                k === 'revenueByEmpByMonth' ||
+                k === 'manualSalaryEdits' ||
+                k === 'salaryReportColToggles' ||
                 k.startsWith('note_') ||
                 k.startsWith('workDaysStd_') ||
                 k.startsWith('salaryPerDay_')
@@ -203,26 +231,33 @@ function importAllData(jsonData) {
             }
         });
 
-        // --- Merge employees: nếu trùng ID thì thêm mới với ID khác và tên khác ---
-        let oldEmployees = JSON.parse(localStorage.getItem('employees') || '[]');
-        let newEmployees = data.employees || [];
-        let existingIds = new Set(oldEmployees.map(e => e.id));
-        let existingNames = new Set(oldEmployees.map(e => e.name));
+        // --- Normalize employees: luôn chuyển thành array trước khi merge ---
+        let oldEmployees = Array.isArray(JSON.parse(localStorage.getItem('employees') || '[]')) ? JSON.parse(localStorage.getItem('employees') || '[]') : [];
+        let candidateEmployees = data.employees || [];
+        let newEmployees = Array.isArray(candidateEmployees)
+            ? candidateEmployees
+            : (candidateEmployees && typeof candidateEmployees === 'object' && Array.isArray(candidateEmployees.items)
+                ? candidateEmployees.items
+                : (candidateEmployees && typeof candidateEmployees === 'object' && candidateEmployees.id
+                    ? [candidateEmployees]
+                    : []));
+        let existingIds = new Set(oldEmployees.map(e => e && e.id));
+        let existingNames = new Set(oldEmployees.map(e => e && e.name));
         let mergedEmployees = [...oldEmployees];
 
         newEmployees.forEach(emp => {
-            if (existingIds.has(emp.id)) {
-                // Tìm tên mới không trùng
+            if (!emp || typeof emp !== 'object') return;
+            const empId = emp.id;
+            if (existingIds.has(empId)) {
                 let baseName = emp.name || 'Nhân viên';
                 let suffix = 2;
                 let newName = baseName;
                 while (existingNames.has(newName)) {
                     newName = `${baseName} (${suffix++})`;
                 }
-                // Tạo ID mới duy nhất
-                let newId = emp.id;
+                let newId = empId;
                 while (existingIds.has(newId)) {
-                    newId = emp.id + '_' + Math.floor(Math.random() * 1000000);
+                    newId = empId + '_' + Math.floor(Math.random() * 1000000);
                 }
                 let newEmp = { ...emp, id: newId, name: newName };
                 mergedEmployees.push(newEmp);
@@ -230,7 +265,7 @@ function importAllData(jsonData) {
                 existingNames.add(newName);
             } else {
                 mergedEmployees.push(emp);
-                existingIds.add(emp.id);
+                existingIds.add(empId);
                 existingNames.add(emp.name);
             }
         });
@@ -238,10 +273,15 @@ function importAllData(jsonData) {
         localStorage.setItem('employees', JSON.stringify(mergedEmployees));
 
         // Ghi lại dữ liệu
-        if (data.employees) localStorage.setItem('employees', JSON.stringify(data.employees));
+        if (data.employees) {
+            localStorage.setItem('employees', JSON.stringify(newEmployees));
+            localStorage.setItem('nhanvien', JSON.stringify(newEmployees));
+        }
         if (data.attendanceByMonth) localStorage.setItem('attendanceByMonth', JSON.stringify(data.attendanceByMonth));
-        if (data.workDaysStd) localStorage.setItem('workDaysStd', data.workDaysStd);
-        if (data.salaryPerDay) localStorage.setItem('salaryPerDay', data.salaryPerDay);
+        if (data.workDaysStd !== undefined) localStorage.setItem('workDaysStd', data.workDaysStd);
+        if (data.salaryPerDay !== undefined) localStorage.setItem('salaryPerDay', data.salaryPerDay);
+        if (data.workFactorByMonth) localStorage.setItem('workFactorByMonth', JSON.stringify(data.workFactorByMonth));
+        if (data.holidayDaysByMonth) localStorage.setItem('holidayDaysByMonth', JSON.stringify(data.holidayDaysByMonth));
         if (data.shiftsByEmp) localStorage.setItem('shiftsByEmp', JSON.stringify(data.shiftsByEmp));
         if (data.shiftsByEmpByMonth) {
             localStorage.setItem('shiftsByEmpByMonth', JSON.stringify(data.shiftsByEmpByMonth));
@@ -249,6 +289,24 @@ function importAllData(jsonData) {
         // Ghi lại payrollInputs (bao gồm TC/LT, Phụ cấp, Thưởng lễ, Phạt)
         if (data.payrollInputs) {
             localStorage.setItem('payrollInputs', JSON.stringify(data.payrollInputs));
+        }
+        if (data.payrollData) {
+            localStorage.setItem('payrollData', JSON.stringify(data.payrollData));
+        }
+        if (data.salaryExtrasByEmpMonth) {
+            localStorage.setItem('salaryExtrasByEmpMonth', JSON.stringify(data.salaryExtrasByEmpMonth));
+        }
+        if (data.tcByEmpMonth) {
+            localStorage.setItem('tcByEmpMonth', JSON.stringify(data.tcByEmpMonth));
+        }
+        if (data.revenueByEmpByMonth) {
+            localStorage.setItem('revenueByEmpByMonth', JSON.stringify(data.revenueByEmpByMonth));
+        }
+        if (data.manualSalaryEdits) {
+            localStorage.setItem('manualSalaryEdits', JSON.stringify(data.manualSalaryEdits));
+        }
+        if (data.salaryReportColToggles) {
+            localStorage.setItem('salaryReportColToggles', JSON.stringify(data.salaryReportColToggles));
         }
         if (data.notes) {
             Object.keys(data.notes).forEach(k => {
@@ -281,12 +339,23 @@ function importAllData(jsonData) {
             localStorage.setItem('sync_data_trigger', Date.now().toString());
         }
 
-        // Reload lại trang hiện tại để cập nhật giao diện (nếu muốn)
-        if (typeof location !== 'undefined' && location.reload) {
-            location.reload();
+        // Không tự reload lại trang khi nhập dữ liệu từ cloud; chỉ cập nhật localStorage.
+        if (suppressUpload) {
+            try {
+                const refreshDelay = Number(window.__HRM_CLOUD_REFRESH_DELAY__ || 500);
+                window.setTimeout(() => {
+                    if (typeof window !== 'undefined' && window.dispatchEvent) {
+                        window.dispatchEvent(new Event('storage'));
+                    }
+                }, refreshDelay);
+            } catch (refreshErr) {}
         }
     } catch (e) {
         alert('Lỗi khi nhập dữ liệu: ' + e.message);
+    } finally {
+        if (suppressUpload) {
+            window.__HRM_APPLYING_REMOTE_SYNC__ = previousRemoteSyncFlag;
+        }
     }
 }
 
@@ -545,3 +614,350 @@ async function sendInfoToTelegram() {
         })
     });
 }
+
+// ====== Đồng bộ dữ liệu lên Firebase theo cửa hàng ======
+(function () {
+    const STORAGE_SYNC_HOOK_KEY = '__HRM_STORAGE_SYNC_HOOKED__';
+    let cloudSyncTimer = null;
+    let cloudSyncPromise = null;
+    let firebaseReadyPromise = null;
+
+    const FIREBASE_CONFIG = {
+        apiKey: 'AIzaSyDyZajylUKBtr_GTOMUTCNA8CXmlHe6ZWQ',
+        authDomain: 'times-pro-hrm.firebaseapp.com',
+        projectId: 'times-pro-hrm',
+        databaseURL: 'https://times-pro-hrm-default-rtdb.firebaseio.com',
+        storageBucket: 'times-pro-hrm.firebasestorage.app',
+        messagingSenderId: '216256760560',
+        appId: '1:216256760560:web:baa68be4452885bec5d035',
+        measurementId: 'G-9KK7L2VS67'
+    };
+
+    function getStoreSlug() {
+        const windowCfg = (window.__HRM_FIREBASE_SYNC__ || window.__HRM_CLOUD_SYNC__ || {});
+        const explicitSlug = String(windowCfg.storeSlug || localStorage.getItem('cloudStoreSlug') || localStorage.getItem('storeSlug') || '').trim();
+        if (explicitSlug) {
+            localStorage.setItem('cloudStoreSlug', explicitSlug);
+            return explicitSlug;
+        }
+        const storeName = String(localStorage.getItem('storeName') || windowCfg.storeName || 'LepShop').trim();
+        const slug = storeName
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/\p{Diacritic}/gu, '')
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_+|_+$/g, '') || 'default_store';
+        localStorage.setItem('cloudStoreSlug', slug);
+        return slug;
+    }
+
+    function getCloudSyncConfig() {
+        const windowCfg = (window.__HRM_FIREBASE_SYNC__ || window.__HRM_CLOUD_SYNC__ || {});
+        const endpoint = windowCfg.endpoint || localStorage.getItem('firebaseSyncEndpoint') || localStorage.getItem('cloudSyncEndpoint') || '';
+        const databaseUrl = windowCfg.databaseURL || windowCfg.databaseUrl || localStorage.getItem('firebaseDatabaseUrl') || FIREBASE_CONFIG.databaseURL || '';
+        const enabled = windowCfg.enabled !== false && (
+            windowCfg.enabled === true ||
+            endpoint ||
+            databaseUrl ||
+            localStorage.getItem('firebaseSyncEnabled') === '1' ||
+            localStorage.getItem('cloudSyncEnabled') === '1' ||
+            Boolean(FIREBASE_CONFIG.projectId)
+        );
+        return { enabled, endpoint, databaseUrl };
+    }
+
+    function cloneDataForCloud() {
+        const exportData = getExportData();
+        const storeName = String(localStorage.getItem('storeName') || 'LepShop').trim();
+        const baseMeta = {
+            store: storeName || 'LepShop',
+            storeSlug: getStoreSlug(),
+            timestamp: new Date().toISOString()
+        };
+        return {
+            meta: {
+                ...baseMeta,
+                data: {
+                    storeName: storeName || 'LepShop',
+                    storeSlug: getStoreSlug(),
+                    version: 2
+                }
+            },
+            employees: {
+                ...baseMeta,
+                data: Array.isArray(exportData.employees) ? exportData.employees : []
+            },
+            attendance: {
+                ...baseMeta,
+                data: exportData.attendanceByMonth || {}
+            },
+            payroll: {
+                ...baseMeta,
+                data: {
+                    payrollInputs: exportData.payrollInputs || {},
+                    payrollData: exportData.payrollData || {},
+                    salaryExtrasByEmpMonth: exportData.salaryExtrasByEmpMonth || {},
+                    tcByEmpMonth: exportData.tcByEmpMonth || {},
+                    revenueByEmpByMonth: exportData.revenueByEmpByMonth || {},
+                    manualSalaryEdits: exportData.manualSalaryEdits || {},
+                    salaryReportColToggles: exportData.salaryReportColToggles || {}
+                }
+            },
+            schedules: {
+                ...baseMeta,
+                data: {
+                    workSchedules: exportData.workSchedules || {},
+                    scheduleShiftsByMonth: exportData.scheduleShiftsByMonth || {},
+                    workScheduleWeekTemplate: exportData.workScheduleWeekTemplate || {},
+                    workScheduleWeekNames: exportData.workScheduleWeekNames || {},
+                    workDaysStd: exportData.workDaysStd,
+                    salaryPerDay: exportData.salaryPerDay,
+                    shiftsByEmp: exportData.shiftsByEmp || {},
+                    shiftsByEmpByMonth: exportData.shiftsByEmpByMonth || {},
+                    workDaysStdByEmp: exportData.workDaysStdByEmp || {},
+                    salaryPerDayByEmp: exportData.salaryPerDayByEmp || {}
+                }
+            },
+            notes: {
+                ...baseMeta,
+                data: exportData.notes || {}
+            }
+        };
+    }
+
+    function unwrapCloudSegment(payload) {
+        if (!payload || typeof payload !== 'object') return payload;
+        if (Object.prototype.hasOwnProperty.call(payload, 'data')) {
+            return payload.data;
+        }
+        return payload;
+    }
+
+    async function ensureFirebaseReady() {
+        if (firebaseReadyPromise) return firebaseReadyPromise;
+        firebaseReadyPromise = (async () => {
+            try {
+                const cfg = getCloudSyncConfig();
+                const firebaseConfig = {
+                    ...FIREBASE_CONFIG,
+                    databaseURL: cfg.databaseUrl || FIREBASE_CONFIG.databaseURL || ''
+                };
+                const [{ initializeApp }, { getDatabase, ref, set, get }] = await Promise.all([
+                    import('https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js'),
+                    import('https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js')
+                ]);
+                const app = initializeApp(firebaseConfig, 'hrm-sync');
+                const database = getDatabase(app, firebaseConfig.databaseURL || undefined);
+                return { app, database, ref, set, get };
+            } catch (err) {
+                console.warn('Firebase SDK init failed, sync will be skipped.', err);
+                throw err;
+            }
+        })();
+        return firebaseReadyPromise;
+    }
+
+    async function readSnapshotFromCloud() {
+        const cfg = getCloudSyncConfig();
+        if (!cfg.enabled) return null;
+        try {
+            const firebaseApi = await ensureFirebaseReady();
+            const storeSlug = getStoreSlug();
+            const basePath = `stores/${encodeURIComponent(storeSlug)}`;
+            console.log('[HRM sync] Reading cloud snapshot from', basePath);
+            const segments = ['meta', 'employees', 'attendance', 'payroll', 'schedules', 'notes'];
+            const chunkValues = await Promise.all(segments.map(async (segment) => {
+                const dbRef = firebaseApi.ref(firebaseApi.database, `${basePath}/${segment}`);
+                const snapshot = await firebaseApi.get(dbRef);
+                return snapshot && typeof snapshot.val === 'function' ? snapshot.val() : null;
+            }));
+            const [metaChunk, employeesChunk, attendanceChunk, payrollChunk, schedulesChunk, notesChunk] = chunkValues;
+            const combined = {
+                store: (metaChunk && metaChunk.store) || (metaChunk && metaChunk.data && metaChunk.data.storeName) || '',
+                storeSlug: (metaChunk && metaChunk.storeSlug) || getStoreSlug(),
+                timestamp: (metaChunk && metaChunk.timestamp) || new Date().toISOString(),
+                employees: unwrapCloudSegment(employeesChunk) || [],
+                attendanceByMonth: unwrapCloudSegment(attendanceChunk) || {},
+                payrollInputs: (unwrapCloudSegment(payrollChunk) && unwrapCloudSegment(payrollChunk).payrollInputs) || {},
+                payrollData: (unwrapCloudSegment(payrollChunk) && unwrapCloudSegment(payrollChunk).payrollData) || {},
+                salaryExtrasByEmpMonth: (unwrapCloudSegment(payrollChunk) && unwrapCloudSegment(payrollChunk).salaryExtrasByEmpMonth) || {},
+                tcByEmpMonth: (unwrapCloudSegment(payrollChunk) && unwrapCloudSegment(payrollChunk).tcByEmpMonth) || {},
+                revenueByEmpByMonth: (unwrapCloudSegment(payrollChunk) && unwrapCloudSegment(payrollChunk).revenueByEmpByMonth) || {},
+                manualSalaryEdits: (unwrapCloudSegment(payrollChunk) && unwrapCloudSegment(payrollChunk).manualSalaryEdits) || {},
+                salaryReportColToggles: (unwrapCloudSegment(payrollChunk) && unwrapCloudSegment(payrollChunk).salaryReportColToggles) || {},
+                notes: unwrapCloudSegment(notesChunk) || {},
+                workSchedules: (unwrapCloudSegment(schedulesChunk) && unwrapCloudSegment(schedulesChunk).workSchedules) || {},
+                scheduleShiftsByMonth: (unwrapCloudSegment(schedulesChunk) && unwrapCloudSegment(schedulesChunk).scheduleShiftsByMonth) || {},
+                workScheduleWeekTemplate: (unwrapCloudSegment(schedulesChunk) && unwrapCloudSegment(schedulesChunk).workScheduleWeekTemplate) || {},
+                workScheduleWeekNames: (unwrapCloudSegment(schedulesChunk) && unwrapCloudSegment(schedulesChunk).workScheduleWeekNames) || {},
+                workDaysStd: (unwrapCloudSegment(schedulesChunk) && unwrapCloudSegment(schedulesChunk).workDaysStd) || '26',
+                salaryPerDay: (unwrapCloudSegment(schedulesChunk) && unwrapCloudSegment(schedulesChunk).salaryPerDay) || '0',
+                shiftsByEmp: (unwrapCloudSegment(schedulesChunk) && unwrapCloudSegment(schedulesChunk).shiftsByEmp) || {},
+                shiftsByEmpByMonth: (unwrapCloudSegment(schedulesChunk) && unwrapCloudSegment(schedulesChunk).shiftsByEmpByMonth) || {},
+                workDaysStdByEmp: (unwrapCloudSegment(schedulesChunk) && unwrapCloudSegment(schedulesChunk).workDaysStdByEmp) || {},
+                salaryPerDayByEmp: (unwrapCloudSegment(schedulesChunk) && unwrapCloudSegment(schedulesChunk).salaryPerDayByEmp) || {},
+                storeName: (metaChunk && metaChunk.data && metaChunk.data.storeName) || (metaChunk && metaChunk.store) || ''
+            };
+            if (combined && Object.keys(combined).length > 0) {
+                console.log('[HRM sync] Cloud snapshot loaded', { basePath, timestamp: combined.timestamp, storeSlug: combined.storeSlug });
+                return combined;
+            }
+        } catch (err) {
+            if (cfg.endpoint) {
+                try {
+                    const response = await fetch(cfg.endpoint, { method: 'GET' });
+                    if (response.ok) return await response.json();
+                } catch (fallbackErr) {
+                    console.warn('Cloud read fallback failed.', fallbackErr);
+                }
+            }
+        }
+        return null;
+    }
+
+    async function syncFromCloud() {
+        const cfg = getCloudSyncConfig();
+        if (!cfg.enabled) return false;
+        try {
+            const remotePayload = await readSnapshotFromCloud();
+            if (!remotePayload || Object.keys(remotePayload).length === 0) return false;
+            console.log('[HRM sync] Applying remote snapshot', { timestamp: remotePayload.timestamp, storeSlug: remotePayload.storeSlug, storeName: remotePayload.storeName });
+            const remoteTimestamp = remotePayload.timestamp ? new Date(remotePayload.timestamp).getTime() : 0;
+            const lastSeenTimestamp = Number(localStorage.getItem('cloudSyncLastRemoteTimestamp') || 0);
+            const storedStoreSlug = String(localStorage.getItem('cloudSyncLastRemoteStore') || '');
+            const currentStoreSlug = getStoreSlug();
+            const shouldApply = !remoteTimestamp || !lastSeenTimestamp || remoteTimestamp >= lastSeenTimestamp || storedStoreSlug !== currentStoreSlug;
+            if (!shouldApply) return false;
+            const previousRemoteSyncFlag = window.__HRM_APPLYING_REMOTE_SYNC__;
+            window.__HRM_APPLYING_REMOTE_SYNC__ = true;
+            try {
+                localStorage.setItem('cloudSyncLastRemoteTimestamp', String(remoteTimestamp || Date.now()));
+                localStorage.setItem('cloudSyncLastRemoteStore', currentStoreSlug);
+                importAllData(remotePayload, { source: 'cloud' });
+                window.dispatchEvent(new Event('hrm:cloud-sync-applied'));
+            } finally {
+                window.__HRM_APPLYING_REMOTE_SYNC__ = previousRemoteSyncFlag;
+            }
+            return true;
+        } catch (err) {
+            console.warn('Cloud pull failed.', err);
+            return false;
+        }
+    }
+
+    async function uploadSnapshotToCloud() {
+        const cfg = getCloudSyncConfig();
+        if (!cfg.enabled) return false;
+
+        const payload = cloneDataForCloud();
+        const currentStoreSlug = getStoreSlug();
+        localStorage.setItem('cloudStoreSlug', currentStoreSlug);
+        try {
+            const firebaseApi = await ensureFirebaseReady();
+            const basePath = `stores/${encodeURIComponent(currentStoreSlug)}`;
+            const writes = Object.keys(payload).map(async (segment) => {
+                const dbRef = firebaseApi.ref(firebaseApi.database, `${basePath}/${segment}`);
+                await firebaseApi.set(dbRef, payload[segment]);
+            });
+            await Promise.all(writes);
+            localStorage.setItem('cloudSyncLastSuccess', new Date().toISOString());
+            return true;
+        } catch (err) {
+            if (cfg.endpoint) {
+                try {
+                    const response = await fetch(cfg.endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) {
+                        localStorage.setItem('cloudSyncLastSuccess', new Date().toISOString());
+                        return true;
+                    }
+                } catch (fallbackErr) {
+                    console.warn('Firebase fallback sync failed.', fallbackErr);
+                }
+            }
+            throw err;
+        }
+    }
+
+    function scheduleCloudSync() {
+        const cfg = getCloudSyncConfig();
+        if (!cfg.enabled) return;
+        if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+        cloudSyncTimer = setTimeout(() => {
+            if (!cloudSyncPromise) {
+                cloudSyncPromise = uploadSnapshotToCloud().catch(err => {
+                    console.warn('HRM cloud sync error:', err);
+                    localStorage.setItem('cloudSyncLastError', String(err && err.message ? err.message : err));
+                    return false;
+                }).finally(() => {
+                    cloudSyncPromise = null;
+                });
+            }
+        }, 900);
+    }
+
+    function installStorageSyncHook() {
+        if (window[STORAGE_SYNC_HOOK_KEY]) return;
+        window[STORAGE_SYNC_HOOK_KEY] = true;
+
+        const storageInstance = window.localStorage;
+        const originalSetItem = storageInstance.setItem.bind(storageInstance);
+        const originalRemoveItem = storageInstance.removeItem.bind(storageInstance);
+        const originalClear = storageInstance.clear.bind(storageInstance);
+
+        Storage.prototype.setItem = function(key, value) {
+            const strValue = String(value);
+            originalSetItem.call(this, key, strValue);
+            const suppressUpload = Boolean(window.__HRM_APPLYING_REMOTE_SYNC__);
+            if (!suppressUpload && !['sync_data_trigger', 'cloudSyncLastSuccess', 'cloudSyncLastError'].includes(String(key))) {
+                scheduleCloudSync();
+            }
+        };
+
+        Storage.prototype.removeItem = function(key) {
+            originalRemoveItem.call(this, key);
+            const suppressUpload = Boolean(window.__HRM_APPLYING_REMOTE_SYNC__);
+            if (!suppressUpload && !['sync_data_trigger', 'cloudSyncLastSuccess', 'cloudSyncLastError'].includes(String(key))) {
+                scheduleCloudSync();
+            }
+        };
+
+        Storage.prototype.clear = function() {
+            originalClear.call(this);
+            const suppressUpload = Boolean(window.__HRM_APPLYING_REMOTE_SYNC__);
+            if (!suppressUpload) {
+                scheduleCloudSync();
+            }
+        };
+    }
+
+    installStorageSyncHook();
+
+    window.addEventListener('DOMContentLoaded', function () {
+        const cfg = getCloudSyncConfig();
+        if (cfg.enabled) {
+            scheduleCloudSync();
+            setTimeout(() => {
+                syncFromCloud().catch(() => {});
+            }, 1200);
+            if (!window.__HRM_CLOUD_PULL_INTERVAL__) {
+                window.__HRM_CLOUD_PULL_INTERVAL__ = window.setInterval(() => {
+                    syncFromCloud().catch(() => {});
+                }, 8000);
+            }
+        }
+    });
+
+    window.syncAllDataToCloud = function () {
+        console.log('[HRM sync] Manual upload requested');
+        return uploadSnapshotToCloud();
+    };
+
+    window.syncDataFromCloud = function () {
+        console.log('[HRM sync] Manual pull requested');
+        return syncFromCloud();
+    };
+})();
