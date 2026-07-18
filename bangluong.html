@@ -851,8 +851,8 @@
         <div class="salary-card">
             <div class="salary-card-header">
                 <div>
-                    <div class="salary-card-title">Khoản bổ sung</div>
-                    <div class="salary-card-subtitle">Nhập phụ cấp, thưởng, ứng, phạt và doanh thu</div>
+                    <div class="salary-card-title">Khoản cộng / trừ</div>
+                    <div class="salary-card-subtitle">Nhập các khoản cộng/trừ và doanh thu</div>
                 </div>
             </div>
             <div class="salary-extra-form-row">
@@ -869,7 +869,7 @@
             </div>
             <div class="salary-extra-cell">
                 <label class="salary-extra-label" for="extraBonus">
-                    <span class="icon">🎁</span>Thưởng lễ:
+                    <span class="icon">🎁</span>Thưởng:
                 </label>
                 <input type="text" class="salary-extra-input" id="extraBonus"
                     value=""
@@ -880,30 +880,30 @@
             </div>
             <div class="salary-extra-cell">
                 <label class="salary-extra-label" for="extraAdvance">
-                    <span class="icon">💳</span>Tiền ứng:
+                    <span class="icon">💳</span>Ứng trước:
                 </label>
                 <input type="text" class="salary-extra-input" id="extraAdvance"
                     value=""
                     oninput="formatVNDInput(this)"
                     onchange="saveSalaryExtrasUI('advance')">
                 <span class="salary-extra-note">•</span>
-                <span class="salary-extra-remark">Tiền ứng trong tháng</span>
+                <span class="salary-extra-remark">Số tiền ứng trước trong tháng</span>
             </div>
             <div class="salary-extra-cell">
                 <label class="salary-extra-label" for="extraPenalty">
-                    <span class="icon">⚠️</span>Phạt:
+                    <span class="icon">⚠️</span>Khấu trừ phạt:
                 </label>
                 <input type="text" class="salary-extra-input" id="extraPenalty"
                     value=""
                     oninput="formatVNDInput(this)"
                     onchange="saveSalaryExtrasUI('penalty')">
                 <span class="salary-extra-note">•</span>
-                <span class="salary-extra-remark">Các khoản phạt tháng này</span>
+                <span class="salary-extra-remark">Các khoản phạt cần khấu trừ</span>
             </div>
             <!-- Thêm phần nhập Doanh Thu cho nhân viên lương cơ bản -->
             <div class="salary-extra-cell" id="revenueInputCell" style="display:none;">
                 <label class="salary-extra-label" for="extraRevenue">
-                    <span class="icon">📈</span>Doanh Thu:
+                    <span class="icon">📈</span>Doanh thu tháng:
                 </label>
                 <input type="text" class="salary-extra-input" id="extraRevenue"
                     value=""
@@ -916,7 +916,7 @@
             <div class="salary-extra-cell" id="tcInputCell" style="flex-direction: row; align-items: flex-end; gap: 8px;">
                 <div style="display: flex; flex-direction: column;">
                     <label class="salary-extra-label" for="extraTC">
-                        <span class="icon">⏫</span>TC/LT:
+                        <span class="icon">⏫</span>Tăng ca / Làm thêm:
                     </label>
                     <input type="number" min="0" step="0.1" class="salary-extra-input" id="extraTC"
                         value=""
@@ -959,10 +959,35 @@
         }
         function formatVND(val) {
             if (isNaN(val)) return '0 ₫';
-            return Number(val).toLocaleString('vi-VN') + ' ₫';
+            const num = Math.round(Number(val) / 10000) * 10000;
+            return num.toLocaleString('vi-VN') + ' ₫';
         }
         function parseCurrency(val) {
             return Number((val+'').replace(/[^\d\-]/g, '')) || 0;
+        }
+        function countPayableWorkDays(empAtt, paidLeaveDays, monthDays) {
+            let count = 0;
+            for (let d = 1; d <= monthDays; d++) {
+                const dayKey = String(d);
+                const rawValue = empAtt && (empAtt[d] ?? empAtt[dayKey] ?? empAtt[Number(d)]);
+                let hasAttendance = false;
+                if (rawValue !== undefined && rawValue !== null) {
+                    if (Array.isArray(rawValue)) {
+                        hasAttendance = rawValue.length > 0;
+                    } else if (typeof rawValue === 'string') {
+                        hasAttendance = rawValue.trim() !== '';
+                    } else if (typeof rawValue === 'number') {
+                        hasAttendance = !Number.isNaN(rawValue);
+                    } else if (typeof rawValue === 'object') {
+                        hasAttendance = Object.keys(rawValue).length > 0;
+                    } else {
+                        hasAttendance = true;
+                    }
+                }
+                const isPaidLeave = Array.isArray(paidLeaveDays) && paidLeaveDays.some(item => String(item) === dayKey || Number(item) === d);
+                if (hasAttendance || isPaidLeave) count++;
+            }
+            return count;
         }
         function getShiftsForEmpMonth(empId, month) {
             if (!shiftsByEmpByMonth[month]) shiftsByEmpByMonth[month] = {};
@@ -1087,6 +1112,7 @@
             let salaryPerDay = parseInt(localStorage.getItem('salaryPerDay_' + empId)) 
                 || parseInt(localStorage.getItem('salaryPerDay') || '0');
             let extras = getSalaryExtras(emp.id, month);
+            let paidLeaveDays = (JSON.parse(localStorage.getItem('paidLeaveDaysByMonth') || '{}')[month]?.[emp.id] || []) || [];
 
             // Luôn cập nhật lại các khoản phụ cấp, thưởng lễ, ứng, phạt từ localStorage khi render
             document.getElementById('extraAllowance').value = extras.allowance ? Number(extras.allowance).toLocaleString('vi-VN') : '';
@@ -1146,9 +1172,11 @@
 
             // Thêm ghi chú giải thích cách tính lương thực nhận
             html += `<div class="salary-summary-note">
-                <b>Ghi chú:</b> <span style="color:#d32f2f;font-weight:bold;">Lương thực nhận</span> = Tổng lương (lương ca hoặc lương cơ bản/ngày công)
-                <span style="color:#388e3c;">+ Phụ cấp + Thưởng lễ + Doanh thu (nếu có) + Tăng ca/Làm thêm</span>
+                <b>Ghi chú:</b> <span style="color:#d32f2f;font-weight:bold;">Lương thực nhận</span> = Tổng lương (lương ca hoặc lương cơ bản theo ngày công)
+                <span style="color:#388e3c;">+ Phụ cấp + Thưởng + Doanh thu (nếu có) + Tăng ca/Làm thêm</span>
                 <span style="color:#d32f2f;">- Tiền ứng - Phạt</span>
+                <br>
+                <span style="color:#888;font-size:13px;">PL được tính như ngày công; KL không được tính vào lương.</span>
                 <br>
                 <span style="color:#888;font-size:13px;">Các khoản cộng/trừ này nhập ở phía trên, tùy loại nhân viên sẽ có thêm mục doanh thu hoặc chọn ca tăng ca.</span>
             </div>`;
@@ -1202,11 +1230,11 @@
                     </tr>
                 </thead><tbody>
                     <tr>
-                        <td style="text-align:left;">Tổng lương ca</td>
+                        <td style="text-align:left;">Tổng tiền lương ca</td>
                         <td style="text-align:right;">${formatVND(tongLuong)}</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left;">TC/LT (Tăng ca/Làm thêm - ${shifts[tcShiftIndex]?.name || 'Ca ' + (tcShiftIndex+1)})</td>
+                        <td style="text-align:left;">Tăng ca / Làm thêm - ${shifts[tcShiftIndex]?.name || 'Ca ' + (tcShiftIndex+1)}</td>
                         <td style="text-align:right;">${formatVND(tienTC)}</td>
                     </tr>
                     <tr>
@@ -1214,43 +1242,40 @@
                         <td style="text-align:right;">${formatVND(extras.allowance)}</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left;">Thưởng lễ</td>
+                        <td style="text-align:left;">Thưởng</td>
                         <td style="text-align:right;">${formatVND(extras.bonus)}</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left;">Phạt</td>
+                        <td style="text-align:left;">Khấu trừ phạt</td>
                         <td style="text-align:right;">- ${formatVND(extras.penalty)}</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left;">Tiền ứng</td>
+                        <td style="text-align:left;">Khấu trừ ứng trước</td>
                         <td style="text-align:right;">- ${formatVND(extras.advance)}</td>
                     </tr>
                     <tr class="salary-final-row">
-                        <td style="text-align:left;font-weight:bold;">LƯƠNG THỰC NHẬN</td>
+                        <td style="text-align:left;font-weight:bold;">Lương thực nhận</td>
                         <td style="text-align:right;font-weight:bold;font-size:1.2rem;">${formatVND(luongThucNhan)}</td>
                     </tr>
                 </tbody></table>`;
             } else {
                 // Làm lại bảng chi tiết lương cơ bản như excel
                 let baseSalary = emp.base_salary || 0;
-                let salaryDay = salaryPerDay;
-                let workDaysStdVal = workDaysStd;
                 let revenueData = JSON.parse(localStorage.getItem('revenueByEmpByMonth') || '{}');
                 let revenue = revenueData[getCurrentMonth()]?.[emp.id] || 0;
 
-                // Tính lương ngày công
-                let luongNgayCong = 0;
-                if (tongCong >= workDaysStdVal) {
-                    luongNgayCong = (tongCong - workDaysStdVal) * salaryDay;
-                } else {
-                    luongNgayCong = -((workDaysStdVal - tongCong) * salaryDay);
-                }
+                // Tính lương theo công thức: lương cơ bản / số ngày trong tháng × số ngày công thực tế
+                let monthDays = days || 1;
+                let actualWorkDays = countPayableWorkDays(empAtt, paidLeaveDays, monthDays);
+                let luongMotNgay = monthDays > 0 ? (baseSalary / monthDays) : 0;
+                let luongMotNgayLamTronLen = Math.round(luongMotNgay);
+                let luongNgayCong = luongMotNgayLamTronLen * actualWorkDays;
                 // Tổng lương trước cộng/trừ các khoản
-                tongLuong = baseSalary + luongNgayCong;
+                tongLuong = luongNgayCong;
                 if (tongLuong < 0) tongLuong = 0;
 
-                // Tính tiền tăng ca/làm thêm
-                let tienTC = hesoTC * salaryPerDay;
+                // Tính tiền tăng ca/làm thêm: 1 công = tiền lương 1 ngày × hệ số TC/LT
+                let tienTC = hesoTC * luongMotNgayLamTronLen;
 
                 // Tính lương thực nhận cho nhân viên lương cơ bản (cộng doanh thu và tăng ca)
                 luongThucNhan = tongLuong + parseCurrency(extras.allowance) + parseCurrency(extras.bonus)
@@ -1266,37 +1291,26 @@
                     </tr>
                 </thead><tbody>
                     <tr>
-                        <td style="text-align:left;">Lương cơ bản (${workDaysStdVal} công)</td>
-                        <td style="text-align:right;">${workDaysStdVal}</td>
+                        <td style="text-align:left;">Lương cơ bản</td>
+                        <td style="text-align:right;"></td>
                         <td style="text-align:right;">${formatVND(baseSalary)}</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left;">Lương ngày công</td>
-                        <td style="text-align:right;">${tongCong}</td>
-                        <td style="text-align:right;">${formatVND(luongNgayCong)}</td>
+                        <td style="text-align:left;">Lương theo ngày công</td>
+                        <td style="text-align:right;">${monthDays}</td>
+                        <td style="text-align:right;">${formatVND(luongMotNgayLamTronLen || 0)} / ngày</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left;">TC/LT (Tăng ca/Làm thêm)</td>
+                        <td style="text-align:left;">Tăng ca / Làm thêm</td>
                         <td style="text-align:right;">${hesoTC ? hesoTC : ''}</td>
                         <td style="text-align:right;">${formatVND(tienTC)}</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left;font-weight:bold;">Ngày Công thực tế</td>
-                        <td style="text-align:right;font-weight:bold;">${tongCong}</td>
+                        <td style="text-align:left;font-weight:bold;">Số ngày công thực tế (PL tính công)</td>
+                        <td style="text-align:right;font-weight:bold;">${actualWorkDays}</td>
                         <td style="text-align:right;font-weight:bold;">
                             <span style="color:#1976d2;font-weight:bold;">
-                                Quy ra tiền: ${
-                                    (() => {
-                                        let quyRaTien = 0;
-                                        if (tongCong >= workDaysStdVal) {
-                                            quyRaTien = baseSalary + (tongCong - workDaysStdVal) * salaryDay;
-                                        } else {
-                                            quyRaTien = baseSalary - (workDaysStdVal - tongCong) * salaryDay;
-                                        }
-                                        if (quyRaTien < 0) quyRaTien = 0;
-                                        return formatVND(quyRaTien);
-                                    })()
-                                }
+                                Quy ra tiền: ${formatVND(luongNgayCong)}
                             </span>
                         </td>
                     </tr>
@@ -1306,22 +1320,22 @@
                         <td style="text-align:right;">${formatVND(extras.allowance)}</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left;">Thưởng lễ</td>
+                        <td style="text-align:left;">Thưởng</td>
                         <td style="text-align:right;"></td>
                         <td style="text-align:right;">${formatVND(extras.bonus)}</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left;">Phạt</td>
+                        <td style="text-align:left;">Khấu trừ phạt</td>
                         <td style="text-align:right;"></td>
                         <td style="text-align:right;">- ${formatVND(extras.penalty)}</td>
                     </tr>
                     <tr>
-                        <td style="text-align:left;">Tiền ứng</td>
+                        <td style="text-align:left;">Khấu trừ ứng trước</td>
                         <td style="text-align:right;"></td>
                         <td style="text-align:right;">- ${formatVND(extras.advance)}</td>
                     </tr>
                     <tr class="salary-final-row">
-                        <td style="text-align:left;font-weight:bold;">LƯƠNG THỰC NHẬN</td>
+                        <td style="text-align:left;font-weight:bold;">Lương thực nhận</td>
                         <td></td>
                         <td style="text-align:right;font-weight:bold;font-size:1.2rem;">${formatVND(luongThucNhan)}</td>
                     </tr>
@@ -1349,7 +1363,6 @@
     </script>
     <script src="footer.js"></script>
     <script>renderFooter();</script>
-    <script src="hotline.js"></script>
 
 </body>
 </html>

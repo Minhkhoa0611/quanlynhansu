@@ -1,21 +1,38 @@
+function safeParseStoredJson(key, fallback) {
+    const rawValue = localStorage.getItem(key);
+    if (rawValue === null || typeof rawValue === 'undefined') return fallback;
+    if (typeof rawValue === 'object') return rawValue;
+    if (typeof rawValue !== 'string') return fallback;
+    const trimmed = String(rawValue).trim();
+    if (!trimmed) return fallback;
+    try {
+        return JSON.parse(trimmed);
+    } catch (err) {
+        if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+            return fallback;
+        }
+        return trimmed;
+    }
+}
+
 // Hàm lấy dữ liệu xuất chuẩn (đồng bộ với menu.js)
 function getExportData() {
-    const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+    const employees = Array.isArray(safeParseStoredJson('employees', [])) ? safeParseStoredJson('employees', []) : [];
     const validEmpIds = new Set(employees.map(e => e.id));
-    const allShiftsByEmp = JSON.parse(localStorage.getItem('shiftsByEmp') || '{}');
+    const allShiftsByEmp = safeParseStoredJson('shiftsByEmp', {});
     let shiftsByEmp = {};
-    Object.keys(allShiftsByEmp).forEach(empId => {
+    Object.keys(allShiftsByEmp || {}).forEach(empId => {
         if (validEmpIds.has(empId)) shiftsByEmp[empId] = allShiftsByEmp[empId];
     });
     if (employees.length === 0) {
         shiftsByEmp = {};
     }
     // shiftsByEmpByMonth: luôn có ít nhất 1 ca mặc định nếu chưa có ca nào
-    const allShiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
+    const allShiftsByEmpByMonth = safeParseStoredJson('shiftsByEmpByMonth', {});
     let shiftsByEmpByMonth = {};
-    Object.keys(allShiftsByEmpByMonth).forEach(month => {
+    Object.keys(allShiftsByEmpByMonth || {}).forEach(month => {
         let monthObj = {};
-        Object.keys(allShiftsByEmpByMonth[month]).forEach(empId => {
+        Object.keys(allShiftsByEmpByMonth[month] || {}).forEach(empId => {
             if (validEmpIds.has(empId)) {
                 let arr = allShiftsByEmpByMonth[month][empId];
                 if (!Array.isArray(arr)) arr = [{ name: '', start: '', end: '', salary: 0, half: false }];
@@ -41,20 +58,20 @@ function getExportData() {
 
     return {
         employees,
-        attendanceByMonth: JSON.parse(localStorage.getItem('attendanceByMonth') || '{}'),
+        attendanceByMonth: safeParseStoredJson('attendanceByMonth', {}),
         workDaysStd: String(Number(localStorage.getItem('workDaysStd')) || 26),
         salaryPerDay: String(Number(localStorage.getItem('salaryPerDay')) || 0),
-        workFactorByMonth: JSON.parse(localStorage.getItem('workFactorByMonth') || '{}'),
-        holidayDaysByMonth: JSON.parse(localStorage.getItem('holidayDaysByMonth') || '{}'),
+        workFactorByMonth: safeParseStoredJson('workFactorByMonth', {}),
+        holidayDaysByMonth: safeParseStoredJson('holidayDaysByMonth', {}),
         shiftsByEmp,
         shiftsByEmpByMonth,
-        payrollInputs: JSON.parse(localStorage.getItem('payrollInputs') || '{}'), // advance (tiền ứng) nằm trong đây
-        payrollData: JSON.parse(localStorage.getItem('payrollData') || '{}'),
-        salaryExtrasByEmpMonth: JSON.parse(localStorage.getItem('salaryExtrasByEmpMonth') || '{}'),
-        tcByEmpMonth: JSON.parse(localStorage.getItem('tcByEmpMonth') || '{}'),
-        revenueByEmpByMonth: JSON.parse(localStorage.getItem('revenueByEmpByMonth') || '{}'),
-        manualSalaryEdits: JSON.parse(localStorage.getItem('manualSalaryEdits') || '{}'),
-        salaryReportColToggles: JSON.parse(localStorage.getItem('salaryReportColToggles') || '{}'),
+        payrollInputs: safeParseStoredJson('payrollInputs', {}), // advance (tiền ứng) nằm trong đây
+        payrollData: safeParseStoredJson('payrollData', {}),
+        salaryExtrasByEmpMonth: safeParseStoredJson('salaryExtrasByEmpMonth', {}),
+        tcByEmpMonth: safeParseStoredJson('tcByEmpMonth', {}),
+        revenueByEmpByMonth: safeParseStoredJson('revenueByEmpByMonth', {}),
+        manualSalaryEdits: safeParseStoredJson('manualSalaryEdits', {}),
+        salaryReportColToggles: safeParseStoredJson('salaryReportColToggles', {}),
         notes: (() => {
             let notes = {};
             Object.keys(localStorage).forEach(k => {
@@ -65,10 +82,10 @@ function getExportData() {
         workDaysStdByEmp,
         salaryPerDayByEmp,
         // Thêm các dòng sau để xuất lịch làm việc và ca mẫu lịch làm việc
-        workSchedules: JSON.parse(localStorage.getItem('workSchedules') || '{}'),
-        scheduleShiftsByMonth: JSON.parse(localStorage.getItem('scheduleShiftsByMonth') || '{}'),
-        workScheduleWeekTemplate: JSON.parse(localStorage.getItem('workScheduleWeekTemplate') || '{}'),
-        workScheduleWeekNames: JSON.parse(localStorage.getItem('workScheduleWeekNames') || '{}'),
+        workSchedules: safeParseStoredJson('workSchedules', {}),
+        scheduleShiftsByMonth: safeParseStoredJson('scheduleShiftsByMonth', {}),
+        workScheduleWeekTemplate: safeParseStoredJson('workScheduleWeekTemplate', {}),
+        workScheduleWeekNames: safeParseStoredJson('workScheduleWeekNames', {}),
         // Thêm tên cửa hàng vào dữ liệu xuất
         storeName: localStorage.getItem('storeName') || ''
     };
@@ -199,7 +216,8 @@ function importAllData(jsonData, options) {
     }
     try {
         const parsed = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
-        const data = (parsed && parsed.data && typeof parsed.data === 'object') ? parsed.data : parsed;
+        const directPayload = parsed && parsed.employees !== undefined && parsed.attendanceByMonth !== undefined;
+        const data = (parsed && parsed.data && typeof parsed.data === 'object' && !directPayload) ? parsed.data : parsed;
         const incomingStoreName = (parsed && parsed.store) || (parsed && parsed.storeName) || (data && data.storeName) || '';
         if (incomingStoreName) {
             localStorage.setItem('storeName', incomingStoreName);
@@ -621,6 +639,8 @@ async function sendInfoToTelegram() {
     let cloudSyncTimer = null;
     let cloudSyncPromise = null;
     let firebaseReadyPromise = null;
+    let cloudSyncInProgress = false;
+    let skipNextSyncTrigger = false;
 
     const FIREBASE_CONFIG = {
         apiKey: 'AIzaSyDyZajylUKBtr_GTOMUTCNA8CXmlHe6ZWQ',
@@ -655,14 +675,15 @@ async function sendInfoToTelegram() {
         const windowCfg = (window.__HRM_FIREBASE_SYNC__ || window.__HRM_CLOUD_SYNC__ || {});
         const endpoint = windowCfg.endpoint || localStorage.getItem('firebaseSyncEndpoint') || localStorage.getItem('cloudSyncEndpoint') || '';
         const databaseUrl = windowCfg.databaseURL || windowCfg.databaseUrl || localStorage.getItem('firebaseDatabaseUrl') || FIREBASE_CONFIG.databaseURL || '';
-        const enabled = windowCfg.enabled !== false && (
-            windowCfg.enabled === true ||
-            endpoint ||
-            databaseUrl ||
-            localStorage.getItem('firebaseSyncEnabled') === '1' ||
-            localStorage.getItem('cloudSyncEnabled') === '1' ||
-            Boolean(FIREBASE_CONFIG.projectId)
-        );
+        const hasFirebaseCreds = Boolean(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId && FIREBASE_CONFIG.databaseURL);
+        const enabled = false;
+        if (enabled) {
+            localStorage.setItem('firebaseSyncEnabled', '1');
+            localStorage.setItem('cloudSyncEnabled', '1');
+        } else {
+            localStorage.setItem('firebaseSyncEnabled', '0');
+            localStorage.setItem('cloudSyncEnabled', '0');
+        }
         return { enabled, endpoint, databaseUrl };
     }
 
@@ -821,6 +842,7 @@ async function sendInfoToTelegram() {
         try {
             const remotePayload = await readSnapshotFromCloud();
             if (!remotePayload || Object.keys(remotePayload).length === 0) return false;
+            window.__HRM_LAST_REMOTE_PAYLOAD__ = remotePayload;
             console.log('[HRM sync] Applying remote snapshot', { timestamp: remotePayload.timestamp, storeSlug: remotePayload.storeSlug, storeName: remotePayload.storeName });
             const remoteTimestamp = remotePayload.timestamp ? new Date(remotePayload.timestamp).getTime() : 0;
             const lastSeenTimestamp = Number(localStorage.getItem('cloudSyncLastRemoteTimestamp') || 0);
@@ -848,11 +870,16 @@ async function sendInfoToTelegram() {
     async function uploadSnapshotToCloud() {
         const cfg = getCloudSyncConfig();
         if (!cfg.enabled) return false;
-
-        const payload = cloneDataForCloud();
-        const currentStoreSlug = getStoreSlug();
-        localStorage.setItem('cloudStoreSlug', currentStoreSlug);
+        if (cloudSyncInProgress) return false;
+        cloudSyncInProgress = true;
+        skipNextSyncTrigger = true;
         try {
+            const payload = cloneDataForCloud();
+            const currentStoreSlug = getStoreSlug();
+            const previousStoreSlug = localStorage.getItem('cloudStoreSlug');
+            if (previousStoreSlug !== currentStoreSlug) {
+                localStorage.setItem('cloudStoreSlug', currentStoreSlug);
+            }
             const firebaseApi = await ensureFirebaseReady();
             const basePath = `stores/${encodeURIComponent(currentStoreSlug)}`;
             const writes = Object.keys(payload).map(async (segment) => {
@@ -879,6 +906,9 @@ async function sendInfoToTelegram() {
                 }
             }
             throw err;
+        } finally {
+            cloudSyncInProgress = false;
+            skipNextSyncTrigger = false;
         }
     }
 
@@ -887,7 +917,7 @@ async function sendInfoToTelegram() {
         if (!cfg.enabled) return;
         if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
         cloudSyncTimer = setTimeout(() => {
-            if (!cloudSyncPromise) {
+            if (!cloudSyncPromise && !cloudSyncInProgress) {
                 cloudSyncPromise = uploadSnapshotToCloud().catch(err => {
                     console.warn('HRM cloud sync error:', err);
                     localStorage.setItem('cloudSyncLastError', String(err && err.message ? err.message : err));
@@ -910,26 +940,37 @@ async function sendInfoToTelegram() {
 
         Storage.prototype.setItem = function(key, value) {
             const strValue = String(value);
+            const skipKey = ['sync_data_trigger', 'cloudSyncLastSuccess', 'cloudSyncLastError', 'cloudStoreSlug', 'firebaseSyncEnabled', 'cloudSyncEnabled'].includes(String(key));
+            const suppressUpload = Boolean(window.__HRM_APPLYING_REMOTE_SYNC__) || cloudSyncInProgress || skipNextSyncTrigger || skipKey;
             originalSetItem.call(this, key, strValue);
-            const suppressUpload = Boolean(window.__HRM_APPLYING_REMOTE_SYNC__);
-            if (!suppressUpload && !['sync_data_trigger', 'cloudSyncLastSuccess', 'cloudSyncLastError'].includes(String(key))) {
+            if (!suppressUpload && !skipKey) {
                 scheduleCloudSync();
+            }
+            if (skipNextSyncTrigger) {
+                skipNextSyncTrigger = false;
             }
         };
 
         Storage.prototype.removeItem = function(key) {
+            const skipKey = ['sync_data_trigger', 'cloudSyncLastSuccess', 'cloudSyncLastError', 'cloudStoreSlug', 'firebaseSyncEnabled', 'cloudSyncEnabled'].includes(String(key));
+            const suppressUpload = Boolean(window.__HRM_APPLYING_REMOTE_SYNC__) || cloudSyncInProgress || skipNextSyncTrigger || skipKey;
             originalRemoveItem.call(this, key);
-            const suppressUpload = Boolean(window.__HRM_APPLYING_REMOTE_SYNC__);
-            if (!suppressUpload && !['sync_data_trigger', 'cloudSyncLastSuccess', 'cloudSyncLastError'].includes(String(key))) {
+            if (!suppressUpload && !skipKey) {
                 scheduleCloudSync();
+            }
+            if (skipNextSyncTrigger) {
+                skipNextSyncTrigger = false;
             }
         };
 
         Storage.prototype.clear = function() {
+            const suppressUpload = Boolean(window.__HRM_APPLYING_REMOTE_SYNC__) || cloudSyncInProgress || skipNextSyncTrigger;
             originalClear.call(this);
-            const suppressUpload = Boolean(window.__HRM_APPLYING_REMOTE_SYNC__);
             if (!suppressUpload) {
                 scheduleCloudSync();
+            }
+            if (skipNextSyncTrigger) {
+                skipNextSyncTrigger = false;
             }
         };
     }
@@ -939,25 +980,37 @@ async function sendInfoToTelegram() {
     window.addEventListener('DOMContentLoaded', function () {
         const cfg = getCloudSyncConfig();
         if (cfg.enabled) {
+            localStorage.setItem('firebaseSyncEnabled', '1');
+            localStorage.setItem('cloudSyncEnabled', '1');
             scheduleCloudSync();
-            setTimeout(() => {
-                syncFromCloud().catch(() => {});
-            }, 1200);
+            setTimeout(async () => {
+                try {
+                    await syncFromCloud();
+                } catch (err) {}
+                try {
+                    await uploadSnapshotToCloud();
+                } catch (err) {}
+            }, 800);
             if (!window.__HRM_CLOUD_PULL_INTERVAL__) {
-                window.__HRM_CLOUD_PULL_INTERVAL__ = window.setInterval(() => {
-                    syncFromCloud().catch(() => {});
-                }, 8000);
+                window.__HRM_CLOUD_PULL_INTERVAL__ = window.setInterval(async () => {
+                    try {
+                        await syncFromCloud();
+                    } catch (err) {}
+                    try {
+                        await uploadSnapshotToCloud();
+                    } catch (err) {}
+                }, 12000);
             }
         }
     });
 
-    window.syncAllDataToCloud = function () {
-        console.log('[HRM sync] Manual upload requested');
-        return uploadSnapshotToCloud();
+    window.syncAllDataToCloud = async function () {
+        console.log('[HRM sync] Disabled');
+        return { pullResult: false, pushResult: false };
     };
 
     window.syncDataFromCloud = function () {
-        console.log('[HRM sync] Manual pull requested');
-        return syncFromCloud();
+        console.log('[HRM sync] Disabled');
+        return false;
     };
 })();

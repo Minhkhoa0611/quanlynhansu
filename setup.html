@@ -299,7 +299,8 @@
 
         function formatVND(val) {
             if (isNaN(val)) return '';
-            return Number(val).toLocaleString('vi-VN') + ' ₫';
+            const num = Math.round(Number(val) / 10000) * 10000;
+            return num.toLocaleString('vi-VN') + ' ₫';
         }
         function parseCurrency(val) {
             return Number((val+'').replace(/[^\d]/g, '')) || 0;

@@ -435,22 +435,22 @@
                     <input type="checkbox" id="toggleColNgayCong" checked> Ngày Công
                 </label>
                 <label>
-                    <input type="checkbox" id="toggleColTCLT" checked> TC/LT
+                    <input type="checkbox" id="toggleColTCLT" checked> Tăng ca / Làm thêm
                 </label>
                 <label>
                     <input type="checkbox" id="toggleColPhuCap" checked> Phụ cấp
                 </label>
                 <label>
-                    <input type="checkbox" id="toggleColThuongLe" checked> Thưởng lễ
+                    <input type="checkbox" id="toggleColThuongLe" checked> Thưởng
                 </label>
                 <label id="toggleColDoanhThuWrap">
                     <input type="checkbox" id="toggleColDoanhThu" checked> Doanh thu
                 </label>
                 <label>
-                    <input type="checkbox" id="toggleColPhat" checked> Phạt
+                    <input type="checkbox" id="toggleColPhat" checked> Khấu trừ phạt
                 </label>
                 <label>
-                    <input type="checkbox" id="toggleColTienUng" checked> Tiền ứng
+                    <input type="checkbox" id="toggleColTienUng" checked> Khấu trừ ứng trước
                 </label>
             </div>
         </div>
@@ -493,10 +493,35 @@
         }
         function formatVND(val) {
             if (isNaN(val)) return '0 ₫';
-            return Number(val).toLocaleString('vi-VN') + ' ₫';
+            const num = Math.round(Number(val) / 10000) * 10000;
+            return num.toLocaleString('vi-VN') + ' ₫';
         }
         function parseCurrency(val) {
             return Number((val+'').replace(/[^\d\-]/g, '')) || 0;
+        }
+        function countPayableWorkDays(empAtt, paidLeaveDays, monthDays) {
+            let count = 0;
+            for (let d = 1; d <= monthDays; d++) {
+                const dayKey = String(d);
+                const rawValue = empAtt && (empAtt[d] ?? empAtt[dayKey] ?? empAtt[Number(d)]);
+                let hasAttendance = false;
+                if (rawValue !== undefined && rawValue !== null) {
+                    if (Array.isArray(rawValue)) {
+                        hasAttendance = rawValue.length > 0;
+                    } else if (typeof rawValue === 'string') {
+                        hasAttendance = rawValue.trim() !== '';
+                    } else if (typeof rawValue === 'number') {
+                        hasAttendance = !Number.isNaN(rawValue);
+                    } else if (typeof rawValue === 'object') {
+                        hasAttendance = Object.keys(rawValue).length > 0;
+                    } else {
+                        hasAttendance = true;
+                    }
+                }
+                const isPaidLeave = Array.isArray(paidLeaveDays) && paidLeaveDays.some(item => String(item) === dayKey || Number(item) === d);
+                if (hasAttendance || isPaidLeave) count++;
+            }
+            return count;
         }
         function getShiftsForEmpMonth(empId, month) {
             if (!shiftsByEmpByMonth[month]) shiftsByEmpByMonth[month] = {};
@@ -612,13 +637,13 @@
                 <tr>
                     <th>STT</th>
                     <th>Họ tên</th>
-                    ${toggles.NgayCong ? '<th>Ngày Công</th>' : ''}
-                    ${toggles.TCLT ? '<th>TC/LT</th>' : ''}
+                    ${toggles.NgayCong ? '<th>Ngày công</th>' : ''}
+                    ${toggles.TCLT ? '<th>Tăng ca / Làm thêm</th>' : ''}
                     ${toggles.PhuCap ? '<th>Phụ cấp</th>' : ''}
-                    ${toggles.ThuongLe ? '<th>Thưởng lễ</th>' : ''}
+                    ${toggles.ThuongLe ? '<th>Thưởng</th>' : ''}
                     ${(!hideRevenueCol && toggles.DoanhThu) ? '<th>Doanh thu</th>' : ''}
-                    ${toggles.Phat ? '<th>Phạt</th>' : ''}
-                    ${toggles.TienUng ? '<th>Tiền ứng</th>' : ''}
+                    ${toggles.Phat ? '<th>Khấu trừ phạt</th>' : ''}
+                    ${toggles.TienUng ? '<th>Khấu trừ ứng trước</th>' : ''}
                     <th>Tổng lương</th>
                 </tr>
             </thead><tbody>`;
@@ -636,6 +661,7 @@
                 let extras = getSalaryExtras(emp.id, month);
                 let hesoTC = tcByEmpMonth[month]?.[emp.id] || 0;
                 let revenue = revenueByEmpByMonth[month]?.[emp.id] || 0;
+                let paidLeaveDays = (JSON.parse(localStorage.getItem('paidLeaveDaysByMonth') || '{}')[month]?.[emp.id] || []) || [];
 
                 // Tính ngày công
                 let tongCong = 0;
@@ -674,6 +700,7 @@
                 // Tính tổng lương
                 let tongLuong = 0;
                 let tienTC = 0;
+                let actualWorkDays = 0;
                 if (emp.salary_type === 'shift') {
                     // Tổng lương ca
                     let caCong = [];
@@ -700,17 +727,16 @@
                     tongLuong += parseCurrency(extras.allowance) + parseCurrency(extras.bonus);
                     tongLuong -= parseCurrency(extras.advance) + parseCurrency(extras.penalty);
                 } else {
-                    // Lương cơ bản
-                    let baseSalary = emp.base_salary || 0;
-                    let luongNgayCong = 0;
-                    if (tongCong >= workDaysStd) {
-                        luongNgayCong = (tongCong - workDaysStd) * salaryPerDay;
-                    } else {
-                        luongNgayCong = -((workDaysStd - tongCong) * salaryPerDay);
-                    }
-                    tongLuong = baseSalary + luongNgayCong;
+                    // Lương cơ bản theo công thức: lương cơ bản / số ngày trong tháng × số ngày công thực tế
+                    let baseSalary = parseFloat(emp.base_salary || 0) || 0;
+                    let monthDays = Math.max(parseInt(days || 1), 1);
+                    actualWorkDays = countPayableWorkDays(empAtt, paidLeaveDays, monthDays);
+                    let luongMotNgay = monthDays > 0 ? (baseSalary / monthDays) : 0;
+                    let luongMotNgayLamTronLen = Math.round(luongMotNgay);
+                    let luongNgayCong = luongMotNgayLamTronLen * actualWorkDays;
+                    tongLuong = luongNgayCong;
                     if (tongLuong < 0) tongLuong = 0;
-                    tienTC = hesoTC * salaryPerDay;
+                    tienTC = Math.round(hesoTC * luongMotNgayLamTronLen);
                     tongLuong += tienTC;
                     tongLuong += parseCurrency(extras.allowance) + parseCurrency(extras.bonus) + parseCurrency(revenue);
                     tongLuong -= parseCurrency(extras.advance) + parseCurrency(extras.penalty);
@@ -721,7 +747,7 @@
                 let manual = manualSalaryEdits[manualKey] || {};
                 // Lấy giá trị hiển thị ưu tiên giá trị chỉnh sửa
                 let show = {
-                    ngaycong: manual.ngaycong !== undefined ? manual.ngaycong : tongCong,
+                    ngaycong: manual.ngaycong !== undefined ? manual.ngaycong : (emp.salary_type === 'base' ? actualWorkDays : tongCong),
                     tclt: manual.tclt !== undefined ? manual.tclt : hesoTC,
                     phucap: manual.phucap !== undefined ? manual.phucap : extras.allowance,
                     thuongle: manual.thuongle !== undefined ? manual.thuongle : extras.bonus,
@@ -1278,6 +1304,7 @@
         });
     </script>
 </body>
-<script src="hotline.js"></script>
+    <script src="footer.js"></script>
+    <script>renderFooter();</script>
 
 </html>

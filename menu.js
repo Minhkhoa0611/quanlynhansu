@@ -1,5 +1,5 @@
 if (typeof CODE_VERSION === 'undefined') {
-    var CODE_VERSION = '2.2.6(Final)'; // cập nhật version mới nhất
+    var CODE_VERSION = '2.2.7'; // cập nhật version mới nhất
 
 }
 
@@ -74,17 +74,17 @@ function renderMenu(active) {
     style.id = 'menu-style';
     style.innerHTML = `
         .navbar {
-            background: #fff;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
             color: #0f172a;
             padding: 0 24px;
             display: flex;
             align-items: center;
-            min-height: 54px;
+            min-height: 60px;
             gap: 0;
-            box-shadow: 0 1px 0 #e5e7eb, 0 2px 10px rgba(15,23,42,0.05);
+            box-shadow: 0 2px 16px rgba(15,23,42,0.06);
             position: relative;
             z-index: 10;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e2e8f0;
         }
         .navbar .navbar-logo {
             font-family: ${logoFont};
@@ -102,20 +102,20 @@ function renderMenu(active) {
             text-shadow: none;
         }
         .navbar .navbar-logo-icon {
-            width: 32px;
-            height: 32px;
-            background: #fff3;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #e3f0ff 0%, #ffffff 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0;
-            box-shadow: 0 2px 8px #0002;
-            /* SVG sẽ fill toàn bộ */
+            box-shadow: 0 3px 10px rgba(25,118,210,0.16);
+            border: 1px solid #dbeafe;
         }
         .navbar .navbar-logo-icon svg {
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             display: block;
         }
         .navbar .app-version-label {
@@ -123,19 +123,20 @@ function renderMenu(active) {
             font-size:13px;
             font-weight:600;
             color: #fff;
-            border-radius:6px;
-            padding:2px 8px;
+            border-radius:999px;
+            padding:3px 10px;
             margin-left:8px;
             letter-spacing:1px;
             cursor:pointer;
             box-shadow: 0 2px 8px ${labelColor}33;
             border: 2px solid #fff5;
-            transition: background 0.2s;
+            transition: transform 0.2s, filter 0.2s;
             display: inline-block;
             text-align: center;
         }
         .navbar .app-version-label:hover {
-            filter: brightness(1.1);
+            filter: brightness(1.08);
+            transform: translateY(-1px);
         }
         .navbar .navbar-menu {
             display: flex;
@@ -145,86 +146,88 @@ function renderMenu(active) {
         .navbar button {
             background: transparent;
             border: none;
-            color: #4b5563;
+            color: #475569;
             font-size: 14px;
             cursor: pointer;
             padding: 10px 12px;
-            border-radius: 0;
-            transition: background 0.15s, color 0.15s;
+            border-radius: 999px;
+            transition: background 0.16s, color 0.16s, box-shadow 0.16s, transform 0.16s;
             font-weight: 600;
             letter-spacing: 0.2px;
             margin: 0 2px;
             position: relative;
         }
         .navbar button.active, .navbar button:hover {
-            background: #f8fafc;
+            background: #f1f7ff;
             color: ${menuColor};
-            box-shadow: inset 0 -2px 0 ${menuColor};
-            transform: none;
+            box-shadow: 0 4px 12px rgba(25,118,210,0.10);
+            transform: translateY(-1px);
         }
         .navbar .menu-export-btn {
-            background: #43a047;
+            background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
             color: #fff;
             border: none;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
-            padding: 10px 18px;
-            border-radius: 8px;
+            padding: 10px 16px;
+            border-radius: 999px;
             margin-left: 16px;
-            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-            font-weight: 500;
-            letter-spacing: 0.5px;
+            transition: transform 0.18s, box-shadow 0.18s;
+            font-weight: 600;
+            letter-spacing: 0.4px;
             display: inline-block;
-            box-shadow: 0 2px 8px #43a04733;
+            box-shadow: 0 3px 10px rgba(67,160,71,0.24);
         }
         .navbar .menu-export-btn:hover {
-            background: #388e3c;
-            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(67,160,71,0.28);
         }
         .navbar .menu-import-btn {
-            background: #ff9800;
+            background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%);
             color: #fff;
             border: none;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
-            padding: 10px 18px;
-            border-radius: 8px;
+            padding: 10px 16px;
+            border-radius: 999px;
             margin-left: 10px;
-            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-            font-weight: 500;
-            letter-spacing: 0.5px;
+            transition: transform 0.18s, box-shadow 0.18s;
+            font-weight: 600;
+            letter-spacing: 0.4px;
             display: inline-block;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 2px 8px #ff980033;
+            box-shadow: 0 3px 10px rgba(255,152,0,0.24);
         }
         .navbar .menu-import-btn:hover {
-            background: #fb8c00;
-            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(255,152,0,0.28);
         }
         .navbar .menu-data-dropdown {
             position: relative;
             margin-left: 16px;
         }
         .navbar .menu-data-btn {
-            background: #1565c0;
+            background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
             color: #fff;
             border: none;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 6px;
-            transition: background 0.18s;
+            transition: transform 0.18s, box-shadow 0.18s;
+            box-shadow: 0 3px 10px rgba(25,118,210,0.24);
         }
         .navbar .menu-data-btn:hover,
         .navbar .menu-data-btn:focus {
-            background: #1976d2;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(25,118,210,0.28);
         }
         .navbar .menu-data-btn .menu-toggle-icon {
             margin-left: 8px;
@@ -239,34 +242,37 @@ function renderMenu(active) {
             position: relative;
             margin-top: 8px;
             min-width: 100%;
-            background: #fff;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
             color: #1976d2;
-            border-radius: 8px;
-            box-shadow: 0 4px 16px #0002;
+            border-radius: 14px;
+            border: 1px solid #dbeafe;
+            box-shadow: 0 10px 24px rgba(15,23,42,0.12);
             z-index: 100;
             flex-direction: column;
-            padding: 6px 0;
+            padding: 6px;
             animation: fadeInMenu 0.18s;
         }
         .navbar .menu-data-dropdown.open .menu-data-list {
             display: flex;
         }
         .navbar .menu-data-list button {
-            background: none;
+            background: transparent;
             border: none;
-            color: #1976d2;
-            font-size: 15px;
+            color: #334155;
+            font-size: 14px;
             text-align: left;
             width: 100%;
-            padding: 10px 20px;
-            border-radius: 0;
+            padding: 10px 12px;
+            border-radius: 10px;
             margin: 0;
-            transition: background 0.15s, color 0.15s;
+            transition: background 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
             font-weight: 500;
         }
         .navbar .menu-data-list button:hover {
-            background: #e3f2fd;
+            background: #f1f7ff;
             color: #1565c0;
+            transform: translateX(2px);
+            box-shadow: inset 0 0 0 1px rgba(25,118,210,0.08);
         }
         .navbar .menu-data-list .menu-import-btn {
             color: #ff9800;
@@ -277,20 +283,45 @@ function renderMenu(active) {
         .navbar .menu-data-list .menu-telegram-btn {
             color: #0088cc;
         }
+        .navbar .menu-sync-btn {
+            background: linear-gradient(90deg, #0f766e 0%, #14b8a6 100%);
+            color: #fff;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 8px;
+            transition: transform 0.16s, box-shadow 0.16s;
+            box-shadow: 0 3px 10px rgba(20,184,166,0.25);
+        }
+        .navbar .menu-sync-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(20,184,166,0.28);
+        }
         .navbar .menu-footer-logo {
             margin-top: 16px;
-            padding-top: 12px;
-            border-top: 1px solid #e5e7eb;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #f8fbff 0%, #ffffff 100%);
             display: flex;
             justify-content: center;
             align-items: center;
+            box-shadow: 0 3px 10px rgba(15,23,42,0.05);
         }
         .navbar .menu-footer-logo img {
             max-width: 100%;
             max-height: 72px;
             object-fit: contain;
             border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(15,23,42,0.08);
+            box-shadow: 0 2px 8px rgba(15,23,42,0.08);
             background: #fff;
         }
         .navbar.collapsed .menu-footer-logo {
@@ -300,22 +331,28 @@ function renderMenu(active) {
             display: none;
         }
         .navbar-toggle {
-            width: 38px;
-            height: 38px;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            background: #f8fafc;
+            width: 40px;
+            height: 40px;
+            border: 1px solid #dbeafe;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #eef6ff 0%, #f8fbff 100%);
             color: #1976d2;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             font-size: 18px;
+            font-weight: 700;
+            line-height: 1;
             margin-bottom: 10px;
-            transition: background 0.2s, color 0.2s;
+            transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+            box-shadow: 0 2px 8px rgba(25,118,210,0.12);
+            padding: 0;
         }
         .navbar-toggle:hover {
             background: #e3f0ff;
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 4px 12px rgba(25,118,210,0.16);
         }
         .navbar .navbar-logo-text,
         .navbar .app-version-label,
@@ -383,6 +420,10 @@ function renderMenu(active) {
             flex-direction: column;
             align-items: flex-start;
             gap: 10px;
+            padding: 8px 10px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(227,240,255,0.5) 0%, rgba(255,255,255,0.95) 100%);
+            border: 1px solid #e2e8f0;
         }
         .navbar .navbar-menu {
             display: flex;
@@ -394,14 +435,14 @@ function renderMenu(active) {
             width: 100%;
             text-align: left;
             padding: 10px 12px;
-            border-radius: 10px;
+            border-radius: 12px;
             margin: 0;
         }
         .navbar button.active,
         .navbar button:hover {
-            background: #f8fafc;
+            background: linear-gradient(135deg, #f1f7ff 0%, #eaf3ff 100%);
             color: ${menuColor};
-            box-shadow: inset 0 0 0 1px rgba(25,118,210,0.12);
+            box-shadow: inset 0 0 0 1px rgba(25,118,210,0.12), 0 4px 10px rgba(25,118,210,0.08);
         }
         .navbar .menu-export-btn,
         .navbar .menu-import-btn,
@@ -450,7 +491,7 @@ function renderMenu(active) {
     const nav = document.createElement('div');
     nav.className = 'navbar';
     nav.innerHTML = `
-        <button type="button" class="navbar-toggle" onclick="toggleSidebarMenu(event)" aria-expanded="true" title="Thu gọn/hiện menu">☰</button>
+        <button type="button" class="navbar-toggle" onclick="toggleSidebarMenu(event)" aria-expanded="true" title="Thu gọn/hiện menu">‹</button>
         <div class="navbar-logo" style="position:relative;">
             <span class="navbar-logo-icon">
                 <!-- SVG đồng hồ hiện đại -->
@@ -548,6 +589,10 @@ function renderMenu(active) {
         <div class="menu-footer-logo">
             <img src="timespro.png" alt="TimesPro logo" />
         </div>
+        <div class="menu-contact-info" style="margin-top:10px; padding:10px 12px; text-align:center; font-size:12px; color:#f8fafc; line-height:1.5; border-radius:12px; background:linear-gradient(135deg, #1976d2 0%, #2563eb 100%); box-shadow:0 6px 16px rgba(25,118,210,0.22);">
+            <div style="font-weight:700; color:#ffffff; letter-spacing:0.4px;">By Minh Khoa</div>
+            <div style="color:#e3f2fd; font-weight:600;">0867544809</div>
+        </div>
     `;
     document.body.insertBefore(nav, document.body.firstChild);
 
@@ -559,7 +604,8 @@ function renderMenu(active) {
         const toggleBtn = navbarEl.querySelector('.navbar-toggle');
         if (toggleBtn) {
             toggleBtn.setAttribute('aria-expanded', savedCollapsed ? 'false' : 'true');
-            toggleBtn.innerHTML = savedCollapsed ? '☰' : '✕';
+            toggleBtn.innerHTML = savedCollapsed ? '›' : '‹';
+            toggleBtn.title = savedCollapsed ? 'Mở menu' : 'Thu gọn menu';
         }
     }
     window.toggleSidebarMenu = function(event) {
@@ -571,7 +617,8 @@ function renderMenu(active) {
         const toggleBtn = navbarEl.querySelector('.navbar-toggle');
         if (toggleBtn) {
             toggleBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-            toggleBtn.innerHTML = collapsed ? '☰' : '✕';
+            toggleBtn.innerHTML = collapsed ? '›' : '‹';
+            toggleBtn.title = collapsed ? 'Mở menu' : 'Thu gọn menu';
         }
         if (event && event.stopPropagation) event.stopPropagation();
     };
@@ -830,6 +877,11 @@ function renderMenu(active) {
         const content = document.getElementById('popup-version-history-content');
         // Danh sách lịch sử phiên bản (bản cuối cùng cập nhật theo yêu cầu)
         const history = [
+            {
+                version: '2.2.7',
+                date: '19/07/2026',
+                note: 'Cải tiến giao diện menu và nút ẩn/hiện sidebar.<br>- Nút thu gọn/hiện menu được đổi sang icon mũi tên hiện đại hơn.<br>- Hiệu ứng hover và chuyển trạng thái mượt hơn, phù hợp với phong cách sidebar doanh nghiệp.<br>- Tối ưu giao diện các nút tiện ích và footer trong sidebar để nhìn gọn, rõ ràng và chuyên nghiệp hơn.'
+            },
             {
                 version: '2.2.6 (Final)',
                 date: '01/01/2026',
