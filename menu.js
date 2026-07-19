@@ -1332,7 +1332,40 @@ function renderMenu(active) {
         const wb = XLSX.utils.table_to_book(table, {sheet:"Báo Cáo Lương"});
         XLSX.writeFile(wb, title + '.xlsx');
     }
-
+   <div class="navbar-menu">
+            ${(() => {
+                // Danh sách menu mặc định (bỏ setup khỏi menu chính)
+                const defaultMenus = [
+                    { id: 'index', label: 'Trang Chủ', href: 'index.html' },
+                    { id: 'emp', label: 'Danh sách nhân viên', href: 'emp.html' },
+                    // { id: 'setup', label: 'Thiết Lập', href: 'setup.html' }, // chuyển vào Cài Đặt
+                    { id: 'att', label: 'Chấm công', href: 'att.html' },
+                    { id: 'quydinh', label: 'Hướng dẫn chấm công', href: 'quydinh-chamcong-moi.html' },
+                    { id: 'about', label: 'About', href: 'about-mksof.html' },
+                    { id: 'payroll', label: 'Bảng lương', href: 'bangluong.html' },
+                    { id: 'payroll_report', label: 'Lập BC Lương', href: 'baocaoluong.html' }
+                ];
+                // Lấy cấu hình menu từ localStorage
+                let menuConfig = [];
+                try {
+                    menuConfig = JSON.parse(localStorage.getItem('menuConfig') || '[]');
+                } catch {}
+                // Loại bỏ setup, work_schedule, about khỏi menuConfig nếu có
+                menuConfig = menuConfig.filter(m => m.id !== 'setup' && m.id !== 'work_schedule' && m.id !== 'about');
+                let menus = menuConfig.length ? menuConfig : defaultMenus.map(m => ({...m, visible: true}));
+                // Đảm bảo luôn có đủ các menu mặc định (nếu thiếu do cập nhật)
+                defaultMenus.forEach(def => {
+                    if (!menus.some(m => m.id === def.id)) menus.push({...def, visible: true});
+                });
+                // Sắp xếp lại đúng thứ tự theo config
+                menus = menus.filter(m => defaultMenus.some(d => d.id === m.id));
+                // Render các menu visible
+                let html = menus.filter(m => m.visible !== false).map(m =>
+                    `<button onclick="location.href='${m.href}'"${active===m.id?' class="active"':''} title="${m.label}"><span class="menu-label">${m.label}</span></button>`
+                ).join('');
+                return html;
+            })()}
+        </div>
     // Thêm popup chat bot hỗ trợ nếu chưa có
     if (!document.getElementById('support-bot-popup')) {
         const supportBotHtml = `
