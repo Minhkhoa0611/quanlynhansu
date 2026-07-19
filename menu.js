@@ -537,6 +537,8 @@ function renderMenu(active) {
                     { id: 'emp', label: 'Danh sách nhân viên', href: 'emp.html' },
                     // { id: 'setup', label: 'Thiết Lập', href: 'setup.html' }, // chuyển vào Cài Đặt
                     { id: 'att', label: 'Chấm công', href: 'att.html' },
+                    { id: 'quydinh', label: 'Hướng dẫn chấm công', href: 'quydinh-chamcong-moi.html' },
+                    { id: 'about', label: 'About', href: 'about-mksof.html' },
                     { id: 'payroll', label: 'Bảng lương', href: 'bangluong.html' },
                     { id: 'payroll_report', label: 'Lập BC Lương', href: 'baocaoluong.html' }
                 ];
@@ -574,6 +576,8 @@ function renderMenu(active) {
                 <button type="button" class="menu-setting-btn" onclick="showMenuSettingPopup()" style="color:#1976d2;">⚙️ Cài đặt menu</button>
                 <button type="button" class="menu-setup-btn" onclick="location.href='setup.html'" style="color:#1976d2;">🔧 Thiết Lập</button>
                 <button type="button" class="menu-work-schedule-btn" onclick="location.href='work_schedule.html'" style="color:#1976d2;">📅 Lịch làm việc</button>
+                <button type="button" class="menu-quydinh-btn" onclick="location.href='quydinh-chamcong-moi.html'" style="color:#1976d2;">📘 Hướng dẫn chấm công</button>
+                <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ About</button>
                 <!-- Đã loại bỏ các menu: Bảng lương chi tiết, Báo Cáo Chi Trả Lương, Bảng Lương, Local Data theo yêu cầu -->
 
 

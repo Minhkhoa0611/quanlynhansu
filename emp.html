@@ -5,134 +5,198 @@
     <title>Workforce 365 HRM Pro-Danh sách nhân viên</title>
         <link rel="icon" type="image/png" href="iconlogo.png">
     <style>
+        :root {
+            --primary: #1976d2;
+            --primary-dark: #0f4c81;
+            --primary-soft: #eaf4ff;
+            --accent: #43a047;
+            --danger: #e53935;
+            --text: #16324f;
+            --muted: #5b728b;
+            --border: #dce9f7;
+            --surface: #ffffff;
+            --surface-soft: #f8fbff;
+        }
+        * { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #eef5ff 0%, #f8fbff 45%, #eef7f3 100%);
+            background: radial-gradient(circle at top left, rgba(25,118,210,0.08), transparent 24%), linear-gradient(135deg, #eef5ff 0%, #f8fbff 45%, #eef7f3 100%);
             margin: 0;
             min-height: 100vh;
-            color: #16324f;
+            color: var(--text);
             padding-left: 270px;
             padding-right: 20px;
             box-sizing: border-box;
         }
         .container {
-            max-width: 1400px;
-            margin: 28px auto 48px;
-            background: rgba(255,255,255,0.95);
-            padding: 30px 28px 32px 28px;
+            max-width: 1450px;
+            margin: 24px auto 40px;
+            background: rgba(255,255,255,0.96);
+            padding: 28px 30px 32px 30px;
             border-radius: 24px;
-            box-shadow: 0 18px 45px rgba(25, 118, 210, 0.12);
-            border: 1px solid #dce9f7;
+            box-shadow: 0 22px 48px rgba(25, 118, 210, 0.12);
+            border: 1px solid var(--border);
             position: relative;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(8px);
+            overflow: hidden;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #e3eefb;
+            margin-bottom: 20px;
+        }
+        .page-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .page-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), #4f8edb);
+            color: #fff;
+            font-size: 1.2rem;
+            box-shadow: 0 10px 24px rgba(25, 118, 210, 0.18);
         }
         h2 {
-            color: #1976d2;
-            margin-bottom: 20px;
-            letter-spacing: 0.8px;
-            font-size: 2.4rem;
-            text-align: center;
+            color: var(--primary);
+            margin: 0;
+            letter-spacing: 0.4px;
+            font-size: 1.95rem;
+            text-align: left;
             font-weight: 700;
+        }
+        .page-subtitle {
+            color: var(--muted);
+            margin-top: 4px;
+            font-size: 0.95rem;
+        }
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .badge-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary-dark);
+            border: 1px solid #d7eaff;
+            font-size: 0.84rem;
+            font-weight: 600;
         }
         table {
             width: 100%;
             margin-top: 18px;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
-            background: #f9fbfd;
-            box-shadow: 0 2px 8px #0001;
-            table-layout: fixed; /* đảm bảo các cột có thể set width */
-            border-collapse: collapse; /* Thêm dòng này */
+            background: var(--surface-soft);
+            box-shadow: 0 8px 24px rgba(25, 118, 210, 0.06);
+            table-layout: fixed;
+            border-collapse: collapse;
         }
         table, th, td {
-            border: 1px solid #b3d1f7; /* Thay đổi từ border: none; */
+            border: 1px solid var(--border);
         }
         th, td {
             padding: 12px 10px;
             text-align: left;
-            /* ...existing code... */
         }
         th:nth-child(1), td:nth-child(1) {
-            width: 18%; /* Tên */
+            width: 18%;
         }
         th:nth-child(2), td:nth-child(2) {
-            width: 15%; /* ID */
+            width: 15%;
             min-width: 120px;
             max-width: 200px;
             word-break: break-all;
         }
         th:nth-child(3), td:nth-child(3) {
-            width: 13%; /* Chức vụ */
+            width: 13%;
         }
         th:nth-child(4), td:nth-child(4) {
-            width: 13%; /* Cửa hàng */
+            width: 13%;
         }
         th:nth-child(5), td:nth-child(5) {
-            width: 13%; /* Hình thức trả lương */
+            width: 13%;
         }
         th:nth-child(6), td:nth-child(6) {
-            width: 13%; /* Lương cơ bản */
+            width: 13%;
         }
         th:nth-child(7), td:nth-child(7) {
-            width: 7%; /* Ẩn/Hiện */
+            width: 7%;
         }
         th.action-col, td.action-col {
-            width: 8%; /* thu nhỏ lại */
+            width: 8%;
             min-width: 80px;
             max-width: 120px;
             text-align: left;
         }
         input[type="number"], input[type="text"], .emp-input {
-            padding: 7px 10px;
-            border-radius: 6px;
-            border: 1.5px solid #b3d1f7;
+            padding: 9px 12px;
+            border-radius: 10px;
+            border: 1.5px solid #cfe2f7;
             font-size: 15px;
             outline: none;
-            transition: border 0.2s;
-            background: #f7fbff;
+            transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+            background: #fcfeff;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
         }
         input[type="number"]:focus, input[type="text"]:focus, .emp-input:focus {
-            border: 1.5px solid #1976d2;
-            background: #e3f0ff;
+            border: 1.5px solid var(--primary);
+            background: #f1f8ff;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
         }
         select.emp-input {
-            height: 34px;
-            /* Đảm bảo chiều cao đồng bộ với input */
+            height: 42px;
         }
         .form-row {
             margin-bottom: 14px;
             display: flex;
             align-items: center;
             gap: 18px;
+            flex-wrap: wrap;
         }
         .form-row label {
             display: inline-block;
-            width: 110px;
-            color: #1976d2;
-            font-weight: 500;
+            width: 115px;
+            color: var(--primary-dark);
+            font-weight: 600;
         }
         .btn {
             background: linear-gradient(90deg, #1976d2 60%, #2196f3 100%);
             color: #fff;
             border: none;
-            padding: 8px 22px;
-            border-radius: 6px;
+            padding: 9px 20px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 15px;
-            font-weight: 500;
-            box-shadow: 0 2px 8px #1976d220;
-            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+            font-weight: 600;
+            box-shadow: 0 8px 18px rgba(25, 118, 210, 0.16);
+            transition: all 0.2s ease;
         }
         .btn:hover {
             background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
-            box-shadow: 0 4px 16px #1976d220;
-            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 10px 22px rgba(25, 118, 210, 0.22);
+            transform: translateY(-1px);
         }
         .btn[style*="background:#e53935"] {
-            background: linear-gradient(90deg, #e53935 60%, #ff5252 100%) !important;
+            background: linear-gradient(90deg, #e53935 60%, #ff5c5c 100%) !important;
         }
         .btn[style*="background:#e53935"]:hover {
-            background: linear-gradient(90deg, #b71c1c 60%, #e53935 100%) !important;
+            background: linear-gradient(90deg, #c62828 60%, #e53935 100%) !important;
         }
         .btn[style*="background:#43a047"] {
             background: linear-gradient(90deg, #43a047 60%, #66bb6a 100%) !important;
@@ -164,19 +228,53 @@
         }
         #addEmpForm {
             background: linear-gradient(135deg, #f7fbff 0%, #eef5ff 100%);
-            border-radius: 16px;
-            box-shadow: 0 10px 28px rgba(25, 118, 210, 0.10);
-            padding: 20px 20px 14px 20px;
+            border-radius: 18px;
+            box-shadow: 0 14px 32px rgba(25, 118, 210, 0.10);
+            padding: 20px 22px;
             margin-bottom: 18px;
             display: flex;
             flex-direction: column;
             gap: 0;
             border: 1px solid #dce9f7;
         }
+        .panel-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dceaf8;
+        }
+        .panel-heading h3 {
+            margin: 0;
+            color: var(--primary-dark);
+            font-size: 1.08rem;
+            font-weight: 700;
+        }
+        .panel-subtitle {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            padding: 4px 0;
+        }
+        .toolbar-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
         #empTable {
-            border-radius: 14px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 8px 24px rgba(25, 118, 210, 0.08);
+            box-shadow: 0 12px 26px rgba(25, 118, 210, 0.08);
+            border: 1px solid #dce9f7;
         }
         #empTable thead th {
             background: linear-gradient(90deg, #1976d2 0%, #4f8edb 100%);
@@ -184,8 +282,14 @@
             font-weight: 600;
             letter-spacing: 0.3px;
         }
+        #empTable tbody tr {
+            transition: background 0.15s ease;
+        }
         #empTable tbody tr:hover {
-            background: #f3f9ff;
+            background: #f4f9ff;
+        }
+        #empTable tbody td {
+            border-color: #dce9f7;
         }
         .emp-hide-checkbox {
             transform: scale(1.3);
@@ -221,10 +325,15 @@
         .copy-id-btn:active svg {
             fill: #2e7d32;
         }
+        @media (max-width: 900px) {
+            body { padding-left: 0; padding-right: 0; }
+            .container { margin: 12px; padding: 18px; }
+        }
         @media (max-width: 700px) {
-            .container { padding: 10px; }
+            .container { padding: 14px; }
             .form-row { flex-direction: column; align-items: flex-start; gap: 6px; }
             .form-row label { width: 100%; }
+            .toolbar { flex-direction: column; align-items: flex-start; }
             table, th, td { font-size: 14px; }
         }
         .emp-store-glossy {
@@ -256,7 +365,19 @@
     }
     </script>
     <div class="container">
-        <h2>Workforce 365 HRM Pro - Danh Sách Nhân Viên</h2>
+        <div class="page-header">
+            <div class="page-title-group">
+                <div class="page-icon">👥</div>
+                <div>
+                    <h2>Danh sách nhân viên</h2>
+                    <div class="page-subtitle">Quản lý thông tin nhân sự, chức vụ, cửa hàng và mức lương</div>
+                </div>
+            </div>
+            <div class="badge-row">
+                <span class="badge-chip">🧾 HRM Pro</span>
+                <span class="badge-chip">⚡ Cập nhật nhanh</span>
+            </div>
+        </div>
 
         <!-- Snackbar hoàn tác xóa -->
         <div id="undoDeleteSnackbar" style="display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:16px 28px;border-radius:8px;box-shadow:0 4px 24px #0005;z-index:3000;font-size:1.08rem;min-width:220px;text-align:center;">
@@ -264,6 +385,10 @@
             <button id="undoDeleteBtn" style="margin-left:18px;background:#43a047;color:#fff;border:none;border-radius:6px;padding:6px 18px;font-size:1rem;font-weight:600;cursor:pointer;">Hoàn tác</button>
         </div>
         <form id="addEmpForm">
+            <div class="panel-heading">
+                <h3>Thêm nhân viên mới</h3>
+                <span class="panel-subtitle">Điền đầy đủ thông tin để tạo hồ sơ</span>
+            </div>
             <div class="form-row">
                 <label>Tên:</label>
                 <input id="empName" required class="emp-input" style="flex:1;">
@@ -298,17 +423,14 @@
             </div>
         </form>
         <!-- Nút chọn/xóa nhiều nhân viên -->
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-
-        <div>
-            <button class="btn btn-red" type="button" id="toggleSelectBtn" style="min-width:140px;">Select</button>
-            <button class="btn btn-red" type="button" id="deleteSelectedBtn" style="min-width:140px;display:none;">Delete</button>
-        </div>
-
-        <div style="text-align:right; margin-top:10px;">
-            <button class="btn" style="background:#e53935" onclick="deleteAllEmployees()">Delete All</button>
-        </div>
-
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <button class="btn btn-red" type="button" id="toggleSelectBtn" style="min-width:140px;">Select</button>
+                <button class="btn btn-red" type="button" id="deleteSelectedBtn" style="min-width:140px;display:none;">Delete</button>
+            </div>
+            <div class="toolbar-group">
+                <button class="btn" style="background:#e53935" onclick="deleteAllEmployees()">Delete All</button>
+            </div>
         </div>
         <table id="empTable">
             <thead>

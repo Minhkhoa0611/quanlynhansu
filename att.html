@@ -956,12 +956,28 @@
                 <div class="stat"><span>Ngày công thực tế</span><b id="demoActualWorkDays">0</b></div>
                 <div class="stat"><span>Ngày lễ</span><b id="demoHoliday">0</b></div>
                 <div class="stat"><span>Nhân viên</span><b id="demoEmpCount">0</b></div>
+                <div class="stat"><span>Tăng ca (giờ)</span><b id="demoOvertimeHours">0</b></div>
+                <div class="stat"><span>Tiền tăng ca</span><b id="demoOvertimePay">0</b></div>
                 <div class="stat"><span>Tổng lương</span><b id="demoSalary">0</b></div>
                 <div style="margin-top:10px;padding:10px 12px;border-radius:10px;background:#fff8e1;color:#b36b00;font-size:12px;line-height:1.6;border:1px solid #f4c542;box-shadow:0 2px 8px #0001;">
                     <b>Công thức:</b> Lương = Lương cơ bản / Số ngày trong tháng × Số ngày tính lương (PL tính công, KL không tính)<br>
                     <span style="display:inline-block;margin-top:4px;padding:3px 8px;border-radius:999px;background:#ccfbf1;color:#0f766e;font-weight:700;">PL = Nghỉ có lương</span>
                     <span style="display:inline-block;margin-top:4px;margin-left:6px;padding:3px 8px;border-radius:999px;background:#fee2e2;color:#b91c1c;font-weight:700;">KL = Nghỉ không lương</span>
                 </div>
+            </div>
+        </div>
+        <div class="demo-wrap" style="margin-top:10px;">
+            <div class="demo-calendar">
+                <div class="demo-calendar-head">
+                    <div>
+                        <div class="demo-calendar-title">Lịch chấm tăng ca</div>
+                        <div class="demo-calendar-subtitle">Tích checkbox TC rồi nhập số giờ tăng ca cho từng ngày</div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <div class="demo-calendar-badge" style="background:linear-gradient(90deg,#ff9800 0%,#ffb74d 100%);">TC</div>
+                    </div>
+                </div>
+                <div class="demo-grid" id="overtimeCalendar"></div>
             </div>
         </div>
         <!-- Thêm vùng cảnh báo trạng thái cửa hàng (nên đặt ở đây) -->
@@ -1077,6 +1093,8 @@
         let shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
         // Thêm biến lưu hệ số công từng ngày
         let workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
+        // Thêm biến lưu dữ liệu tăng ca theo tháng/nhân viên
+        let overtimeByMonth = JSON.parse(localStorage.getItem('overtimeByMonth') || '{}');
         // Thêm biến lưu ngày lễ từng tháng
         let holidayDaysByMonth = JSON.parse(localStorage.getItem('holidayDaysByMonth') || '{}');
         // Thêm biến lưu ngày nghỉ có lương và không lương từng tháng/nhân viên
@@ -1251,8 +1269,17 @@
         }
         function formatVND(val) {
             if (isNaN(val)) return '';
-            const num = Math.round(Number(val) / 10000) * 10000;
+            const num = Math.ceil(Number(val));
             return num.toLocaleString('vi-VN') + ' ₫';
+        }
+        function formatOvertimeVND(val) {
+            if (isNaN(val)) return '';
+            const num = Number(val) || 0;
+            const rounded = Math.floor(num / 1000) * 1000 + (num % 1000 >= 500 ? 1000 : 0);
+            return rounded.toLocaleString('vi-VN') + ' ₫';
+        }
+        function calculateOvertimePay(empId, baseSalary, monthDays, overtimeHours) {
+            return getOvertimeHourlyRate(empId, baseSalary, monthDays) * overtimeHours;
         }
         function parseCurrency(val) {
             return Number((val+'').replace(/[^\d]/g, '')) || 0;
@@ -1273,6 +1300,12 @@
             let hour = h % 12 || 12;
             let ampm = h < 12 ? 'AM' : 'PM';
             return `${hour}:${m.toString().padStart(2, '0')} ${ampm}`;
+        }
+        function getOvertimeHourlyRate(empId, baseSalary, monthDays) {
+            const baseDailyPay = Number(baseSalary) > 0 ? (Number(baseSalary) / (monthDays || 1)) : 0;
+            const configuredDailyPay = parseInt(localStorage.getItem('salaryPerDay_' + empId)) || parseInt(localStorage.getItem('salaryPerDay') || '0');
+            const dailyPay = baseDailyPay > 0 ? baseDailyPay : (configuredDailyPay > 0 ? configuredDailyPay : 0);
+            return dailyPay > 0 ? dailyPay / 8 : 0;
         }
 
         // ====== QUẢN LÝ CA LÀM ======
@@ -1406,6 +1439,7 @@
             updateSalaryTypeDisplay();
             showMissingAttendanceAlert();
             renderDemoAttendanceCalendar();
+            renderOvertimeCalendar();
         });
         document.getElementById('attMonth').addEventListener('change', function() {
             // Khi đổi tháng, luôn nạp lại dữ liệu và render lại bảng chấm công
@@ -1413,6 +1447,7 @@
             showMissingAttendanceAlert();
             updateHolidayInput();
             renderDemoAttendanceCalendar();
+            renderOvertimeCalendar();
         });
         // --- Thêm hàm này để tránh lỗi nếu chưa có định nghĩa ---
         function showMissingAttendanceAlert() {
@@ -1574,6 +1609,8 @@
             let daysPL = 0;
             let daysKL = 0;
             let actualPaidDays = 0;
+            let overtimeHours = 0;
+            overtimeByMonth = JSON.parse(localStorage.getItem('overtimeByMonth') || '{}');
             for (let i = 1; i <= days; i++) {
                 const cell = document.createElement('div');
                 const hasAttendance = Array.isArray(empAtt[i]) && empAtt[i].length > 0;
@@ -1583,6 +1620,9 @@
                 const isPresent = hasAttendance || isHoliday || isPaidLeave || isUnpaidLeave;
                 const factorKey = `${i}_0`;
                 const currentWorkFactor = empId ? getWorkFactor(month, empId, factorKey) : 1;
+                const effectiveDayValue = hasAttendance ? parseFloat(currentWorkFactor || 1) : (isPaidLeave && !isUnpaidLeave ? 1 : 0);
+                const overtimeData = empId ? (overtimeByMonth[month]?.[empId]?.[String(i)] || { checked: false, hours: 0 }) : { checked: false, hours: 0 };
+                overtimeHours += (overtimeData.checked ? parseFloat(overtimeData.hours || 0) : 0);
                 const today = new Date();
                 const isToday = year === today.getFullYear() && monthNum === today.getMonth() + 1 && i === today.getDate();
                 const noteValue = (leaveNotes[i] || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -1619,7 +1659,7 @@
                 if (hasAttendance) daysWork++;
                 if (isPaidLeave) daysPL++;
                 if (isUnpaidLeave) daysKL++;
-                if ((hasAttendance || isPaidLeave) && !isUnpaidLeave) actualPaidDays++;
+                if ((hasAttendance || isPaidLeave) && !isUnpaidLeave) actualPaidDays += effectiveDayValue;
                 cal.appendChild(cell);
             }
             const demoWork = document.getElementById('demoWork');
@@ -1628,6 +1668,8 @@
             const demoActualWorkDays = document.getElementById('demoActualWorkDays');
             const demoHoliday = document.getElementById('demoHoliday');
             const demoEmpCount = document.getElementById('demoEmpCount');
+            const demoOvertimeHours = document.getElementById('demoOvertimeHours');
+            const demoOvertimePay = document.getElementById('demoOvertimePay');
             const demoSalary = document.getElementById('demoSalary');
             if (demoWork) demoWork.textContent = daysWork;
             if (demoPL) demoPL.textContent = daysPL;
@@ -1635,13 +1677,15 @@
             if (demoActualWorkDays) demoActualWorkDays.textContent = actualPaidDays;
             if (demoHoliday) demoHoliday.textContent = holidayDays.length;
             if (demoEmpCount) demoEmpCount.textContent = employees.length;
+            if (demoOvertimeHours) demoOvertimeHours.textContent = overtimeHours.toFixed(1).replace(/\.0$/, '');
+            const emp = employees.find(e => e.id == empId);
+            const baseSalary = parseFloat(emp?.base_salary || 0);
+            const overtimePay = calculateOvertimePay(empId, baseSalary, days, overtimeHours);
+            const roundedOvertimePay = Math.floor(overtimePay / 1000) * 1000 + (overtimePay % 1000 >= 500 ? 1000 : 0);
             if (demoSalary) {
-                const emp = employees.find(e => e.id == empId);
-                const baseSalary = parseFloat(emp?.base_salary || 0);
-                const salaryPerDay = parseInt(localStorage.getItem('salaryPerDay_' + empId)) || parseInt(localStorage.getItem('salaryPerDay') || '0');
                 let value = 0;
                 if (baseSalary > 0) {
-                    value = (baseSalary / (days || 1)) * actualPaidDays;
+                    value = (baseSalary / (days || 1)) * actualPaidDays + roundedOvertimePay;
                 } else {
                     let salary = 0;
                     if (empId) {
@@ -1656,9 +1700,97 @@
                             }
                         }
                     }
-                    value = salaryPerDay > 0 ? salary * salaryPerDay : salary;
+                    const configuredSalaryPerDay = parseInt(localStorage.getItem('salaryPerDay_' + empId)) || parseInt(localStorage.getItem('salaryPerDay') || '0');
+                    value = (configuredSalaryPerDay > 0 ? salary * configuredSalaryPerDay : salary) + roundedOvertimePay;
                 }
                 demoSalary.textContent = formatVND(value);
+            }
+            if (demoOvertimePay) {
+                demoOvertimePay.textContent = formatOvertimeVND(roundedOvertimePay);
+            }
+        }
+        function toggleOvertimeDay(day, checked) {
+            const month = getCurrentMonth();
+            const empId = document.getElementById('empSelect').value;
+            if (!empId) return;
+            if (!overtimeByMonth[month]) overtimeByMonth[month] = {};
+            if (!overtimeByMonth[month][empId]) overtimeByMonth[month][empId] = {};
+            const key = String(day);
+            const current = overtimeByMonth[month][empId][key] || { checked: false, hours: 0 };
+            current.checked = checked;
+            if (!checked) current.hours = 0;
+            overtimeByMonth[month][empId][key] = current;
+            localStorage.setItem('overtimeByMonth', JSON.stringify(overtimeByMonth));
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+            renderOvertimeCalendar();
+            renderDemoAttendanceCalendar();
+        }
+        function updateOvertimeHours(day, value) {
+            const month = getCurrentMonth();
+            const empId = document.getElementById('empSelect').value;
+            if (!empId) return;
+            if (!overtimeByMonth[month]) overtimeByMonth[month] = {};
+            if (!overtimeByMonth[month][empId]) overtimeByMonth[month][empId] = {};
+            const key = String(day);
+            const current = overtimeByMonth[month][empId][key] || { checked: false, hours: 0 };
+            const parsed = parseFloat(value);
+            current.hours = isNaN(parsed) ? 0 : parsed;
+            current.checked = current.hours > 0;
+            overtimeByMonth[month][empId][key] = current;
+            localStorage.setItem('overtimeByMonth', JSON.stringify(overtimeByMonth));
+            if (typeof autoSendDataToTelegramBot === 'function') autoSendDataToTelegramBot();
+            renderOvertimeCalendar();
+            renderDemoAttendanceCalendar();
+        }
+        function renderOvertimeCalendar() {
+            overtimeByMonth = JSON.parse(localStorage.getItem('overtimeByMonth') || '{}');
+            const cal = document.getElementById('overtimeCalendar');
+            if (!cal) return;
+            const month = getCurrentMonth();
+            const [year, monthNum] = month.split('-').map(Number);
+            const days = daysInMonth(month);
+            const empId = document.getElementById('empSelect')?.value || '';
+            const monthData = overtimeByMonth[month] || {};
+            const empOvertime = monthData[empId] || {};
+            const headers = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+            cal.innerHTML = '';
+            headers.forEach(h => {
+                const d = document.createElement('div');
+                d.className = 'dayhead';
+                d.textContent = h;
+                cal.appendChild(d);
+            });
+            const firstDay = new Date(year, monthNum - 1, 1);
+            const offset = (firstDay.getDay() + 6) % 7;
+            for (let i = 0; i < offset; i++) {
+                const blank = document.createElement('div');
+                blank.className = 'demo-cell blank';
+                cal.appendChild(blank);
+            }
+            for (let i = 1; i <= days; i++) {
+                const cell = document.createElement('div');
+                const key = String(i);
+                const data = empOvertime[key] || { checked: false, hours: 0 };
+                const checked = !!data.checked;
+                const hours = data.hours || 0;
+                const today = new Date();
+                const isToday = year === today.getFullYear() && monthNum === today.getMonth() + 1 && i === today.getDate();
+                cell.className = `demo-cell${checked ? ' present' : ''}${isToday ? ' today' : ''}`;
+                cell.innerHTML = `
+                    <div class="day-top">
+                        <span class="day-number">${String(i).padStart(2, '0')}</span>
+                        <label class="day-toggle" title="Đánh dấu tăng ca">
+                            <input type="checkbox" class="demo-checkbox" ${checked ? 'checked' : ''} onchange="toggleOvertimeDay(${i}, this.checked)">
+                        </label>
+                    </div>
+                    <div class="day-actions">
+                        <span class="status-pill">${checked ? 'TC' : 'Không'}</span>
+                    </div>
+                    <div class="factor-row">
+                        <span class="factor-label">Giờ</span>
+                        <input type="number" min="0" step="0.5" value="${hours}" class="factor-input" onchange="updateOvertimeHours(${i}, this.value)" ${checked ? '' : 'disabled'}>
+                    </div>`;
+                cal.appendChild(cell);
             }
         }
         function renderAttendance() {
@@ -1708,6 +1840,7 @@
             // Cập nhật giao diện chọn ngày lễ khi render lại
             updateHolidayInput();
             renderDemoAttendanceCalendar();
+            renderOvertimeCalendar();
         }
         function toggleAttendanceShift(empId, day, shiftIdx, checked) {
             const month = getCurrentMonth();

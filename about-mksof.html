@@ -1,400 +1,191 @@
 <!DOCTYPE html>
 <html lang="vi" style="zoom:90%;">
 <head>
-    <meta charset="UTF-8">
-    <title>Giới Thiệu Mạng Lưới MK SOF TECH GROUP</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="icon" href="iconlogo.png">
-
+    <meta charset="utf-8">
+    <title>About - Phần mềm</title>
+    <link rel="icon" type="image/png" href="iconlogo.png">
     <style>
+        :root {
+            --primary: #1976d2;
+            --primary-dark: #0f4c81;
+            --accent: #22c55e;
+            --border: #dceeff;
+            --text: #18324a;
+            --muted: #5b728b;
+        }
+        * { box-sizing: border-box; }
         body {
-            background: linear-gradient(135deg, #e3f0ff 0%, #f7f7f7 100%);
+            margin: 0;
+            padding-left: 270px;
+            padding-right: 20px;
             font-family: 'Segoe UI', Arial, sans-serif;
-            color: #222;
+            color: var(--text);
+            background: linear-gradient(135deg, #eef6ff 0%, #f8fbff 45%, #eef7ff 100%);
             min-height: 100vh;
         }
-        .about-section {
+        .container {
             max-width: 980px;
-            margin: 48px auto 0 auto;
-            background: #ffffffee; /* sáng hơn, trong suốt nhẹ */
-            border-radius: 28px;
-            box-shadow: 0 8px 40px #1976d250, 0 2px 8px #0001;
-            padding: 54px 40px 40px 40px;
-            text-align: center;
-            position: relative;
+            margin: 32px auto 36px;
+            background: rgba(255,255,255,0.95);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 20px 44px rgba(15, 76, 129, 0.16);
+            padding: 28px 30px 36px;
         }
-        .about-logo {
-            width: 100px;
-            height: 100px;
-            border-radius: 20px;
-            box-shadow: 0 4px 24px #1976d230;
-            background: #fff;
-            object-fit: contain;
-            margin-bottom: 14px;
-        }
-        .about-title {
-            font-size: 2.3rem;
-            font-weight: 900;
-            color: #1976d2;
-            margin-bottom: 6px;
-            letter-spacing: 2px;
-            text-shadow: 0 2px 12px #1976d220;
-        }
-        .about-title-en {
-            font-size: 1.15rem;
-            color: #43a047;
-            font-weight: 700;
-            margin-bottom: 10px;
-            letter-spacing: 1.2px;
-        }
-        .about-slogan {
-            font-size: 1.18rem;
-            color: #1976d2;
-            font-weight: 600;
-            margin-bottom: 22px;
-            letter-spacing: 1px;
-        }
-        .about-desc {
-            font-size: 1.09rem;
-            color: #333;
-            margin-bottom: 32px;
-            line-height: 1.8;
-            max-width: 760px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .network-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 26px;
-            margin-bottom: 38px;
-        }
-        .network-card {
-            background: linear-gradient(120deg, #e3f0ff 60%, #f7f7f7 100%);
-            border-radius: 16px;
-            box-shadow: 0 2px 12px #1976d210;
-            padding: 28px 26px 22px 26px;
-            min-width: 220px;
-            max-width: 270px;
-            flex: 1 1 220px;
-            text-align: left;
-            border-left: 6px solid #1976d2;
-            transition: transform 0.18s, box-shadow 0.18s;
-        }
-        .network-card:hover {
-            transform: translateY(-6px) scale(1.04);
-            box-shadow: 0 8px 32px #1976d230;
-        }
-        .network-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #1976d2;
-            margin-bottom: 8px;
-        }
-        .network-desc {
-            color: #444;
-            font-size: 1.01rem;
-        }
-        .about-contact {
-            margin-top: 40px;
-            background: #f7f7f7;
-            border-radius: 16px;
-            padding: 26px 20px 20px 20px;
-            box-shadow: 0 2px 8px #1976d210;
-            max-width: 540px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .about-contact-title {
-            color: #1976d2;
-            font-weight: bold;
-            font-size: 1.18rem;
-            margin-bottom: 12px;
-        }
-        .about-contact-info {
-            color: #333;
-            font-size: 1.09rem;
-            margin-bottom: 7px;
-        }
-        .about-mission {
-            background: linear-gradient(90deg, #1976d2 60%, #43a047 100%);
+        .hero {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, #2d9cdb 100%);
             color: #fff;
+            padding: 24px 26px;
+            border-radius: 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 12px 28px rgba(25,118,210,0.22);
+        }
+        .hero h1 { margin: 0 0 8px; font-size: 1.7rem; }
+        .hero p { margin: 0; line-height: 1.6; color: #eaf5ff; }
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            box-shadow: 0 10px 20px rgba(25,118,210,0.06);
+        }
+        .card h2 {
+            margin: 0 0 10px;
+            color: var(--primary);
+            font-size: 1.08rem;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+        }
+        .info-item {
+            padding: 12px 14px;
             border-radius: 12px;
-            padding: 18px 18px 14px 18px;
-            margin: 0 auto 32px auto;
-            max-width: 700px;
-            font-size: 1.09rem;
-            font-weight: 500;
-            box-shadow: 0 2px 12px #1976d210;
+            background: #f8fbff;
+            border: 1px solid #e0ecff;
         }
-        @media (max-width: 1100px) {
-            .about-section { padding: 24px 6vw; }
-            .network-list { flex-direction: column; align-items: center; }
-        }
-        @media (max-width: 700px) {
-            .about-section { padding: 12px 2vw; }
-            .network-card { min-width: 0; max-width: 100%; }
+        .info-item strong { color: var(--primary-dark); display:block; margin-bottom:4px; }
+        .footer-note {
+            margin-top: 10px;
+            color: var(--muted);
+            line-height: 1.6;
+            background: linear-gradient(90deg, #f7fbff 0%, #eef6ff 100%);
+            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            padding: 12px 14px;
         }
     </style>
+    <script src="menu.js"></script>
 </head>
 <body>
-    <script src="menu.js"></script>
-    <script>renderMenu();</script>
-    <div class="about-section">
-        <img src="iconlogo.png" alt="MK SOF TECH GROUP" class="about-logo">
-        <div class="about-title">MK SOF TECH GROUP</div>
-        <div class="about-title-en">MK SOF TECH GROUP – Next-Gen Software & AI Solutions</div>
-        <div class="about-slogan">Mạng lưới công nghệ - Đổi mới sáng tạo - Kết nối toàn cầu</div>
-        <div style="font-size:1.13rem;color:#1976d2;font-weight:700;margin-bottom:18px;">
-            <span style="color:#ffd600;">Vươn tầm vũ trụ – Định hình tương lai số Việt Nam!</span>
+    <script>renderMenu('about');</script>
+    <div class="container">
+        <div class="hero">
+            <h1>About</h1>
+            <p>Thông tin về phần mềm, tác giả, ngày phát hành và phiên bản hiện tại.</p>
         </div>
-        <div class="about-desc">
-            <b>MK SOF TECH GROUP</b> là hệ sinh thái chuyên nghiệp gồm các công ty thành viên, dự án công nghệ, đối tác chiến lược và cộng đồng chuyên gia trong lĩnh vực phần mềm, chuyển đổi số và AI.<br>
-            Chúng tôi cung cấp giải pháp toàn diện cho doanh nghiệp Việt: từ phần mềm quản lý, tự động hóa, AI, đến các dịch vụ tư vấn, triển khai hệ thống công nghệ hiện đại.<br>
-        </div>
-        <div class="about-mission">
-            <b>Sứ mệnh:</b> Kết nối tri thức, sáng tạo công nghệ, đồng hành cùng doanh nghiệp Việt vươn tầm quốc tế.<br>
-            <b>Tầm nhìn:</b> Trở thành mạng lưới công nghệ & phần mềm hàng đầu khu vực Đông Nam Á.<br>
-            <b>Tầm nhìn AI & Vũ trụ:</b>
-            <span style="color:#ffd600;">
-                Định hướng phát triển các giải pháp AI tiên tiến ứng dụng trong lĩnh vực hàng không và vũ trụ: tự động hóa, robot, dữ liệu lớn, AI cho vệ tinh, IoT không gian, phân tích dữ liệu bay, tối ưu hóa vận hành và an toàn hàng không.<br>
-                MK SOF TECH GROUP hướng tới kết nối hệ sinh thái số với các lĩnh vực công nghệ cao, góp phần đưa Việt Nam vào bản đồ công nghệ vũ trụ và AI toàn cầu.
-            </span>
-        </div>
-        <div class="network-list">
-            <div class="network-card">
-                <div class="network-title">Workforce 365 HRM Pro</div>
-                <div class="network-desc">Phần mềm chấm công & quản lý nhân sự hiện đại, tối ưu cho doanh nghiệp vừa và nhỏ.</div>
-            </div>
-            <div class="network-card">
-                <div class="network-title">MK Sales</div>
-                <div class="network-desc">Giải pháp quản lý bán hàng, kho, khách hàng, báo cáo doanh thu cho cửa hàng và doanh nghiệp.</div>
-            </div>
-            <div class="network-card">
-                <div class="network-title">AI Solutions</div>
-                <div class="network-desc">Tư vấn, triển khai các giải pháp AI: nhận diện khuôn mặt, xử lý dữ liệu lớn, tự động hóa quy trình.</div>
-            </div>
-            <div class="network-card">
-                <div class="network-title">MK Cloud</div>
-                <div class="network-desc">Hạ tầng lưu trữ, đồng bộ dữ liệu, bảo mật và dịch vụ cloud cho doanh nghiệp.</div>
-            </div>
-            <div class="network-card">
-                <div class="network-title">Đối tác & Cộng đồng</div>
-                <div class="network-desc">Kết nối chuyên gia, doanh nghiệp, startup công nghệ cùng phát triển hệ sinh thái số.</div>
-            </div>
-            <div class="network-card">
-                <div class="network-title">MK AI Chat</div>
-                <div class="network-desc">
-                    <b>Nền tảng Trí Tuệ Nhân Tạo giao tiếp:</b><br>
-                    Ứng dụng AI giao tiếp tự nhiên, hỗ trợ trả lời khách hàng, tư vấn thông minh, chatbot đa ngôn ngữ, tích hợp đa nền tảng cho doanh nghiệp và cá nhân.
+
+        <div class="card">
+            <h2>Thông tin phần mềm</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Tên phần mềm</strong>
+                    Workforce 365 HRM Pro
                 </div>
+                <div class="info-item">
+                    <strong>Tác giả</strong>
+                    Minh Khoa
+                </div>
+                <div class="info-item">
+                    <strong>Ngày phát hành</strong>
+                    19/07/2026
+                </div>
+                <div class="info-item">
+                    <strong>Phiên bản</strong>
+                    V2.2.7
+                </div>
+                <div class="info-item">
+                    <strong>Loại hình</strong>
+                    Quản lý nhân sự, chấm công, bảng lương
+                </div>
+                <div class="info-item">
+                    <strong>Trạng thái</strong>
+                    Đang sử dụng nội bộ / triển khai cho khách hàng
+                </div>
+            </div>
+            <div class="footer-note">
+                Đây là trang thông tin chính thức về phần mềm, dùng để ghi nhận tác giả, thời điểm phát hành và phiên bản đang sử dụng.
             </div>
         </div>
-        <!-- Các dự án chuẩn bị phát triển -->
-        <div style="margin:0 auto 36px auto;max-width:900px;">
-            <div style="font-size:1.15rem;font-weight:700;color:#1976d2;margin-bottom:10px;">
-                🚀 Dự án chiến lược & hiện đại sắp ra mắt của MK SOF TECH GROUP
-            </div>
-            <div class="network-list">
-                <div class="network-card">
-                    <div class="network-title">MK AI Assistant</div>
-                    <div class="network-desc">
-                        <b>Trợ lý AI cho doanh nghiệp:</b><br>
-                        Tích hợp AI hỗ trợ trả lời khách hàng tự động, phân tích dữ liệu kinh doanh, dự báo xu hướng, tự động hóa quy trình nội bộ.
-                    </div>
+
+        <div class="card">
+            <h2>Thông tin liên hệ</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Điện thoại</strong>
+                    0867544809
                 </div>
-                <div class="network-card">
-                    <div class="network-title">MK Blockchain Platform</div>
-                    <div class="network-desc">
-                        <b>Nền tảng ứng dụng Blockchain:</b><br>
-                        Quản lý hợp đồng thông minh, truy xuất nguồn gốc sản phẩm, xác thực giao dịch, lưu trữ dữ liệu phi tập trung.
-                    </div>
+                <div class="info-item">
+                    <strong>Email</strong>
+                    minhkhoa0611@gmail.com
                 </div>
-                <div class="network-card">
-                    <div class="network-title">MK Smart Retail</div>
-                    <div class="network-desc">
-                        <b>Giải pháp bán lẻ thông minh:</b><br>
-                        Tích hợp IoT, AI, camera nhận diện khuôn mặt, phân tích hành vi khách hàng tại cửa hàng, tối ưu hóa trưng bày và marketing.
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">MK HealthTech</div>
-                    <div class="network-desc">
-                        <b>Nền tảng quản lý y tế & sức khỏe thông minh:</b><br>
-                        Quản lý hồ sơ bệnh án điện tử, đặt lịch khám online, AI hỗ trợ chẩn đoán, theo dõi sức khỏe từ xa, kết nối thiết bị y tế IoT.
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">MK EduAI</div>
-                    <div class="network-desc">
-                        <b>Nền tảng giáo dục AI cá nhân hóa:</b><br>
-                        Đề xuất lộ trình học tập thông minh, kiểm tra đánh giá tự động, chatbot hỗ trợ học viên, phân tích tiến độ học tập bằng AI.
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">MK Smart City</div>
-                    <div class="network-desc">
-                        <b>Giải pháp thành phố thông minh:</b><br>
-                        Quản lý giao thông, an ninh, môi trường, chiếu sáng, cảnh báo sự cố, dashboard tổng hợp dữ liệu đô thị theo thời gian thực.
-                    </div>
+                <div class="info-item">
+                    <strong>Hỗ trợ</strong>
+                    Hỗ trợ qua Zalo / Messenger / Điện thoại
                 </div>
             </div>
         </div>
-        <!-- Sơ đồ cầu nối hợp tác -->
-        <div style="margin:0 auto 40px auto;max-width:900px;">
-            <div style="font-size:1.15rem;font-weight:700;color:#1976d2;margin-bottom:12px;">
-                🌐 Đối tác công nghệ chiến lược của MK SOF TECH GROUP
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:18px;justify-content:center;font-size:1.12rem;font-weight:600;color:#1976d2;">
-                <span>Microsoft</span>
-                <span>Google</span>
-                <span>AWS</span>
-                <span>IBM</span>
-                <span>Oracle</span>
-                <span>Nvidia</span>
-                <span>Tesla</span>
-                <span>SpaceX</span>
-            </div>
-            <div style="margin-top:14px;color:#1976d2;font-size:1.07rem;">
-                MK SOF TECH GROUP hợp tác, chuyển giao công nghệ, tích hợp giải pháp với các tập đoàn công nghệ hàng đầu thế giới, thúc đẩy đổi mới sáng tạo và phát triển hệ sinh thái số tại Việt Nam.
-            </div>
+
+        <div class="card">
+            <h2>Mục đích sử dụng</h2>
+            <ul>
+                <li>Quản lý danh sách nhân viên và thông tin cơ bản.</li>
+                <li>Chấm công, theo dõi ngày nghỉ, lễ tết và tăng ca.</li>
+                <li>Tính bảng lương và lập báo cáo lương theo từng tháng.</li>
+                <li>Hỗ trợ thao tác quản trị nhanh chóng cho cửa hàng hoặc công ty.</li>
+            </ul>
         </div>
-        <!-- Dự án đã đóng góp cho xã hội -->
-        <div style="margin:0 auto 36px auto;max-width:900px;">
-            <div style="font-size:1.15rem;font-weight:700;color:#43a047;margin-bottom:10px;">
-                🌟 Một số dự án tiêu biểu MK SOF TECH GROUP đã đóng góp cho xã hội
-            </div>
-            <div class="network-list">
-                <div class="network-card">
-                    <div class="network-title">Hệ thống AI cảnh báo thiên tai toàn quốc</div>
-                    <div class="network-desc">
-                        Nền tảng AI dự báo, cảnh báo sớm lũ lụt, hạn hán, động đất, giúp bảo vệ cộng đồng và hỗ trợ chính quyền ứng phó kịp thời.
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">Ứng dụng chăm sóc sức khỏe cộng đồng MK HealthCare</div>
-                    <div class="network-desc">
-                        Ứng dụng AI hỗ trợ tư vấn sức khỏe, nhắc lịch uống thuốc, theo dõi chỉ số sức khỏe cho người dân vùng sâu vùng xa.
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">Nền tảng giáo dục số MK Edu4Future</div>
-                    <div class="network-desc">
-                        Hệ thống học tập trực tuyến, kiểm tra đánh giá tự động, kết nối giáo viên và học sinh trên toàn quốc, thúc đẩy chuyển đổi số giáo dục.
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">Giải pháp Smart City cho đô thị thông minh</div>
-                    <div class="network-desc">
-                        Triển khai giải pháp quản lý giao thông, an ninh, môi trường, cảnh báo sự cố, góp phần xây dựng thành phố thông minh, an toàn, hiện đại.
-                    </div>
-                </div>
-            </div>
+
+        <div class="card">
+            <h2>Hỗ trợ nền tảng</h2>
+            <ul>
+                <li>Phần mềm chỉ hỗ trợ nền tảng <strong>website</strong>, chạy trên trình duyệt.</li>
+                <li>Hiện tại không hỗ trợ nền tảng mobile app riêng hoặc desktop app độc lập.</li>
+                <li>Để sử dụng tốt nhất, cần có kết nối internet ổn định và trình duyệt được cập nhật.</li>
+            </ul>
         </div>
-        <!-- Sản phẩm phần mềm đã phát triển -->
-        <div style="margin:0 auto 36px auto;max-width:900px;">
-            <div style="font-size:1.15rem;font-weight:700;color:#1976d2;margin-bottom:10px;">
-                💻 Các sản phẩm phần mềm đã triển khai thực tế của MK SOF TECH GROUP
-            </div>
-            <div class="network-list">
-                <div class="network-card">
-                    <div class="network-title">Workforce 365 HRM Pro</div>
-                    <div class="network-desc">
-                        Đã triển khai cho nhiều doanh nghiệp, trường học: chấm công, quản lý nhân sự, ca làm, lương thưởng, báo cáo tự động.
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">MK Sales</div>
-                    <div class="network-desc">
-                        Được sử dụng tại các cửa hàng, doanh nghiệp: quản lý bán hàng, kho, khách hàng, hóa đơn, báo cáo doanh thu.
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">MK AI Chat</div>
-                    <div class="network-desc">
-                        Ứng dụng thực tế cho doanh nghiệp và cá nhân: AI giao tiếp tự nhiên, chatbot đa ngôn ngữ, hỗ trợ tư vấn khách hàng.
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">MK Cloud</div>
-                    <div class="network-desc">
-                        Đã triển khai cho doanh nghiệp: lưu trữ, đồng bộ dữ liệu, bảo mật, chia sẻ tài liệu nội bộ.
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">MK Invoice</div>
-                    <div class="network-desc">
-                        Được sử dụng để phát hành hóa đơn điện tử, ký số, quản lý hóa đơn, tích hợp bán hàng thực tế.
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">MK Edu4Future</div>
-                    <div class="network-desc">
-                        Đã triển khai cho các trung tâm đào tạo: học tập trực tuyến, kiểm tra đánh giá tự động, quản lý học viên, kết nối giáo viên và học sinh.
-                    </div>
-                </div>
-            </div>
+
+        <div class="card">
+            <h2>Dữ liệu</h2>
+            <ul>
+                <li>Dữ liệu được lưu tại <strong>local storage / local data</strong> trên thiết bị đang sử dụng.</li>
+                <li>Thông tin có thể bị ảnh hưởng nếu xóa dữ liệu trình duyệt hoặc đổi thiết bị.</li>
+                <li>Khuyến nghị thường xuyên sao lưu dữ liệu để tránh mất thông tin.</li>
+            </ul>
         </div>
-        <!-- Hệ thống công ty trực thuộc -->
-        <div style="margin:0 auto 36px auto;max-width:900px;">
-            <div style="font-size:1.15rem;font-weight:700;color:#1976d2;margin-bottom:10px;">
-                🏢 Hệ thống công ty thành viên trực thuộc MK SOF TECH GROUP
-            </div>
-            <div class="network-list">
-                <div class="network-card">
-                    <div class="network-title">Công ty TNHH MK SOF AI Solutions</div>
-                    <div class="network-desc">
-                        Chuyên phát triển trí tuệ nhân tạo, học máy, xử lý ngôn ngữ, thị giác máy tính…
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">Công ty TNHH MK SOF Software Development</div>
-                    <div class="network-desc">
-                        Chuyên viết phần mềm theo yêu cầu, sản phẩm SaaS, ứng dụng doanh nghiệp…
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">Công ty TNHH MK SOF Cloud & Data Services</div>
-                    <div class="network-desc">
-                        Điện toán đám mây, hạ tầng số, lưu trữ, xử lý dữ liệu lớn (Big Data)…
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">Công ty TNHH MK SOF Cyber Security</div>
-                    <div class="network-desc">
-                        Chuyên về bảo mật hệ thống, kiểm thử xâm nhập (pentest), an toàn dữ liệu…
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">Công ty TNHH MK SOF Digital Transformation</div>
-                    <div class="network-desc">
-                        Tư vấn & triển khai chuyển đổi số cho doanh nghiệp, chính phủ…
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">Công ty TNHH MK SOF Robotics & Automation</div>
-                    <div class="network-desc">
-                        Tự động hóa công nghiệp, phần mềm điều khiển robot, hệ thống nhúng…
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">Công ty TNHH MK SOF Edutech</div>
-                    <div class="network-desc">
-                        Phát triển giải pháp công nghệ giáo dục, e-learning, nền tảng đào tạo số…
-                    </div>
-                </div>
-                <div class="network-card">
-                    <div class="network-title">Công ty TNHH MK SOF R&D Lab</div>
-                    <div class="network-desc">
-                        Nghiên cứu và phát triển công nghệ lõi, sản phẩm thử nghiệm, AI model riêng…
-                    </div>
-                </div>
-            </div>
+
+        <div class="card">
+            <h2>Sao lưu dữ liệu</h2>
+            <ul>
+                <li>Để tránh mất dữ liệu, người dùng nên thực hiện sao lưu thường xuyên bằng chức năng <strong>Xuất dữ liệu</strong> trong menu.</li>
+                <li>File dữ liệu sao lưu nên được lưu ở một nơi an toàn như ổ D, ổ USB hoặc Google Drive/OneDrive.</li>
+                <li>Nên sao lưu trước khi đổi máy, cài lại trình duyệt, xóa dữ liệu trình duyệt hoặc nâng cấp phiên bản phần mềm.</li>
+                <li>Nếu cần, có thể gửi file backup cho người hỗ trợ để kiểm tra và khôi phục dữ liệu.</li>
+                <li>Dữ liệu của chúng tôi có thể được khôi phục nếu có đủ cơ sở thời gian và thông tin liên quan để xác minh.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Điều khoản sử dụng</h2>
+            <ul>
+                <li>Phần mềm chỉ được sử dụng cho mục đích quản lý nội bộ và theo đúng quy định của khách hàng.</li>
+                <li>Khách hàng cần bảo mật thông tin nhân viên và dữ liệu cá nhân.</li>
+                <li>Không sao chép, phân phối hoặc chỉnh sửa trái phép phần mềm.</li>
+                <li>Đội ngũ hỗ trợ có thể cập nhật phiên bản mới để cải thiện tính năng.</li>
+            </ul>
         </div>
     </div>
-    <script src="footer.js"></script>
-    <script>renderFooter();</script>
 </body>
 </html>

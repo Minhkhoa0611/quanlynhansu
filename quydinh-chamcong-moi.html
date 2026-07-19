@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi" style="zoom:90%;">
+<head>
+    <meta charset="utf-8">
+    <title>Hướng dẫn chấm công</title>
+    <link rel="icon" type="image/png" href="iconlogo.png">
+    <style>
+        :root {
+            --primary: #1976d2;
+            --primary-dark: #0f4c81;
+            --accent: #22c55e;
+            --warning: #ff9800;
+            --bg: #f4f8ff;
+            --card: #ffffff;
+            --text: #18324a;
+            --muted: #5b728b;
+            --border: #dceeff;
+            --soft: #f7fbff;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding-left: 270px;
+            padding-right: 20px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(25,118,210,0.08), transparent 24%),
+                linear-gradient(135deg, #eef6ff 0%, #f8fbff 45%, #eef7ff 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 32px auto 42px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 24px 55px rgba(15, 76, 129, 0.16);
+            padding: 28px 30px 36px;
+            overflow: hidden;
+        }
+        .hero {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, #2d9cdb 100%);
+            color: #fff;
+            padding: 26px 28px;
+            border-radius: 20px;
+            margin-bottom: 18px;
+            box-shadow: 0 14px 30px rgba(25,118,210,0.22);
+            position: relative;
+        }
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0.12), transparent 60%);
+            pointer-events: none;
+            border-radius: inherit;
+        }
+        .hero h1 {
+            margin: 0 0 8px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+        .hero p {
+            margin: 0;
+            line-height: 1.7;
+            color: #e9f6ff;
+            max-width: 920px;
+        }
+        .top-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            background: rgba(255,255,255,0.16);
+            color: #f8fbff;
+            border: 1px solid rgba(255,255,255,0.28);
+            backdrop-filter: blur(6px);
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px 22px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 24px rgba(25,118,210,0.06);
+        }
+        .card h2 {
+            margin: 0 0 12px;
+            color: var(--primary);
+            font-size: 1.16rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+        }
+        .card .title-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 999px;
+            background: #eaf4ff;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+        .note {
+            background: linear-gradient(90deg, #f7fbff 0%, #eef6ff 100%);
+            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: var(--muted);
+            margin: 12px 0 0;
+            line-height: 1.65;
+        }
+        .formula {
+            background: linear-gradient(135deg, #0f4c81 0%, #145ea3 100%);
+            color: #fff;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin: 10px 0 12px;
+            line-height: 1.65;
+            overflow-x: auto;
+        }
+        ul { padding-left: 18px; }
+        li { margin-bottom: 7px; line-height: 1.6; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+        }
+        .mini-card {
+            border: 1px dashed #cfe4ff;
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: var(--soft);
+            line-height: 1.6;
+        }
+        .mini-card strong { color: var(--primary-dark); }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            background: #fcfeff;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th { background: #eef6ff; color: var(--primary-dark); font-weight: 700; }
+        tr:nth-child(even) td { background: #fbfdff; }
+        .pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: #fff4e5;
+            color: #b35d00;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+        .summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .summary .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #f5faff;
+            color: var(--primary-dark);
+            border: 1px solid #dceeff;
+            font-weight: 600;
+        }
+        @media (max-width: 900px) {
+            body { padding-left: 0; padding-right: 0; }
+            .container { margin: 12px; padding: 18px; }
+        }
+    </style>
+    <script src="menu.js"></script>
+</head>
+<body>
+    <script>renderMenu('quydinh');</script>
+    <div class="container">
+        <div class="hero">
+            <div class="top-strip">
+                <span class="badge">📘 Quy định chấm công</span>
+                <span class="badge">✅ Áp dụng cho hệ thống HRM</span>
+            </div>
+            <h1>Hướng dẫn chấm công</h1>
+            <p>Ngày nghỉ hàng tuần đã được tính lương và được tích vào PL. Nếu nhân viên phải đi làm vào ngày đó thì được tính nhân 2; ngày lễ được tính x2 hoặc x3 tùy theo quy định của cửa hàng. Ngày công chuẩn được tính theo lương cơ bản chia cho số ngày trong tháng.</p>
+        </div>
+
+        <div class="card">
+            <h2><span class="title-icon">1</span> Ngày nghỉ hàng tuần đã được tính lương <span class="badge">PL</span></h2>
+            <ul>
+                <li>Ngày nghỉ hàng tuần theo quy định của cửa hàng (ví dụ: Chủ nhật hoặc ngày nghỉ cố định trong tuần) đã được tính lương.</li>
+                <li>Ngày này được ghi nhận là <strong>PL</strong> và không bị trừ công.</li>
+                <li>Nếu nhân viên vẫn phải đi làm vào ngày nghỉ hàng tuần thì được tính theo hệ số <strong>nhân 2</strong>.</li>
+            </ul>
+            <div class="note">
+                <strong>Ý nghĩa:</strong> Khi nhân viên làm việc vào ngày nghỉ hàng tuần, nếu đó là ngày đã có lương thì vẫn giữ quyền lợi PL, nhưng tiền công được tính theo mức <strong>2 lần</strong> so với ngày thường.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><span class="title-icon">2</span> Cách tính ngày công chuẩn</h2>
+            <div class="formula">
+                Ngày công chuẩn = Lương cơ bản / Số ngày trong tháng<br>
+                Ví dụ: tháng có 29 ngày thì chuẩn 29 ngày; tháng có 31 ngày thì chuẩn 31 ngày
+            </div>
+            <div class="grid">
+                <div class="mini-card">
+                    <strong>Ví dụ 1:</strong><br>
+                    Lương cơ bản = 10.000.000 đồng<br>
+                    Tháng có 29 ngày → Ngày công chuẩn = 29 ngày<br>
+                    Tiền 1 ngày công = 10.000.000 / 29 ≈ 344.828 đồng
+                </div>
+                <div class="mini-card">
+                    <strong>Ví dụ 2:</strong><br>
+                    Lương cơ bản = 10.000.000 đồng<br>
+                    Tháng có 31 ngày → Ngày công chuẩn = 31 ngày<br>
+                    Tiền 1 ngày công = 10.000.000 / 31 ≈ 322.581 đồng
+                </div>
+            </div>
+            <div class="summary">
+                <div class="chip">📅 Tháng 29 ngày: dùng 29 ngày chuẩn</div>
+                <div class="chip">📅 Tháng 31 ngày: dùng 31 ngày chuẩn</div>
+            </div>
+            <div class="note">
+                Ngày công chuẩn được tính theo đúng số ngày thực tế của tháng, nên tháng 29 ngày thì dùng 29, tháng 31 ngày thì dùng 31. Nếu nhân viên làm đủ số ngày công chuẩn thì sẽ được nhận đủ lương cơ bản.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><span class="title-icon">3</span> Cách tính tăng ca</h2>
+            <div class="formula">
+                Tiền lương theo giờ = Lương cơ bản / Số giờ làm chuẩn<br>
+                Tiền tăng ca = Tiền lương theo giờ × Số giờ tăng ca × Hệ số tăng ca
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Loại tăng ca</th>
+                        <th>Hệ số</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ngày thường</td>
+                        <td>1.0</td>
+                        <td>Ngày làm bình thường</td>
+                    </tr>
+                    <tr>
+                        <td>Ngày nghỉ hàng tuần phải đi làm</td>
+                        <td>2.0</td>
+                        <td>Nhân 2 so với ngày thường</td>
+                    </tr>
+                    <tr>
+                        <td>Ngày lễ</td>
+                        <td>2.0 hoặc 3.0</td>
+                        <td>Tùy theo quy định của cửa hàng</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="note">
+                Nếu nhân viên làm tăng ca vào ngày nghỉ hàng tuần hoặc ngày lễ, tiền tăng ca được tính theo hệ số quy định của cửa hàng, đồng thời vẫn bảo toàn quyền lợi PL của ngày nghỉ có lương đó.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><span class="title-icon">4</span> Công thức tổng lương</h2>
+            <div class="formula">
+                Tổng lương = Lương ngày công + Tiền tăng ca + Phụ cấp (nếu có) - Khấu trừ (nếu có)
+            </div>
+            <ul>
+                <li>Ngày nghỉ hàng tuần đã có lương và được tích vào PL.</li>
+                <li>Nếu đi làm vào ngày nghỉ hàng tuần thì được tính nhân 2.</li>
+                <li>Ngày lễ có thể tính x2 hoặc x3 tùy quy định của cửa hàng.</li>
+                <li>Ngày công chuẩn được tính theo lương cơ bản chia cho số ngày thực tế của tháng.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
