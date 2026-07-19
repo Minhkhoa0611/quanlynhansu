@@ -537,10 +537,10 @@ function renderMenu(active) {
                     { id: 'emp', label: 'Danh sách nhân viên', href: 'emp.html' },
                     // { id: 'setup', label: 'Thiết Lập', href: 'setup.html' }, // chuyển vào Cài Đặt
                     { id: 'att', label: 'Chấm công', href: 'att.html' },
-                    { id: 'payroll', label: 'Bảng lương', href: 'bangluong.html' },
-                    { id: 'payroll_report', label: 'Lập BC Lương', href: 'baocaoluong.html' }
                     { id: 'quydinh', label: 'Hướng dẫn chấm công', href: 'quydinh-chamcong-moi.html' },
                     { id: 'about', label: 'About', href: 'about-mksof.html' },
+                    { id: 'payroll', label: 'Bảng lương', href: 'bangluong.html' },
+                    { id: 'payroll_report', label: 'Lập BC Lương', href: 'baocaoluong.html' }
                 ];
                 // Lấy cấu hình menu từ localStorage
                 let menuConfig = [];
@@ -1749,3 +1749,4 @@ if (
             if (input) input.click();
         }, 300);
     });
+}
