@@ -1,6 +1,49 @@
 if (typeof CODE_VERSION === 'undefined') {
-    var CODE_VERSION = '2.2.7'; // cập nhật version mới nhất
+    var CODE_VERSION = '2.2.8'; // cập nhật version mới nhất
 
+}
+
+function getPageBreadcrumbInfo(active) {
+    const pageMap = {
+        index: { label: 'Trang Chủ', href: 'index.html' },
+        emp: { label: 'Danh sách nhân viên', href: 'emp.html' },
+        att: { label: 'Chấm công', href: 'att.html' },
+        payroll: { label: 'Bảng lương', href: 'bangluong.html' },
+        payroll_report: { label: 'Lập BC Lương', href: 'baocaoluong.html' },
+        quydinh: { label: 'Hướng dẫn chấm công', href: 'quydinh-chamcong-moi.html' },
+        about: { label: 'About', href: 'about-mksof.html' },
+        setup: { label: 'Thiết lập', href: 'setup.html' }
+    };
+    const currentPath = (location.pathname || '').split('/').pop().toLowerCase();
+    const normalizedActive = String(active || '').toLowerCase();
+    let match = pageMap[normalizedActive];
+    if (!match) {
+        if (currentPath.includes('emp')) match = pageMap.emp;
+        else if (currentPath.includes('att')) match = pageMap.att;
+        else if (currentPath.includes('bangluong')) match = pageMap.payroll;
+        else if (currentPath.includes('baocaoluong')) match = pageMap.payroll_report;
+        else if (currentPath.includes('quydinh') || currentPath.includes('huongdan')) match = pageMap.quydinh;
+        else if (currentPath.includes('about')) match = pageMap.about;
+        else if (currentPath.includes('setup')) match = pageMap.setup;
+        else match = pageMap.index;
+    }
+    const fallbackLabel = (document.title || '').replace(/^Workforce 365 HRM Pro[-\s]*/, '').trim() || 'Trang';
+    return {
+        label: (match && match.label) ? match.label : fallbackLabel,
+        href: (match && match.href) ? match.href : currentPath || 'index.html'
+    };
+}
+
+function buildBreadcrumbMarkup(active) {
+    const current = getPageBreadcrumbInfo(active);
+    const isHome = current.label === 'Trang Chủ';
+    const parts = [];
+    parts.push(`<a href="index.html" class="breadcrumb-link"><span class="breadcrumb-icon">⌂</span><span>Trang chủ</span></a>`);
+    if (!isHome) {
+        parts.push(`<span class="breadcrumb-separator">›</span>`);
+        parts.push(`<span class="breadcrumb-current">${current.label}</span>`);
+    }
+    return parts.join('');
 }
 
 function renderMenu(active) {
@@ -86,6 +129,68 @@ function renderMenu(active) {
             z-index: 10;
             border-bottom: 1px solid #e2e8f0;
         }
+        .page-breadcrumb {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 14px 22px 18px 22px;
+            padding: 9px 14px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(248,251,255,0.98), rgba(241,247,255,0.96));
+            border: 1px solid #dbeafe;
+            box-shadow: 0 4px 12px rgba(15,23,42,0.05);
+            color: #334155;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.18px;
+            max-width: calc(100% - 44px);
+            width: fit-content;
+        }
+        .page-breadcrumb .breadcrumb-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: ${menuColor};
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 4px 8px;
+            transition: background 0.16s, color 0.16s, transform 0.16s;
+        }
+        .page-breadcrumb .breadcrumb-link:hover {
+            background: rgba(25,118,210,0.08);
+            color: ${menuColor};
+            transform: translateY(-1px);
+        }
+        .page-breadcrumb .breadcrumb-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(25,118,210,0.12);
+            font-size: 11px;
+        }
+        .page-breadcrumb .breadcrumb-separator {
+            color: #94a3b8;
+            font-weight: 700;
+            font-size: 13px;
+            line-height: 1;
+            margin: 0 2px;
+        }
+        .page-breadcrumb .breadcrumb-current {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 8px;
+            color: #0f172a;
+            background: rgba(255,255,255,0.95);
+            border: 1px solid rgba(25,118,210,0.12);
+            box-shadow: inset 0 0 0 1px rgba(25,118,210,0.04);
+            font-weight: 700;
+        }
         .navbar .navbar-logo {
             font-family: ${logoFont};
             font-size: 18px;
@@ -117,26 +222,6 @@ function renderMenu(active) {
             width: 24px;
             height: 24px;
             display: block;
-        }
-        .navbar .app-version-label {
-            background: ${labelColor};
-            font-size:13px;
-            font-weight:600;
-            color: #fff;
-            border-radius:999px;
-            padding:3px 10px;
-            margin-left:8px;
-            letter-spacing:1px;
-            cursor:pointer;
-            box-shadow: 0 2px 8px ${labelColor}33;
-            border: 2px solid #fff5;
-            transition: transform 0.2s, filter 0.2s;
-            display: inline-block;
-            text-align: center;
-        }
-        .navbar .app-version-label:hover {
-            filter: brightness(1.08);
-            transform: translateY(-1px);
         }
         .navbar .navbar-menu {
             display: flex;
@@ -488,6 +573,8 @@ function renderMenu(active) {
     document.head.appendChild(style);
 
     // Tạo menu mới (hiển thị phiên bản như cũ, nằm cạnh TimePro HRM)
+    const oldBreadcrumb = document.querySelector('.page-breadcrumb');
+    if (oldBreadcrumb) oldBreadcrumb.remove();
     const nav = document.createElement('div');
     nav.className = 'navbar';
     nav.innerHTML = `
@@ -525,9 +612,6 @@ function renderMenu(active) {
                     V${CODE_VERSION}
                 </span>
             </span>
-            <span id="app-version-label" class="app-version-label" title="Nhấn để nhập Key" style="color:#111;">
-                ${appVersion}
-            </span>
         </div>
         <div class="navbar-menu">
             ${(() => {
@@ -560,45 +644,37 @@ function renderMenu(active) {
                 let html = menus.filter(m => m.visible !== false).map(m =>
                     `<button onclick="location.href='${m.href}'"${active===m.id?' class="active"':''} title="${m.label}"><span class="menu-label">${m.label}</span></button>`
                 ).join('');
+                html += `
+                    <div class="menu-data-dropdown" tabindex="0">
+                        <button type="button" class="menu-data-btn" onclick="toggleMenuDataDropdown(event)" title="Tiện Ích">
+                            <span class="menu-icon">🛠️</span><span class="menu-label">Tiện Ích</span><span class="menu-toggle-icon">▾</span>
+                        </button>
+                        <div class="menu-data-list">
+                            <button onclick="exportAllData()" class="menu-export-btn"${active==='export'?' class="active"':''}>Xuất dữ liệu</button>
+                            <button type="button" class="menu-import-btn" onclick="handleMenuImportBtnClick()">Nhập dữ liệu</button>
+                            <input id="importDataInput" type="file" accept=".json" onchange="importAllData && importAllData(event)">
+                            <button type="button" class="menu-telegram-btn" onclick="sendAllDataToTelegramBot()">Gửi dữ liệu về Bot</button>
+                            <button type="button" class="menu-quydinh-btn" onclick="location.href='quydinh-chamcong-moi.html'" style="color:#1976d2;">📘 Hướng dẫn chấm công</button>
+                            <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ About</button>
+                        </div>
+                    </div>`;
                 return html;
             })()}
         </div>
         <button onclick="showSupportBotPopup()" style="background:#fff; color:#1976d2; border:1px solid #1976d2; margin-left:8px; height:40px; display:flex; align-items:center;" title="Hỗ trợ"><span class="menu-icon">🤖</span><span class="menu-label">Hỗ trợ</span></button>
-        <div class="menu-data-dropdown" tabindex="0">
-            <button type="button" class="menu-data-btn" onclick="toggleMenuDataDropdown(event)" title="Tiện Ích">
-                <span class="menu-icon">🛠️</span><span class="menu-label">Tiện Ích</span><span class="menu-toggle-icon">▾</span>
-            </button>
-            <div class="menu-data-list">
-                <button onclick="exportAllData()" class="menu-export-btn"${active==='export'?' class="active"':''}>Xuất dữ liệu</button>
-                <button type="button" class="menu-import-btn" onclick="handleMenuImportBtnClick()">Nhập dữ liệu</button>
-                <input id="importDataInput" type="file" accept=".json" onchange="importAllData && importAllData(event)">
-                <button type="button" class="menu-telegram-btn" onclick="sendAllDataToTelegramBot()">Gửi dữ liệu về Bot</button>
-                <button type="button" class="menu-setting-btn" onclick="showMenuSettingPopup()" style="color:#1976d2;">⚙️ Cài đặt menu</button>
-                <button type="button" class="menu-setup-btn" onclick="location.href='setup.html'" style="color:#1976d2;">🔧 Thiết Lập</button>
-                <button type="button" class="menu-work-schedule-btn" onclick="location.href='work_schedule.html'" style="color:#1976d2;">📅 Lịch làm việc</button>
-                <button type="button" class="menu-quydinh-btn" onclick="location.href='quydinh-chamcong-moi.html'" style="color:#1976d2;">📘 Hướng dẫn chấm công</button>
-                <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ About</button>
-                <!-- Đã loại bỏ các menu: Bảng lương chi tiết, Báo Cáo Chi Trả Lương, Bảng Lương, Local Data theo yêu cầu -->
-
-
-                <button type="button" class="menu-ckbank" onclick="location.href='BankQR/BankQR.html'" style="color:#2563eb;">🏦BANK</button>
-                <button type="button" class="menu-qrscanner" onclick="location.href='QRSCANNER/qr-scanner.html'" style="color:#2563eb;">📷 QR-Scanner</button>
-                <button type="button" class="menu-admin" onclick="location.href='Admin.html'" style="color:#2563eb;">🔐ADMIN</button>
-                <button type="button" class="menu-hfarm-product" onclick="window.open('https://minhkhoa0611.github.io/H-FARM/danhsachsanpham.html','_blank')" style="color:#2e7d32;">🌱 Quản Lý Sản Phẩm H'Farm</button>
-                <button type="button" class="menu-ckbank" onclick="location.href='Chấm Công MentKhoa/chamcongmentKHOA.html'" style="color:#2563eb;">Lịch</button>
-
-                <button type="button" class="menu-about-btn" onclick="location.href='about-mksof.html'" style="color:#1976d2;">ℹ️ Giới thiệu</button>
-            </div>
-        </div>
         <div class="menu-footer-logo">
             <img src="timespro.png" alt="TimesPro logo" />
         </div>
-        <div class="menu-contact-info" style="margin-top:10px; padding:10px 12px; text-align:center; font-size:12px; color:#f8fafc; line-height:1.5; border-radius:12px; background:linear-gradient(135deg, #1976d2 0%, #2563eb 100%); box-shadow:0 6px 16px rgba(25,118,210,0.22);">
+        <div class="menu-contact-info" onclick="showZaloQrPopup()" style="margin-top:10px; padding:10px 12px; text-align:center; font-size:12px; color:#f8fafc; line-height:1.5; border-radius:12px; background:linear-gradient(135deg, #1976d2 0%, #2563eb 100%); box-shadow:0 6px 16px rgba(25,118,210,0.22); cursor:pointer; transition:transform 0.16s, box-shadow 0.16s;">
             <div style="font-weight:700; color:#ffffff; letter-spacing:0.4px;">By Minh Khoa</div>
             <div style="color:#e3f2fd; font-weight:600;">0867544809</div>
         </div>
     `;
     document.body.insertBefore(nav, document.body.firstChild);
+    const breadcrumb = document.createElement('div');
+    breadcrumb.className = 'page-breadcrumb';
+    breadcrumb.innerHTML = buildBreadcrumbMarkup(active);
+    nav.insertAdjacentElement('afterend', breadcrumb);
 
     const savedCollapsed = localStorage.getItem('sidebarCollapsed') === '1';
     const navbarEl = document.querySelector('.navbar');
@@ -627,26 +703,9 @@ function renderMenu(active) {
         if (event && event.stopPropagation) event.stopPropagation();
     };
 
-    // Thêm popup nhập key nếu chưa có
-    if (!document.getElementById('popup-key-overlay')) {
+    // Chỉ giữ popup thông báo thành công và popup lịch sử phiên bản
+    if (!document.getElementById('popup-success-overlay')) {
         const popupHtml = `
-        <div id="popup-key-overlay" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:#0007; align-items:center; justify-content:center;">
-            <div id="popup-key-box" style="background:#fff; border-radius:12px; box-shadow:0 8px 32px #0003; padding:32px 28px 24px 28px; min-width:320px; max-width:90vw; display:flex; flex-direction:column; align-items:center; position:relative;">
-                <div style="font-size:20px; font-weight:600; color:#1976d2; margin-bottom:18px; letter-spacing:1px;">Nhập Key nâng cấp phiên bản</div>
-                <div style="display:flex; gap:8px; margin-bottom:14px;">
-                    <button class="quick-key-btn" data-key="Free" style="background:#eee; color:#1976d2; border:none; border-radius:6px; padding:6px 14px; font-size:14px; font-weight:600; cursor:pointer;">Free</button>
-                    <button class="quick-key-btn" data-key="22062002Pro" style="background:#eee; color:#1976d2; border:none; border-radius:6px; padding:6px 14px; font-size:14px; font-weight:600; cursor:pointer;">Pro</button>
-                    <button class="quick-key-btn" data-key="22062002BUS" style="background:#eee; color:#1976d2; border:none; border-radius:6px; padding:6px 14px; font-size:14px; font-weight:600; cursor:pointer;">Business</button>
-                </div>
-                <input id="popup-key-input" type="text" placeholder="Nhập key..." style="width:100%; font-size:16px; padding:10px 12px; border-radius:6px; border:1px solid #1976d2; outline:none; margin-bottom:18px;" />
-                <div style="display:flex; gap:12px; width:100%; justify-content:center;">
-                    <button id="popup-key-ok" style="background:#1976d2; color:#fff; border:none; border-radius:6px; padding:8px 22px; font-size:15px; font-weight:600; cursor:pointer; transition:background 0.18s;">Xác nhận</button>
-                    <button id="popup-key-cancel" style="background:#eee; color:#1976d2; border:none; border-radius:6px; padding:8px 22px; font-size:15px; font-weight:600; cursor:pointer; transition:background 0.18s;">Hủy</button>
-                </div>
-                <span id="popup-key-msg" style="color:#d32f2f; font-size:13px; margin-top:10px; display:none;"></span>
-                <span id="popup-key-close" style="position:absolute; top:8px; right:12px; font-size:20px; color:#888; cursor:pointer;" title="Đóng">&times;</span>
-            </div>
-        </div>
         <div id="popup-success-overlay" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100vw; height:100vh; background:#0005; align-items:center; justify-content:center;">
             <div id="popup-success-box" style="background:#fff; border-radius:12px; box-shadow:0 8px 32px #0003; padding:28px 32px 22px 32px; min-width:280px; max-width:90vw; display:flex; flex-direction:column; align-items:center; position:relative;">
                 <div style="font-size:22px; color:#43a047; margin-bottom:12px;">&#10003;</div>
@@ -668,12 +727,10 @@ function renderMenu(active) {
         `;
         const div = document.createElement('div');
         div.innerHTML = popupHtml;
-        // Sửa lỗi: dùng firstChild thay vì firstElementChild để tránh lỗi null
         while (div.firstChild) {
             try {
                 document.body.appendChild(div.firstChild);
             } catch (e) {
-                // Ép ẩn lỗi nếu body chưa sẵn sàng hoặc có lỗi bất ngờ
                 break;
             }
         }
@@ -715,10 +772,10 @@ function renderMenu(active) {
                 window.addHistoryLog('Xem lịch sử phiên bản', '');
             }
         }, true);
-        // Ghi lại mở popup nhập key
+        // Ghi lại mở popup lịch sử phiên bản khi nhấn vào nhãn phiên bản
         document.addEventListener('click', function(e) {
             if (e.target && e.target.id === 'app-version-label') {
-                window.addHistoryLog('Mở popup nhập key', '');
+                window.addHistoryLog('Xem phiên bản hiện tại', '');
             }
         }, true);
         // Ghi lại mở popup lịch sử thao tác
@@ -804,83 +861,18 @@ function renderMenu(active) {
         }, 100);
     }
 
-    // Hàm mở popup nhập key
-    function showKeyPopup() {
-        const overlay = document.getElementById('popup-key-overlay');
-        const input = document.getElementById('popup-key-input');
-        const msg = document.getElementById('popup-key-msg');
-        overlay.style.display = 'flex';
-        input.value = '';
-        msg.style.display = 'none';
-        msg.textContent = '';
-        input.focus();
-
-        // Xác nhận key
-        document.getElementById('popup-key-ok').onclick = function() {
-            const key = input.value.trim();
-            if (!key) {
-                msg.textContent = 'Vui lòng nhập key!';
-                msg.style.display = 'block';
-                input.focus();
-                return;
-            }
-            function setVersion(version, msgText) {
-                localStorage.setItem('appVersion', version);
-                localStorage.setItem('appVersionManual', '1');
-                // Đổi màu menu theo phiên bản ngay lập tức
-                localStorage.setItem('menuVersionColor', versionColors[version].menu);
-                // Khi chọn phiên bản, bỏ chọn màu thủ công (menuColor) để ưu tiên màu phiên bản
-                localStorage.removeItem('menuColor');
-                overlay.style.display = 'none';
-                showSuccessPopup(msgText);
-                // Không tự reload lại trang sau khi chọn phiên bản; chỉ cập nhật giao diện hiện tại
-                setTimeout(() => {
-                    if (typeof renderMenu === 'function') renderMenu(active || 'emp');
-                }, 200);
-            }
-            if (key === '22062002Pro') {
-                setVersion('Pro', 'Đã nâng cấp lên phiên bản Pro!');
-            } else if (key === '22062002BUS') {
-                setVersion('Business', 'Đã nâng cấp lên phiên bản Business!');
-            } else if (key === 'Free') {
-                setVersion('Free', 'Đã chuyển về phiên bản Free!');
-            } else {
-                msg.textContent = 'Key không hợp lệ!';
-                msg.style.display = 'block';
-                input.focus();
-            }
-        };
-        // Hủy
-        document.getElementById('popup-key-cancel').onclick = function() {
-            overlay.style.display = 'none';
-        };
-        // Đóng bằng dấu X
-        document.getElementById('popup-key-close').onclick = function() {
-            overlay.style.display = 'none';
-        };
-        // Đóng bằng phím ESC
-        overlay.onkeydown = function(e) {
-            if (e.key === 'Escape') overlay.style.display = 'none';
-        };
-        // Cho phép Enter để xác nhận
-        input.onkeydown = function(e) {
-            if (e.key === 'Enter') document.getElementById('popup-key-ok').click();
-        };
-        // Thêm sự kiện cho các nút key mẫu
-        overlay.querySelectorAll('.quick-key-btn').forEach(btn => {
-            btn.onclick = function() {
-                input.value = btn.getAttribute('data-key');
-                document.getElementById('popup-key-ok').click();
-            };
-        });
-    }
-
+    // Không còn popup nhập key; giữ hàm lịch sử phiên bản riêng
     // Thêm hàm hiển thị popup lịch sử phiên bản
     function showVersionHistoryPopup() {
         const overlay = document.getElementById('popup-version-history-overlay');
         const content = document.getElementById('popup-version-history-content');
         // Danh sách lịch sử phiên bản (bản cuối cùng cập nhật theo yêu cầu)
         const history = [
+            {
+                version: '2.2.8',
+                date: '19/07/2026',
+                note: 'Cập nhật giao diện và trải nghiệm người dùng.<br>- Tinh chỉnh lại giao diện trang Danh sách nhân viên theo phong cách doanh nghiệp.<br>- Cải thiện bố cục và phong cách trang Quy định chấm công mới để dễ đọc và chuyên nghiệp hơn.<br>- Tối ưu các nút thao tác, bảng dữ liệu và các khối thông tin trong hệ thống để mang lại trải nghiệm rõ ràng, hiện đại hơn.'
+            },
             {
                 version: '2.2.7',
                 date: '19/07/2026',
@@ -1366,6 +1358,40 @@ function renderMenu(active) {
         XLSX.writeFile(wb, title + '.xlsx');
     }
 
+    if (!document.getElementById('zalo-qr-popup')) {
+        const zaloQrHtml = `
+        <div id="zalo-qr-popup" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100vw; height:100vh; background:#0007; align-items:center; justify-content:center;">
+            <div style="background:#fff; border-radius:18px; box-shadow:0 10px 34px rgba(15,23,42,0.18); padding:24px 24px 20px; min-width:300px; max-width:92vw; display:flex; flex-direction:column; align-items:center; position:relative;">
+                <span id="zalo-qr-close" style="position:absolute; top:10px; right:12px; font-size:22px; color:#64748b; cursor:pointer;" title="Đóng">&times;</span>
+                <div style="font-size:18px; font-weight:700; color:#1976d2; margin-bottom:8px;">Liên hệ Zalo</div>
+                <div style="font-size:14px; color:#475569; margin-bottom:12px; text-align:center;">Quét mã QR để chat với Minh Khoa</div>
+                <div id="zalo-qr-code" style="width:220px; height:220px; display:flex; align-items:center; justify-content:center; background:#f8fbff; border:1px solid #dbeafe; border-radius:14px; padding:10px;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https://zalo.me/0867544809" alt="QR Zalo" style="width:100%; height:100%; object-fit:contain;">
+                </div>
+                <div style="margin-top:12px; font-size:14px; color:#0f172a; font-weight:600;">SĐT: 0867 544 809</div>
+            </div>
+        </div>
+        `;
+        const div = document.createElement('div');
+        div.innerHTML = zaloQrHtml;
+        document.body.appendChild(div.firstElementChild);
+    }
+
+    window.showZaloQrPopup = function() {
+        const overlay = document.getElementById('zalo-qr-popup');
+        if (!overlay) return;
+        overlay.style.display = 'flex';
+        const closeBtn = document.getElementById('zalo-qr-close');
+        if (closeBtn) {
+            closeBtn.onclick = function() {
+                overlay.style.display = 'none';
+            };
+        }
+        overlay.onclick = function(e) {
+            if (e.target === overlay) overlay.style.display = 'none';
+        };
+    };
+
     // Thêm popup chat bot hỗ trợ nếu chưa có
     if (!document.getElementById('support-bot-popup')) {
         const supportBotHtml = `
@@ -1578,12 +1604,14 @@ function renderMenu(active) {
                 showVersionHistoryPopup();
             };
         }
-        // Thêm: cho phép nhấn vào nhãn phiên bản để đổi phiên bản (mở popup nhập key)
+        // Nhấn vào nhãn phiên bản chỉ mở lịch sử phiên bản
         const versionLabel = document.getElementById('app-version-label');
-        if (versionLabel && typeof showKeyPopup === 'function') {
+        if (versionLabel) {
             versionLabel.onclick = function(e) {
                 e.stopPropagation();
-                showKeyPopup();
+                if (typeof showVersionHistoryPopup === 'function') {
+                    showVersionHistoryPopup();
+                }
             };
         }
     }, 0);
