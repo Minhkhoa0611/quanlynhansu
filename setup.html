@@ -155,7 +155,7 @@
     </style>
     <script src="menu.js"></script>
     <script src="data_io.js"></script>
-
+    <script src="google_sheets_sync.js"></script>
 </head>
 <body>
     <script>renderMenu('setup');</script>
@@ -185,11 +185,20 @@
             <label>Tiền 1 ngày công:</label>
             <input id="salaryPerDay" type="text" value="0" oninput="formatCurrencyInput(this);autoSaveStdDaysAndSalaryPerDay()">
         </div>
-        <!-- <div class="form-row">
-            <button class="btn" onclick="saveStdDaysAndSalaryPerDay()">Lưu</button>
-        </div> -->
-        <div id="workdays-setup-section">
-            <!-- ...các input thiết lập ngày công... -->
+
+        <!-- Khối Đồng Bộ Google Sheets Miễn Phí -->
+        <div style="width:100%; border-top: 1.5px dashed #bcdffb; margin-top:20px; padding-top:16px;">
+            <h3 style="color:#1976d2; font-size:1.15rem; margin:0 0 10px 0; text-align:center;">📊 Lưu Trữ Google Sheets (Miễn Phí 100%)</h3>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.95rem; font-weight:600; color:#444; display:block; margin-bottom:4px;">Google Web App URL:</label>
+                <input id="googleScriptUrlInput" type="text" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%; box-sizing:border-box; font-size:0.9rem; padding:6px 10px;">
+            </div>
+            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:8px;">
+                <button class="btn" style="background:#2e7d32; font-size:0.9rem; padding:6px 14px;" onclick="saveGoogleScriptUrl()">Lưu URL</button>
+                <button class="btn" style="background:#0288d1; font-size:0.9rem; padding:6px 14px;" onclick="syncToGoogleSheetsUI()">Đẩy Dữ Liệu Lên</button>
+                <button class="btn" style="background:#ed6c02; font-size:0.9rem; padding:6px 14px;" onclick="pullFromGoogleSheetsUI()">Tải Dữ Liệu Về</button>
+            </div>
+            <div id="gsSyncStatus" style="font-size:0.85rem; color:#666; text-align:center;"></div>
         </div>
     </div>
     <script>
@@ -367,9 +376,66 @@
             }
         });
 
+        // ------------------ GOOGLE SHEETS HANDLERS ------------------
+        function initGoogleSheetsUI() {
+            if (typeof GoogleSheetsSync !== 'undefined') {
+                const urlInput = document.getElementById('googleScriptUrlInput');
+                if (urlInput) urlInput.value = GoogleSheetsSync.getScriptUrl();
+                updateGsSyncStatus();
+            }
+        }
+
+        function updateGsSyncStatus() {
+            const statusDiv = document.getElementById('gsSyncStatus');
+            if (!statusDiv) return;
+            const lastSync = localStorage.getItem('lastGoogleSheetsSync');
+            statusDiv.innerHTML = lastSync ? `Lần đồng bộ gần nhất: <b>${lastSync}</b>` : 'Chưa đồng bộ lần nào';
+        }
+
+        async function saveGoogleScriptUrl() {
+            const url = (document.getElementById('googleScriptUrlInput').value || '').trim();
+            if (typeof GoogleSheetsSync !== 'undefined') {
+                GoogleSheetsSync.setScriptUrl(url);
+                alert('Đã lưu Google Apps Script URL!');
+                updateGsSyncStatus();
+            }
+        }
+
+        async function syncToGoogleSheetsUI() {
+            const statusDiv = document.getElementById('gsSyncStatus');
+            if (statusDiv) statusDiv.innerHTML = '⏳ Đang đẩy dữ liệu lên Google Sheets...';
+            if (typeof GoogleSheetsSync !== 'undefined') {
+                const ok = await GoogleSheetsSync.pushAllToGoogleSheets();
+                if (ok) {
+                    alert('Đã đồng bộ toàn bộ dữ liệu lên Google Sheets thành công!');
+                    updateGsSyncStatus();
+                } else {
+                    alert('Đồng bộ thất bại. Vui lòng kiểm tra lại Google Web App URL và kết nối mạng.');
+                    updateGsSyncStatus();
+                }
+            }
+        }
+
+        async function pullFromGoogleSheetsUI() {
+            if (!confirm('Tải dữ liệu từ Google Sheets sẽ ghi đè lên dữ liệu hiện tại trên máy. Bạn có chắc chắn muốn tiếp tục?')) return;
+            const statusDiv = document.getElementById('gsSyncStatus');
+            if (statusDiv) statusDiv.innerHTML = '⏳ Đang tải dữ liệu từ Google Sheets về...';
+            if (typeof GoogleSheetsSync !== 'undefined') {
+                const ok = await GoogleSheetsSync.pullAllFromGoogleSheets();
+                if (ok) {
+                    alert('Tải dữ liệu từ Google Sheets thành công! Trang sẽ được tải lại.');
+                    location.reload();
+                } else {
+                    alert('Tải dữ liệu thất bại. Vui lòng kiểm tra lại Google Web App URL.');
+                    updateGsSyncStatus();
+                }
+            }
+        }
+
         // Khởi tạo giao diện
         renderStoreName();
         renderEmployeeSelect();
+        initGoogleSheetsUI();
         document.getElementById('workDaysStd').disabled = true;
         document.getElementById('salaryPerDay').disabled = true;
         // Ghi chú luôn hiển thị

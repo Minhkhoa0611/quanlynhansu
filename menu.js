@@ -1,7 +1,24 @@
 if (typeof CODE_VERSION === 'undefined') {
     var CODE_VERSION = '2.2.8'; // cập nhật version mới nhất
-
 }
+
+// 🌐 TỰ ĐỘNG NẠP BỘ ĐỒNG BỘ CLOUD VÀO TẤT CẢ CÁC TRANG HỆ THỐNG
+(function loadGlobalSyncScripts() {
+    function getRootPathPrefix() {
+        return location.pathname.includes('/CodejS/') ? '../' : '';
+    }
+    const prefix = getRootPathPrefix();
+    if (typeof getExportData === 'undefined' && !document.querySelector('script[src*="data_io.js"]')) {
+        const s1 = document.createElement('script');
+        s1.src = prefix + 'data_io.js';
+        document.head.appendChild(s1);
+    }
+    if (typeof GoogleSheetsSync === 'undefined' && !document.querySelector('script[src*="google_sheets_sync.js"]')) {
+        const s2 = document.createElement('script');
+        s2.src = prefix + 'google_sheets_sync.js';
+        document.head.appendChild(s2);
+    }
+})();
 
 function getPageBreadcrumbInfo(active) {
     const pageMap = {

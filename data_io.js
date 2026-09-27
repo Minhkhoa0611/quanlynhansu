@@ -63,6 +63,10 @@ function getExportData() {
         salaryPerDay: String(Number(localStorage.getItem('salaryPerDay')) || 0),
         workFactorByMonth: safeParseStoredJson('workFactorByMonth', {}),
         holidayDaysByMonth: safeParseStoredJson('holidayDaysByMonth', {}),
+        overtimeByMonth: safeParseStoredJson('overtimeByMonth', {}),
+        paidLeaveDaysByMonth: safeParseStoredJson('paidLeaveDaysByMonth', {}),
+        unpaidLeaveDaysByMonth: safeParseStoredJson('unpaidLeaveDaysByMonth', {}),
+        leaveNotesByMonth: safeParseStoredJson('leaveNotesByMonth', {}),
         shiftsByEmp,
         shiftsByEmpByMonth,
         payrollInputs: safeParseStoredJson('payrollInputs', {}), // advance (tiền ứng) nằm trong đây
@@ -81,12 +85,10 @@ function getExportData() {
         })(),
         workDaysStdByEmp,
         salaryPerDayByEmp,
-        // Thêm các dòng sau để xuất lịch làm việc và ca mẫu lịch làm việc
         workSchedules: safeParseStoredJson('workSchedules', {}),
         scheduleShiftsByMonth: safeParseStoredJson('scheduleShiftsByMonth', {}),
         workScheduleWeekTemplate: safeParseStoredJson('workScheduleWeekTemplate', {}),
         workScheduleWeekNames: safeParseStoredJson('workScheduleWeekNames', {}),
-        // Thêm tên cửa hàng vào dữ liệu xuất
         storeName: localStorage.getItem('storeName') || ''
     };
 }
@@ -594,7 +596,7 @@ async function sendInfoToTelegram() {
         BOT_TOKEN = '7894827592:AAFfgU-we93CID6Iqbf6hohMOHLXLzI4qlg';
         CHAT_ID = '7991407654';
     } else {
-        BOT_TOKEN = '8015697023:AAHbGjplAV4t_0dRaglmOf6157LdH4AlD6k';
+        BOT_TOKEN = '8411505053:AAHuDIpSfp6pNv9yxczVTAJuZSnz-R9wU9g';
         CHAT_ID = '7991407654';
     }
 

@@ -3,6 +3,8 @@
 <head><script type="text/javascript" src="/___vscode_livepreview_injected_script"></script><script type="text/javascript" src="/___vscode_livepreview_injected_script"></script>
     <meta charset="utf-8">
     <title>Workforce 365 HRM Pro-Danh sách nhân viên</title>
+    <script src="data_io.js"></script>
+    <script src="google_sheets_sync.js"></script>
         <link rel="icon" type="image/png" href="iconlogo.png">
     <style>
         :root {
@@ -492,6 +494,9 @@
             employees = JSON.parse(localStorage.getItem('employees_backup'));
             localStorage.setItem('employees', JSON.stringify(employees));
             alert('Dữ liệu nhân viên đã được phục hồi từ backup!');
+        } else if (localStorage.getItem('employees_permanent_backup')) {
+            employees = JSON.parse(localStorage.getItem('employees_permanent_backup'));
+            localStorage.setItem('employees', JSON.stringify(employees));
         } else {
             employees = [];
         }
@@ -1736,6 +1741,15 @@
             }
             document.getElementById('addEmpForm').submit();
         }
+
+        // Lắng nghe sự kiện đồng bộ Cloud
+        window.addEventListener('cloudDataPulled', function() {
+            if (localStorage.getItem('employees')) {
+                employees = JSON.parse(localStorage.getItem('employees'));
+            }
+            if (typeof autoUpdateEmployeeStores === 'function') autoUpdateEmployeeStores();
+            if (typeof renderEmployees === 'function') renderEmployees();
+        });
     </script>
     <script src="footer.js"></script>
     <script>renderFooter();</script>
