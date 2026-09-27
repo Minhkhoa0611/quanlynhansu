@@ -4,8 +4,6 @@
 <head>
     <meta charset="utf-8">
     <title>Workforce 365 HRM Pro-Chấm công</title>
-    <script src="data_io.js"></script>
-    <script src="google_sheets_sync.js"></script>
     <link rel="icon" type="image/png" href="iconlogo.png">
     <style>
         body {
@@ -2064,23 +2062,6 @@
             updateHolidayInput();
             renderDemoAttendanceCalendar();
         })();
-
-        // ====== LẮNG NGHE ĐỒNG BỘ 2 CHIỀU TỪ CLOUD (GOOGLE SHEETS) ======
-        window.addEventListener('cloudDataPulled', function() {
-            employees = JSON.parse(localStorage.getItem('employees') || '[]').filter(e => !e.hidden);
-            attendanceByMonth = JSON.parse(localStorage.getItem('attendanceByMonth') || '{}');
-            shiftsByEmpByMonth = JSON.parse(localStorage.getItem('shiftsByEmpByMonth') || '{}');
-            workFactorByMonth = JSON.parse(localStorage.getItem('workFactorByMonth') || '{}');
-            overtimeByMonth = JSON.parse(localStorage.getItem('overtimeByMonth') || '{}');
-            holidayDaysByMonth = JSON.parse(localStorage.getItem('holidayDaysByMonth') || '{}');
-            paidLeaveDaysByMonth = JSON.parse(localStorage.getItem('paidLeaveDaysByMonth') || '{}');
-            unpaidLeaveDaysByMonth = JSON.parse(localStorage.getItem('unpaidLeaveDaysByMonth') || '{}');
-            leaveNotesByMonth = JSON.parse(localStorage.getItem('leaveNotesByMonth') || '{}');
-
-            renderEmpSelect();
-            renderAttendance();
-            updateSalaryTypeDisplay();
-        });
     </script>
     <script>
         // ====== CHỌN NGÀY LỄ POPUP ======
@@ -2318,7 +2299,6 @@ function toggleCCPassword() {
     </script>
         <script src="footer.js"></script>
     <script>renderFooter();</script>
-        <script src="thongbao.js"></script>
 
 </body>
 
