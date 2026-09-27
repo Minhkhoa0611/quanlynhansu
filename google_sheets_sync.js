@@ -62,7 +62,7 @@
         if (!url) {
             badge.style.background = '#ffebee';
             badge.style.color = '#c62828';
-            badge.innerHTML = '⚠️ <span>Chưa nối Google Sheets</span>';
+            badge.innerHTML = '⚠️ <span>Chưa kết nối máy chủ dữ liệu</span>';
             return;
         }
 
@@ -70,31 +70,31 @@
             badge.style.background = 'linear-gradient(90deg, #fff3e0 0%, #ffe0b2 100%)';
             badge.style.color = '#e65100';
             badge.style.boxShadow = '0 4px 20px rgba(230, 81, 0, 0.35)';
-            badge.innerHTML = `<span style="display:inline-block;animation:spin 1s linear infinite;">🔄</span> <span>Đang tự động lưu Google Sheets...</span>`;
+            badge.innerHTML = `<span style="display:inline-block;animation:spin 1s linear infinite;">🔄</span> <span>Đang lưu dữ liệu...</span>`;
         } else if (status === 'syncing_pull') {
             badge.style.background = 'linear-gradient(90deg, #e1f5fe 0%, #b3e5fc 100%)';
             badge.style.color = '#0277bd';
             badge.style.boxShadow = '0 4px 20px rgba(2, 119, 189, 0.35)';
-            badge.innerHTML = `<span style="display:inline-block;animation:spin 1s linear infinite;">📥</span> <span>Đang tải dữ liệu từ Cloud...</span>`;
+            badge.innerHTML = `<span style="display:inline-block;animation:spin 1s linear infinite;">🔄</span> <span>Đang cập nhật dữ liệu...</span>`;
         } else if (status === 'success') {
             const timeStr = new Date().toLocaleTimeString('vi-VN');
             badge.style.background = 'linear-gradient(90deg, #e8f5e9 0%, #c8e6c9 100%)';
             badge.style.color = '#2e7d32';
             badge.style.boxShadow = '0 4px 20px rgba(46, 125, 50, 0.35)';
-            badge.innerHTML = `✅ <span>Đã lưu Google Sheets (${timeStr})</span>`;
+            badge.innerHTML = `✅ <span>Đã lưu thành công (${timeStr})</span>`;
             setTimeout(() => updateCloudMenuBadge('idle'), 4000);
         } else if (status === 'error') {
             badge.style.background = '#ffebee';
             badge.style.color = '#c62828';
             badge.style.boxShadow = '0 4px 20px rgba(198, 40, 40, 0.35)';
-            badge.innerHTML = `⚠️ <span>Lỗi kết nối Cloud</span>`;
+            badge.innerHTML = `⚠️ <span>Ngoại tuyến / Gián đoạn máy chủ</span>`;
         } else {
             const lastSync = localStorage.getItem('lastGoogleSheetsSync');
             badge.style.background = 'rgba(255, 255, 255, 0.98)';
             badge.style.color = '#1976d2';
             badge.style.boxShadow = '0 4px 14px rgba(25, 118, 210, 0.2)';
-            badge.innerHTML = `☁️ <span>Google Sheets Auto-Sync</span>`;
-            badge.title = lastSync ? `Lần lưu gần nhất: ${lastSync}` : 'Tự động 2 chiều';
+            badge.innerHTML = `🟢 <span>Tự động đồng bộ</span>`;
+            badge.title = lastSync ? `Lần cập nhật gần nhất: ${lastSync}` : 'Tự động đồng bộ realtime';
         }
     }
 
