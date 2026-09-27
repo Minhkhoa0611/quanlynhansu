@@ -63,10 +63,6 @@ function getExportData() {
         salaryPerDay: String(Number(localStorage.getItem('salaryPerDay')) || 0),
         workFactorByMonth: safeParseStoredJson('workFactorByMonth', {}),
         holidayDaysByMonth: safeParseStoredJson('holidayDaysByMonth', {}),
-        overtimeByMonth: safeParseStoredJson('overtimeByMonth', {}),
-        paidLeaveDaysByMonth: safeParseStoredJson('paidLeaveDaysByMonth', {}),
-        unpaidLeaveDaysByMonth: safeParseStoredJson('unpaidLeaveDaysByMonth', {}),
-        leaveNotesByMonth: safeParseStoredJson('leaveNotesByMonth', {}),
         shiftsByEmp,
         shiftsByEmpByMonth,
         payrollInputs: safeParseStoredJson('payrollInputs', {}), // advance (tiền ứng) nằm trong đây
@@ -85,10 +81,12 @@ function getExportData() {
         })(),
         workDaysStdByEmp,
         salaryPerDayByEmp,
+        // Thêm các dòng sau để xuất lịch làm việc và ca mẫu lịch làm việc
         workSchedules: safeParseStoredJson('workSchedules', {}),
         scheduleShiftsByMonth: safeParseStoredJson('scheduleShiftsByMonth', {}),
         workScheduleWeekTemplate: safeParseStoredJson('workScheduleWeekTemplate', {}),
         workScheduleWeekNames: safeParseStoredJson('workScheduleWeekNames', {}),
+        // Thêm tên cửa hàng vào dữ liệu xuất
         storeName: localStorage.getItem('storeName') || ''
     };
 }
